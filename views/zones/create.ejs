@@ -1,0 +1,226 @@
+<style>
+  .cat-wrapper { padding: 28px 20px; background: #f8fafc; min-height: 100vh; }
+  .page-heading { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 24px; display:flex; align-items:center; gap:12px; }
+  .page-heading span { color: #e63946; }
+
+  .btn-back { background:#f1f5f9; color:#334155; border:none; border-radius:10px; padding:9px 18px; font-size:13px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; text-decoration:none; transition:all 0.2s; }
+  .btn-back:hover { background:#e2e8f0; color:#0f172a; }
+
+  .dash-card { background:#fff; border:none; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,0.07); overflow:hidden; margin-bottom:20px; }
+  .dash-card-header { background:#0f172a; padding:16px 22px; display:flex; align-items:center; gap:10px; }
+  .dash-card-header i { color:#e63946; font-size:20px; }
+  .dash-card-header span { color:#fff; font-size:15px; font-weight:600; }
+  .dash-card-body { padding:22px; }
+
+  .form-label { font-size:13px; font-weight:600; color:#374151; margin-bottom:6px; display:block; }
+  .form-control { border:1.5px solid #e2e8f0; border-radius:10px; font-size:13.5px; padding:9px 14px; color:#1e293b; width:100%; outline:none; transition:border-color 0.2s; }
+  .form-control:focus { border-color:#e63946; box-shadow:0 0 0 3px rgba(230,57,70,0.1); }
+
+  /* search row */
+  .search-row { display:flex; gap:10px; margin-bottom:14px; }
+  .search-row .form-control { flex:1; }
+  .btn-search { background:#0f172a; color:#fff; border:none; border-radius:10px; padding:9px 18px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:6px; transition:opacity 0.2s; }
+  .btn-search:hover { opacity:0.85; }
+  .btn-locate { background:#eff6ff; color:#3b82f6; border:none; border-radius:10px; padding:9px 16px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:6px; transition:all 0.2s; }
+  .btn-locate:hover { background:#3b82f6; color:#fff; }
+
+  /* map */
+  #map { height:480px; border-radius:12px; border:2px solid #e2e8f0; overflow:hidden; }
+
+  /* save btn */
+  .btn-save { background:linear-gradient(135deg,#e63946,#c1121f); color:#fff; border:none; border-radius:10px; padding:11px 32px; font-size:14px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:8px; transition:opacity 0.2s; margin-top:16px; }
+  .btn-save:hover { opacity:0.88; }
+
+  .btn-clear { background:#f1f5f9; color:#64748b; border:none; border-radius:10px; padding:11px 24px; font-size:14px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:8px; transition:all 0.2s; margin-top:16px; }
+  .btn-clear:hover { background:#fee2e2; color:#e63946; }
+
+  /* hint */
+  .map-hint { background:#fff7ed; border:1.5px solid #fed7aa; border-radius:10px; padding:10px 14px; font-size:13px; color:#92400e; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+</style>
+
+<div class="cat-wrapper">
+
+  <div class="page-heading">
+    <a href="/zones" class="btn-back"><i class="las la-arrow-left"></i> Back</a>
+    <i class="las la-map-marker" style="color:#e63946;"></i>
+    Create <span>Zone</span>
+  </div>
+
+  <div class="dash-card">
+    <div class="dash-card-header">
+      <i class="las la-draw-polygon"></i>
+      <span>Draw Delivery Zone</span>
+    </div>
+    <div class="dash-card-body">
+
+      <!-- Zone Name -->
+      <div style="margin-bottom:16px;">
+        <label class="form-label">Zone Name</label>
+        <input type="text" id="zone_name" class="form-control" placeholder="e.g. North Delhi Zone" style="max-width:400px;">
+      </div>
+
+      <!-- Search + Locate -->
+      <div class="search-row">
+        <input type="text" id="searchInput" class="form-control" placeholder="Search location... e.g. Connaught Place, Delhi">
+        <button class="btn-search" onclick="searchLocation()">
+          <i class="las la-search"></i> Search
+        </button>
+        <button class="btn-locate" onclick="goToCurrentLocation()">
+          <i class="las la-crosshairs"></i> My Location
+        </button>
+      </div>
+
+      <!-- Hint -->
+      <div class="map-hint">
+        <i class="las la-info-circle" style="font-size:18px;"></i>
+        Search or use "My Location" to navigate, then draw a polygon on the map to define the delivery zone.
+      </div>
+
+      <!-- Map -->
+      <div id="map"></div>
+
+      <!-- Save + Clear -->
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn-save" onclick="saveZone()">
+          <i class="las la-save"></i> Save Zone
+        </button>
+        <button class="btn-clear" onclick="clearPolygon()">
+          <i class="las la-trash-alt"></i> Clear Drawing
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+let selectedPolygon = null;
+let drawingManager;
+let map;
+let searchMarker = null;
+
+function initMap() {
+  // Default center India
+  const defaultCenter = { lat: 20.5937, lng: 78.9629 };
+
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: defaultCenter,
+    zoom: 5,
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: true,
+    styles: [{ featureType:"poi", stylers:[{visibility:"off"}] }]
+  });
+
+  drawingManager = new google.maps.drawing.DrawingManager({
+    drawingMode: google.maps.drawing.OverlayType.POLYGON,
+    drawingControl: true,
+    drawingControlOptions: {
+      position: google.maps.ControlPosition.TOP_CENTER,
+      drawingModes: ["polygon"]
+    },
+    polygonOptions: {
+      fillColor: "#e63946",
+      fillOpacity: 0.2,
+      strokeColor: "#e63946",
+      strokeWeight: 2,
+      editable: true
+    }
+  });
+
+  drawingManager.setMap(map);
+
+  google.maps.event.addListener(drawingManager, "overlaycomplete", function(event) {
+    if (selectedPolygon) selectedPolygon.setMap(null);
+    selectedPolygon = event.overlay;
+    drawingManager.setDrawingMode(null);
+  });
+
+  // Auto current location on load
+  goToCurrentLocation(false);
+
+  // Enter key on search
+  document.getElementById("searchInput").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") searchLocation();
+  });
+}
+
+function goToCurrentLocation(showAlert = true) {
+  if (!navigator.geolocation) {
+    if (showAlert) alert("Geolocation not supported by your browser.");
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    const latlng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    map.setCenter(latlng);
+    map.setZoom(14);
+    if (searchMarker) searchMarker.setMap(null);
+    searchMarker = new google.maps.Marker({
+      position: latlng,
+      map: map,
+      title: "Your Location",
+      icon: { path: google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: "#3b82f6", fillOpacity: 1, strokeColor: "#fff", strokeWeight: 2 }
+    });
+  }, function() {
+    if (showAlert) alert("Unable to get your location. Please allow location access.");
+  });
+}
+
+function searchLocation() {
+  const query = document.getElementById("searchInput").value.trim();
+  if (!query) return;
+
+  const geocoder = new google.maps.Geocoder();
+  geocoder.geocode({ address: query }, function(results, status) {
+    if (status === "OK" && results[0]) {
+      const loc = results[0].geometry.location;
+      map.setCenter(loc);
+      map.setZoom(14);
+      if (searchMarker) searchMarker.setMap(null);
+      searchMarker = new google.maps.Marker({
+        position: loc,
+        map: map,
+        title: results[0].formatted_address,
+        animation: google.maps.Animation.DROP
+      });
+    } else {
+      alert("Location not found. Try a different search.");
+    }
+  });
+}
+
+function clearPolygon() {
+  if (selectedPolygon) {
+    selectedPolygon.setMap(null);
+    selectedPolygon = null;
+    drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+  } else {
+    alert("Nothing to clear.");
+  }
+}
+
+function saveZone() {
+  const zoneName = document.getElementById("zone_name").value.trim();
+  if (!zoneName) return alert("Please enter a zone name.");
+  if (!selectedPolygon) return alert("Please draw a polygon on the map.");
+
+  const coordinates = selectedPolygon.getPath().getArray().map(coord => ({
+    lat: coord.lat(),
+    lng: coord.lng()
+  }));
+
+  $.post("/zones/store", { zone_name: zoneName, coordinates: coordinates }, function(res) {
+    if (res.status) {
+      alert("Zone saved successfully!");
+      window.location.href = "/zones";
+    } else {
+      alert(res.message || "Error saving zone.");
+    }
+  });
+}
+
+window.initMap = initMap;
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB0mG3CGok9-9RZau5J_VThUP4OTbQ_SFM&libraries=drawing&callback=initMap" async defer></script>

@@ -1,0 +1,391 @@
+<style>
+  .cat-wrapper { padding: 28px 20px; background: #f8fafc; min-height: 100vh; }
+  .page-heading { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 24px; }
+  .page-heading span { color: #e63946; }
+
+  .dash-card { background: #fff; border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.07); overflow: hidden; margin-bottom: 28px; }
+  .dash-card-header { background: #0f172a; padding: 16px 22px; display: flex; align-items: center; gap: 10px; }
+  .dash-card-header i { color: #e63946; font-size: 20px; }
+  .dash-card-header span { color: #fff; font-size: 15px; font-weight: 600; }
+  .dash-card-body { padding: 24px 22px; }
+
+  .form-label { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+  .form-control, .form-select { border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 13.5px; padding: 9px 14px; color: #1e293b; transition: border-color 0.2s; }
+  .form-control:focus, .form-select:focus { border-color: #e63946; box-shadow: 0 0 0 3px rgba(230,57,70,0.1); }
+  textarea.form-control { resize: none; }
+
+  .btn-create { background: linear-gradient(135deg, #e63946, #c1121f); color: #fff; border: none; border-radius: 10px; padding: 10px 28px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s, transform 0.2s; }
+  .btn-create:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  /* file upload */
+  .file-upload-wrapper input[type="file"] { display: none; }
+  .file-upload-label { display: flex; align-items: center; gap: 10px; border: 1.5px dashed #e2e8f0; border-radius: 10px; padding: 10px 14px; cursor: pointer; background: #f8fafc; transition: border-color 0.2s, background 0.2s; }
+  .file-upload-label:hover { border-color: #e63946; background: #fff1f2; }
+  .file-upload-label .upload-icon { width: 36px; height: 36px; background: #fff1f2; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #e63946; font-size: 18px; flex-shrink: 0; }
+  .file-upload-label .upload-text { font-size: 13px; color: #64748b; }
+  .file-upload-label .upload-text strong { display: block; color: #1e293b; font-size: 13.5px; }
+  .file-name-display { font-size: 12px; color: #e63946; margin-top: 5px; display: none; }
+
+  /* table */
+  .cat-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .cat-table thead tr th { background: #0f172a; color: rgba(255,255,255,0.75); font-size: 12px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; padding: 13px 16px; border: none; white-space: nowrap; }
+  .cat-table thead tr th:first-child { border-radius: 10px 0 0 0; }
+  .cat-table thead tr th:last-child  { border-radius: 0 10px 0 0; }
+  .cat-table tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.15s; }
+  .cat-table tbody tr:hover { background: #fafafa; }
+  .cat-table tbody tr:last-child { border-bottom: none; }
+  .cat-table tbody td { padding: 13px 16px; font-size: 13.5px; color: #334155; vertical-align: middle; }
+
+  .id-badge { background: #f1f5f9; color: #64748b; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 6px; }
+  .badge-veg    { background: #dcfce7; color: #16a34a; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+  .badge-nonveg { background: #fee2e2; color: #dc2626; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+
+  .cat-img { width: 52px; height: 52px; object-fit: cover; border-radius: 10px; border: 2px solid #f1f5f9; cursor: zoom-in; transition: transform 0.2s; }
+  .cat-img:hover { transform: scale(1.08); }
+  .no-img { width: 52px; height: 52px; background: #f1f5f9; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 20px; }
+
+  .toggle-status { border: none; border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .toggle-status.btn-success   { background: #dcfce7; color: #16a34a; }
+  .toggle-status.btn-secondary { background: #f1f5f9; color: #94a3b8; }
+
+  .btn-edit { background: #eff6ff; color: #3b82f6; border: none; border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-edit:hover { background: #3b82f6; color: #fff; }
+  .btn-del  { background: #fff1f2; color: #e63946; border: none; border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-del:hover  { background: #e63946; color: #fff; }
+
+  .date-text { font-size: 12px; color: #94a3b8; }
+  .empty-state { text-align: center; padding: 48px 20px; color: #94a3b8; }
+  .empty-state i { font-size: 48px; margin-bottom: 12px; display: block; }
+
+  /* pagination */
+  .pagination-wrapper { display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; border-top: 1px solid #f1f5f9; flex-wrap: wrap; gap: 10px; }
+  .pagination-info { font-size: 13px; color: #64748b; }
+  .pagination-info strong { color: #0f172a; }
+  .pag-btns { display: flex; gap: 6px; align-items: center; }
+  .pag-btn { min-width: 36px; height: 36px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #fff; color: #334155; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.2s; padding: 0 10px; }
+  .pag-btn:hover { border-color: #e63946; color: #e63946; background: #fff1f2; }
+  .pag-btn.active { background: linear-gradient(135deg,#e63946,#c1121f); color: #fff; border-color: transparent; box-shadow: 0 4px 12px rgba(230,57,70,0.3); }
+  .pag-btn.disabled { opacity: 0.4; pointer-events: none; }
+
+  /* image zoom modal */
+  .img-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+  .img-modal-overlay.active { display: flex; }
+  .img-modal-box { position: relative; animation: zoomIn 0.2s ease; }
+  @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .img-modal-box img { max-width: 480px; max-height: 480px; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); display: block; }
+  .img-modal-close { position: absolute; top: -14px; right: -14px; width: 32px; height: 32px; background: #e63946; color: #fff; border: none; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+  /* edit modal */
+  .modal-header-dark { background: #0f172a; padding: 16px 22px; display: flex; align-items: center; justify-content: space-between; }
+  .modal-header-dark span { color: #fff; font-size: 15px; font-weight: 600; }
+  .modal-header-dark button { background: none; border: none; color: rgba(255,255,255,0.6); font-size: 20px; cursor: pointer; }
+  .modal-header-dark button:hover { color: #e63946; }
+  .modal-content { border: none; border-radius: 16px; overflow: hidden; }
+</style>
+
+<div class="cat-wrapper">
+
+  <div class="page-heading">
+    <i class="las la-layer-group" style="color:#e63946; margin-right:8px;"></i>
+    Manage <span>Sub Categories</span>
+  </div>
+
+  <!-- CREATE FORM -->
+  <div class="dash-card">
+    <div class="dash-card-header">
+      <i class="las la-plus-circle"></i>
+      <span>Create New Sub Category</span>
+    </div>
+    <div class="dash-card-body">
+      <form action="/subcategories/create" method="POST" enctype="multipart/form-data">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Parent Category</label>
+            <select name="category_id" class="form-select" required>
+              <option value="">-- Select Category --</option>
+              <% categories.forEach(cat => { %>
+                <option value="<%= cat.id %>"><%= cat.name %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Sub Category Name</label>
+            <input type="text" name="name" class="form-control" placeholder="e.g. Chicken Biryani" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Veg Type</label>
+            <select name="veg_type" class="form-select">
+              <option value="veg">🟢 Veg</option>
+              <option value="non-veg">🔴 Non-Veg</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+              <option value="1">Active</option>
+              <option value="0">Inactive</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Image</label>
+            <div class="file-upload-wrapper">
+              <label class="file-upload-label" for="scImageInput">
+                <div class="upload-icon"><i class="las la-cloud-upload-alt"></i></div>
+                <div class="upload-text">
+                  <strong>Click to upload</strong>
+                  PNG, JPG supported
+                </div>
+              </label>
+              <input type="file" id="scImageInput" name="image" accept="image/*">
+              <div class="file-name-display" id="scFileName"></div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control" rows="2" placeholder="Short description..."></textarea>
+          </div>
+          <div class="col-12 text-end">
+            <button type="submit" class="btn-create">
+              <i class="las la-plus" style="margin-right:6px;"></i> Create Sub Category
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- LIST TABLE -->
+  <div class="dash-card">
+    <div class="dash-card-header">
+      <i class="las la-th-list"></i>
+      <span>Sub Category List</span>
+    </div>
+    <div style="padding:0;">
+      <div class="table-responsive">
+        <table class="cat-table">
+          <thead>
+            <tr>
+              <th>#ID</th>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Description</th>
+              <th>Veg Type</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="subcat-body">
+            <% if (subCategories && subCategories.length > 0) { %>
+              <% subCategories.forEach(sc => { %>
+                <tr>
+                  <td><span class="id-badge">#<%= sc.id %></span></td>
+                  <td>
+                    <% if (sc.image) { %>
+                      <img src="<%= sc.image %>" class="cat-img" onclick="openImgModal(this.src)">
+                    <% } else { %>
+                      <div class="no-img"><i class="las la-image"></i></div>
+                    <% } %>
+                  </td>
+                  <td style="font-weight:600; color:#0f172a;"><%= sc.name %></td>
+                  <td style="color:#64748b;"><%= sc.category_name %></td>
+                  <td style="max-width:160px; color:#64748b;"><%= sc.description || '—' %></td>
+                  <td>
+                    <% if (sc.veg_type === 'veg') { %>
+                      <span class="badge-veg">🟢 Veg</span>
+                    <% } else { %>
+                      <span class="badge-nonveg">🔴 Non-Veg</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <button class="toggle-status <%= sc.status==1 ? 'btn-success' : 'btn-secondary' %> status-toggle" data-id="<%= sc.id %>">
+                      <%= sc.status==1 ? '✓ Active' : '✗ Inactive' %>
+                    </button>
+                  </td>
+                  <td style="display:flex; gap:6px;">
+                    <button class="btn-edit edit-btn" data-id="<%= sc.id %>"><i class="las la-pen"></i> Edit</button>
+                    <button class="btn-del delete-btn" data-id="<%= sc.id %>"><i class="las la-trash"></i> Del</button>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="8">
+                  <div class="empty-state">
+                    <i class="las la-folder-open"></i>
+                    <p>No sub categories found.</p>
+                  </div>
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PAGINATION -->
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          Page <strong><%= currentPage %></strong> of <strong><%= totalPages %></strong>
+        </div>
+        <div class="pag-btns">
+          <a href="/subcategories?page=<%= currentPage - 1 %>" class="pag-btn <%= currentPage <= 1 ? 'disabled' : '' %>">
+            <i class="las la-angle-left"></i>
+          </a>
+          <% for(let i = 1; i <= totalPages; i++) { %>
+            <% if (i === 1 || i === totalPages || (i >= currentPage-1 && i <= currentPage+1)) { %>
+              <a href="/subcategories?page=<%= i %>" class="pag-btn <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+            <% } else if (i === currentPage-2 || i === currentPage+2) { %>
+              <span class="pag-btn disabled">…</span>
+            <% } %>
+          <% } %>
+          <a href="/subcategories?page=<%= currentPage + 1 %>" class="pag-btn <%= currentPage >= totalPages ? 'disabled' : '' %>">
+            <i class="las la-angle-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Image Zoom Modal -->
+<div class="img-modal-overlay" id="imgModal" onclick="if(event.target===this)this.classList.remove('active')">
+  <div class="img-modal-box">
+    <button class="img-modal-close" onclick="document.getElementById('imgModal').classList.remove('active')">✕</button>
+    <img id="imgModalSrc" src="" alt="">
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header-dark">
+        <span><i class="las la-pen" style="color:#e63946;margin-right:8px;"></i>Edit Sub Category</span>
+        <button data-bs-dismiss="modal">✕</button>
+      </div>
+      <div class="dash-card-body">
+        <form id="editForm" enctype="multipart/form-data">
+          <input type="hidden" name="id" id="edit-id">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Parent Category</label>
+              <select name="category_id" id="edit-category" class="form-select" required>
+                <% categories.forEach(cat => { %>
+                  <option value="<%= cat.id %>"><%= cat.name %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Name</label>
+              <input type="text" name="name" id="edit-name" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Veg Type</label>
+              <select name="veg_type" id="edit-veg" class="form-select">
+                <option value="veg">🟢 Veg</option>
+                <option value="non-veg">🔴 Non-Veg</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Status</label>
+              <select name="status" id="edit-status" class="form-select">
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Image</label>
+              <div class="file-upload-wrapper">
+                <label class="file-upload-label" for="editImageInput">
+                  <div class="upload-icon"><i class="las la-cloud-upload-alt"></i></div>
+                  <div class="upload-text"><strong>Click to change</strong>PNG, JPG supported</div>
+                </label>
+                <input type="file" id="editImageInput" name="image" accept="image/*">
+              </div>
+              <img id="current-image" src="" style="width:60px;height:60px;object-fit:cover;border-radius:10px;margin-top:8px;display:none;">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Description</label>
+              <textarea name="description" id="edit-description" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="col-12 text-end">
+              <button type="submit" class="btn-create">Update Sub Category</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // file input display
+  document.getElementById('scImageInput').addEventListener('change', function() {
+    const d = document.getElementById('scFileName');
+    if (this.files[0]) { d.textContent = '📎 ' + this.files[0].name; d.style.display = 'block'; }
+  });
+
+  // image zoom
+  function openImgModal(src) {
+    document.getElementById('imgModalSrc').src = src;
+    document.getElementById('imgModal').classList.add('active');
+  }
+  document.addEventListener('keydown', e => { if(e.key==='Escape') document.getElementById('imgModal').classList.remove('active'); });
+
+$(document).ready(function(){
+
+  // status toggle
+  $(document).on('click', '.status-toggle', function() {
+    const btn = $(this);
+    $.post(`/subcategories/toggle/${btn.data('id')}`, function(res) {
+      if (res.success) {
+        if (res.newStatus === 1) {
+          btn.removeClass('btn-secondary').addClass('btn-success').text('✓ Active');
+        } else {
+          btn.removeClass('btn-success').addClass('btn-secondary').text('✗ Inactive');
+        }
+      }
+    });
+  });
+
+  // edit
+  $(document).on('click', '.edit-btn', function() {
+    $.get('/subcategories/' + $(this).data('id'), function(data) {
+      $('#edit-id').val(data.id);
+      $('#edit-name').val(data.name);
+      $('#edit-description').val(data.description);
+      $('#edit-category').val(data.category_id);
+      $('#edit-veg').val(data.veg_type);
+      $('#edit-status').val(data.status);
+      const img = document.getElementById('current-image');
+      if (data.image) { img.src = data.image; img.style.display = 'block'; } else { img.style.display = 'none'; }
+      new bootstrap.Modal(document.getElementById('editModal')).show();
+    });
+  });
+
+  // update
+  $('#editForm').submit(function(e) {
+    e.preventDefault();
+    $.ajax({
+      url: '/subcategories/' + $('#edit-id').val() + '/update',
+      type: 'POST', data: new FormData(this),
+      processData: false, contentType: false,
+      success: function(res) { if(res.success) location.reload(); }
+    });
+  });
+
+  // delete
+  $(document).on('click', '.delete-btn', function() {
+    if (!confirm('Delete this sub category?')) return;
+    $.ajax({
+      url: '/subcategories/' + $(this).data('id') + '/delete',
+      type: 'DELETE',
+      success: function(res) { if(res.success) location.reload(); }
+    });
+  });
+
+});
+</script>

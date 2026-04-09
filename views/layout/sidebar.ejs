@@ -1,0 +1,314 @@
+<style>
+/* ═══════════════════════════════
+   SIDEBAR BASE
+═══════════════════════════════ */
+.iq-sidebar {
+  background: #0f172a !important;
+  box-shadow: 4px 0 24px rgba(0,0,0,0.18) !important;
+}
+
+/* ── LOGO AREA ── */
+.iq-sidebar-logo {
+  background: #0f172a !important;
+  border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+  padding: 14px 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  min-height: 70px;
+}
+
+.header-logo {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px;
+  text-decoration: none !important;
+}
+
+.header-logo img {
+  height: 38px;
+  width: 38px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 2px solid rgba(230,57,70,0.5);
+}
+
+.logo-title span {
+  color: #fff !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
+  text-decoration: none !important;
+}
+
+.logo-title span em {
+  color: #e63946;
+  font-style: normal;
+}
+
+/* burger icon */
+.iq-menu-bt-sidebar .wrapper-menu,
+.iq-menu-bt-sidebar .main-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.iq-menu-bt-sidebar .main-circle i {
+  color: rgba(255,255,255,0.6);
+  font-size: 20px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.iq-menu-bt-sidebar .main-circle i:hover {
+  color: #e63946;
+}
+
+/* ── SCROLLBAR AREA ── */
+#sidebar-scrollbar {
+  height: calc(100vh - 70px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+#sidebar-scrollbar::-webkit-scrollbar { width: 4px; }
+#sidebar-scrollbar::-webkit-scrollbar-track { background: transparent; }
+#sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(230,57,70,0.35);
+  border-radius: 4px;
+}
+
+/* ── NAV MENU ── */
+.iq-sidebar-menu {
+  padding: 12px 10px 20px;
+}
+
+.iq-sidebar-menu .iq-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* section label */
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: rgba(255,255,255,0.3);
+  text-transform: uppercase;
+  padding: 18px 12px 6px;
+  display: block;
+}
+
+.iq-sidebar-menu .iq-menu li {
+  margin-bottom: 2px;
+}
+
+.iq-sidebar-menu .iq-menu li a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  color: rgba(255,255,255,0.62) !important;
+  font-size: 13.5px;
+  font-weight: 500;
+  text-decoration: none !important;
+  transition: all 0.22s ease;
+  position: relative;
+}
+
+.iq-sidebar-menu .iq-menu li a i {
+  font-size: 19px;
+  min-width: 22px;
+  text-align: center;
+  color: rgba(255,255,255,0.45);
+  transition: color 0.22s;
+}
+
+/* hover */
+.iq-sidebar-menu .iq-menu li a:hover {
+  background: rgba(230,57,70,0.12) !important;
+  color: #fff !important;
+}
+.iq-sidebar-menu .iq-menu li a:hover i {
+  color: #e63946 !important;
+}
+
+/* active */
+.iq-sidebar-menu .iq-menu li.active > a,
+.iq-sidebar-menu .iq-menu li.active-menu > a {
+  background: linear-gradient(135deg, #e63946, #c1121f) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(230,57,70,0.35);
+}
+.iq-sidebar-menu .iq-menu li.active > a i,
+.iq-sidebar-menu .iq-menu li.active-menu > a i {
+  color: #fff !important;
+}
+
+/* divider */
+.nav-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.07);
+  margin: 10px 12px;
+}
+</style>
+
+<!-- ── LOGO ── -->
+<div class="iq-sidebar-logo d-flex justify-content-between">
+  <a href="/admin/dashboard" class="header-logo">
+    <img src="/uploads/admin/namasteatslogo.png" alt="Logo"
+         onerror="this.src='https://root.namasteats.com/public/uploads/admin/namasteatslogo.png'">
+    <div class="logo-title">
+      <span>Namaste <em>Eats</em></span>
+    </div>
+  </a>
+  <div class="iq-menu-bt-sidebar">
+    <div class="iq-menu-bt align-self-center">
+      <div class="wrapper-menu">
+        <div class="main-circle"><i class="las la-bars"></i></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCROLLABLE MENU ── -->
+<div id="sidebar-scrollbar">
+  <nav class="iq-sidebar-menu">
+    <ul id="iq-sidebar-toggle" class="iq-menu">
+
+      <!-- MAIN -->
+      <span class="nav-section-label">Main</span>
+
+      <li class="active active-menu">
+        <a href="/admin/dashboard" class="iq-waves-effect">
+          <i class="las la-tachometer-alt"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+
+      <!-- CATALOGUE -->
+      <span class="nav-section-label">Catalogue</span>
+
+      <li>
+        <a href="/categories" class="iq-waves-effect">
+          <i class="las la-list"></i>
+          <span>Category</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/subcategories" class="iq-waves-effect">
+          <i class="las la-layer-group"></i>
+          <span>Sub Category</span>
+        </a>
+      </li>
+
+      <!-- BUSINESS -->
+      <span class="nav-section-label">Business</span>
+
+      <li>
+        <a href="/restaurants" class="iq-waves-effect">
+          <i class="las la-store"></i>
+          <span>Restaurants</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/zone" class="iq-waves-effect">
+          <i class="las la-map"></i>
+          <span>Zone List</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/zones/create" class="iq-waves-effect">
+          <i class="las la-map-marker"></i>
+          <span>Zone Create</span>
+        </a>
+      </li>
+
+      <!-- USERS & ORDERS -->
+      <span class="nav-section-label">Users & Orders</span>
+
+      <li>
+        <a href="/users" class="iq-waves-effect">
+          <i class="las la-users"></i>
+          <span>Users</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/orders" class="iq-waves-effect">
+          <i class="las la-shopping-cart"></i>
+          <span>Orders List</span>
+        </a>
+      </li>
+
+      <!-- SETTINGS -->
+      <span class="nav-section-label">Settings</span>
+
+      <li>
+        <a href="/sliders" class="iq-waves-effect">
+          <i class="las la-images"></i>
+          <span>Sliders</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/charges" class="iq-waves-effect">
+          <i class="las la-money-bill"></i>
+          <span>Addon Charges</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/unit-types" class="iq-waves-effect">
+          <i class="las la-boxes"></i>
+          <span>Unit Types</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/coupons" class="iq-waves-effect">
+          <i class="las la-ticket-alt"></i>
+          <span>Coupons</span>
+        </a>
+      </li>
+
+      <div class="nav-divider"></div>
+
+      <li>
+        <a href="/admin/change-password" class="iq-waves-effect">
+          <i class="las la-key"></i>
+          <span>Change Password</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="/admin/logout" class="iq-waves-effect">
+          <i class="las la-sign-out-alt"></i>
+          <span>Logout</span>
+        </a>
+      </li>
+
+    </ul>
+  </nav>
+</div>
+
+<!-- ── ACTIVE LINK SCRIPT ── -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const currentPath = window.location.pathname;
+  const allLi = document.querySelectorAll("#iq-sidebar-toggle li");
+
+  allLi.forEach(li => li.classList.remove("active", "active-menu"));
+
+  allLi.forEach(li => {
+    const a = li.querySelector("a");
+    if (a && a.getAttribute("href") === currentPath) {
+      li.classList.add("active", "active-menu");
+    }
+  });
+});
+</script>

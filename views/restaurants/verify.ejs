@@ -1,0 +1,304 @@
+<style>
+  .cat-wrapper { padding: 28px 20px; background: #f8fafc; min-height: 100vh; }
+  .page-heading { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .page-heading span { color: #e63946; }
+
+  /* info bar */
+  .info-bar { background: #0f172a; border-radius: 14px; padding: 16px 22px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; }
+  .info-bar .rest-img { width: 56px; height: 56px; object-fit: cover; border-radius: 12px; border: 2px solid rgba(255,255,255,0.15); flex-shrink: 0; }
+  .info-bar .no-img { width: 56px; height: 56px; background: rgba(255,255,255,0.08); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.4); font-size: 22px; }
+  .info-bar .rest-name { color: #fff; font-size: 16px; font-weight: 700; }
+  .info-bar .rest-meta { color: rgba(255,255,255,0.55); font-size: 13px; margin-top: 2px; }
+  .info-bar .status-pill { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .status-active   { background: #dcfce7; color: #16a34a; }
+  .status-inactive { background: #fee2e2; color: #dc2626; }
+
+  /* step tabs */
+  .step-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .step-tab {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 12px; border: 2px solid #e2e8f0;
+    background: #fff; color: #64748b; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .step-tab .step-num { width: 24px; height: 24px; border-radius: 50%; background: #f1f5f9; color: #94a3b8; font-size: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+  .step-tab:hover { border-color: #e63946; color: #e63946; }
+  .step-tab.active { background: #0f172a; border-color: #0f172a; color: #fff; }
+  .step-tab.active .step-num { background: #e63946; color: #fff; }
+  .step-tab.done { border-color: #22c55e; color: #16a34a; }
+  .step-tab.done .step-num { background: #dcfce7; color: #16a34a; }
+
+  /* cards */
+  .dash-card { background: #fff; border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.07); overflow: hidden; margin-bottom: 20px; }
+  .dash-card-header { background: #0f172a; padding: 16px 22px; display: flex; align-items: center; gap: 10px; }
+  .dash-card-header i { color: #e63946; font-size: 20px; }
+  .dash-card-header span { color: #fff; font-size: 15px; font-weight: 600; }
+  .dash-card-body { padding: 22px; }
+
+  /* info grid */
+  .info-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+  .info-item label { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+  .info-item p { font-size: 14px; font-weight: 600; color: #0f172a; margin: 0; }
+
+  /* table */
+  .cat-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .cat-table thead tr th { background: #0f172a; color: rgba(255,255,255,0.75); font-size: 12px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; padding: 12px 16px; border: none; }
+  .cat-table thead tr th:first-child { border-radius: 10px 0 0 0; }
+  .cat-table thead tr th:last-child  { border-radius: 0 10px 0 0; }
+  .cat-table tbody tr { border-bottom: 1px solid #f1f5f9; }
+  .cat-table tbody tr:hover { background: #fafafa; }
+  .cat-table tbody td { padding: 12px 16px; font-size: 13.5px; color: #334155; vertical-align: middle; }
+  .menu-img { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; border: 2px solid #f1f5f9; }
+  .no-menu-img { width: 48px; height: 48px; background: #f1f5f9; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #94a3b8; }
+  .price-badge { background: #f0fdf4; color: #16a34a; font-weight: 700; font-size: 13px; padding: 3px 9px; border-radius: 6px; }
+
+  /* action buttons */
+  .action-bar { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; margin-top: 20px; }
+  .btn-approve { background: linear-gradient(135deg, #22c55e, #15803d); color: #fff; border: none; border-radius: 10px; padding: 10px 24px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: opacity 0.2s; }
+  .btn-approve:hover { opacity: 0.88; }
+  .btn-reject  { background: linear-gradient(135deg, #e63946, #c1121f); color: #fff; border: none; border-radius: 10px; padding: 10px 24px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: opacity 0.2s; }
+  .btn-reject:hover { opacity: 0.88; }
+
+  /* reject box */
+  .reject-box { margin-top: 14px; display: none; }
+  .reject-box textarea { border: 1.5px solid #fecaca; border-radius: 10px; padding: 10px 14px; font-size: 13.5px; width: 100%; resize: none; outline: none; }
+  .reject-box textarea:focus { border-color: #e63946; box-shadow: 0 0 0 3px rgba(230,57,70,0.1); }
+  .btn-submit-reject { background: #e63946; color: #fff; border: none; border-radius: 8px; padding: 8px 20px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+
+  /* final card */
+  .final-card { background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: 16px; padding: 32px; text-align: center; color: #fff; }
+  .final-card i { font-size: 48px; color: #e63946; margin-bottom: 12px; display: block; }
+  .final-card h4 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .final-card p { color: rgba(255,255,255,0.6); font-size: 14px; margin-bottom: 20px; }
+  .btn-activate { background: linear-gradient(135deg, #22c55e, #15803d); color: #fff; border: none; border-radius: 12px; padding: 12px 32px; font-size: 15px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: opacity 0.2s; }
+  .btn-activate:hover { opacity: 0.88; }
+
+  /* back btn */
+  .btn-back { background: #f1f5f9; color: #334155; border: none; border-radius: 10px; padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; transition: all 0.2s; }
+  .btn-back:hover { background: #e2e8f0; color: #0f172a; }
+
+  /* empty */
+  .empty-state { text-align: center; padding: 32px; color: #94a3b8; }
+  .empty-state i { font-size: 40px; display: block; margin-bottom: 8px; }
+</style>
+
+<div class="cat-wrapper">
+
+  <!-- Heading -->
+  <div class="page-heading">
+    <a href="/restaurants" class="btn-back"><i class="las la-arrow-left"></i> Back</a>
+    <i class="las la-shield-alt" style="color:#e63946;"></i>
+    Restaurant <span>Verification</span>
+  </div>
+
+  <!-- Info Bar -->
+  <div class="info-bar">
+    <% if (restaurant.image) { %>
+      <img src="<%= restaurant.image %>" class="rest-img" onerror="this.style.display='none'">
+    <% } else { %>
+      <div class="no-img"><i class="las la-store"></i></div>
+    <% } %>
+    <div style="flex:1;">
+      <div class="rest-name"><%= restaurant.name %></div>
+      <div class="rest-meta"><%= restaurant.mobile %> &nbsp;|&nbsp; <%= restaurant.city || '—' %></div>
+    </div>
+    <span class="status-pill <%= restaurant.is_active ? 'status-active' : 'status-inactive' %>">
+      <%= restaurant.is_active ? '✓ Active' : '✗ Inactive' %>
+    </span>
+    <span style="background:rgba(255,255,255,0.1); color:#fff; font-size:12px; font-weight:600; padding:4px 12px; border-radius:20px;">
+      Step <%= step_id %>
+    </span>
+  </div>
+
+  <!-- Step Tabs -->
+  <div class="step-tabs">
+    <button class="step-tab <%= step_id==1 ? 'active' : (step_id>1 ? 'done' : '') %>" onclick="showTab(1)">
+      <span class="step-num"><%= step_id > 1 ? '✓' : '1' %></span> Basic Details
+    </button>
+    <button class="step-tab <%= step_id==2 ? 'active' : (step_id>2 ? 'done' : '') %>" onclick="showTab(2)">
+      <span class="step-num"><%= step_id > 2 ? '✓' : '2' %></span> KYC Documents
+    </button>
+    <button class="step-tab <%= step_id==3 ? 'active' : (step_id>3 ? 'done' : '') %>" onclick="showTab(3)">
+      <span class="step-num"><%= step_id > 3 ? '✓' : '3' %></span> Menu Items
+    </button>
+    <button class="step-tab <%= step_id==4 ? 'active' : '' %>" onclick="showTab(4)">
+      <span class="step-num"><%= step_id == 4 ? '✓' : '4' %></span> Final
+    </button>
+  </div>
+
+  <!-- STEP 1 -->
+  <div id="tab1">
+    <div class="dash-card">
+      <div class="dash-card-header">
+        <i class="las la-info-circle"></i>
+        <span>Step 1 — Basic Details</span>
+      </div>
+      <div class="dash-card-body">
+        <div class="info-grid">
+          <div class="info-item"><label>Restaurant Name</label><p><%= restaurant.name %></p></div>
+          <div class="info-item"><label>Title</label><p><%= restaurant.restaurant_title || '—' %></p></div>
+          <div class="info-item"><label>Mobile</label><p><%= restaurant.mobile || '—' %></p></div>
+          <div class="info-item"><label>Veg Type</label><p><%= restaurant.veg_type || '—' %></p></div>
+          <div class="info-item"><label>Address</label><p><%= restaurant.address || '—' %></p></div>
+          <div class="info-item"><label>City</label><p><%= restaurant.city || '—' %></p></div>
+          <div class="info-item"><label>Rating</label><p>⭐ <%= restaurant.rating || '0' %></p></div>
+          <div class="info-item"><label>COD Available</label><p><%= restaurant.cod_available ? 'Yes' : 'No' %></p></div>
+        </div>
+        <div class="action-bar">
+          <button class="btn-approve" onclick="verifyStep(1,'approve')"><i class="las la-check-circle"></i> Approve</button>
+          <button class="btn-reject"  onclick="showReject(1)"><i class="las la-times-circle"></i> Reject</button>
+        </div>
+        <div class="reject-box" id="rejectBox1">
+          <textarea id="reason1" rows="3" placeholder="Enter reject reason..."></textarea>
+          <button class="btn-submit-reject" onclick="verifyStep(1,'reject')"><i class="las la-paper-plane"></i> Submit Reject</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div id="tab2" style="display:none;">
+    <div class="dash-card">
+      <div class="dash-card-header">
+        <i class="las la-file-alt"></i>
+        <span>Step 2 — KYC Documents</span>
+      </div>
+      <div class="dash-card-body" style="padding:0;">
+        <% if (documents && documents.length > 0) { %>
+        <div class="table-responsive">
+          <table class="cat-table">
+            <thead>
+              <tr>
+                <th>PAN</th>
+                <th>GST</th>
+                <th>Bank Owner</th>
+                <th>IFSC</th>
+                <th>Account No.</th>
+                <th>FSSAI</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% documents.forEach(d => { %>
+              <tr>
+                <td><%= d.pan || '—' %></td>
+                <td><%= d.gst || '—' %></td>
+                <td><%= d.bank_owner_name || '—' %></td>
+                <td><%= d.ifsc_code || '—' %></td>
+                <td><%= d.bank_account_number || '—' %></td>
+                <td><%= d.fssai_certificate_number || '—' %></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <% } else { %>
+          <div class="empty-state"><i class="las la-file-alt"></i><p>No documents uploaded yet.</p></div>
+        <% } %>
+        <div class="dash-card-body">
+          <div class="action-bar">
+            <button class="btn-approve" onclick="verifyStep(2,'approve')"><i class="las la-check-circle"></i> Approve</button>
+            <button class="btn-reject"  onclick="showReject(2)"><i class="las la-times-circle"></i> Reject</button>
+          </div>
+          <div class="reject-box" id="rejectBox2">
+            <textarea id="reason2" rows="3" placeholder="Enter reject reason..."></textarea>
+            <button class="btn-submit-reject" onclick="verifyStep(2,'reject')"><i class="las la-paper-plane"></i> Submit Reject</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div id="tab3" style="display:none;">
+    <div class="dash-card">
+      <div class="dash-card-header">
+        <i class="las la-utensils"></i>
+        <span>Step 3 — Menu Items</span>
+      </div>
+      <div style="padding:0;">
+        <% if (menuItems && menuItems.length > 0) { %>
+        <div class="table-responsive">
+          <table class="cat-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% menuItems.forEach(m => { %>
+              <tr>
+                <td>
+                  <% if (m.thumbnail_image) { %>
+                    <img src="<%= m.thumbnail_image %>" class="menu-img">
+                  <% } else { %>
+                    <div class="no-menu-img"><i class="las la-image"></i></div>
+                  <% } %>
+                </td>
+                <td style="font-weight:600; color:#0f172a;"><%= m.name %></td>
+                <td style="color:#64748b;"><%= m.category || '—' %></td>
+                <td><span class="price-badge">₹<%= m.price %></span></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <% } else { %>
+          <div class="empty-state"><i class="las la-utensils"></i><p>No menu items added yet.</p></div>
+        <% } %>
+        <div class="dash-card-body">
+          <div class="action-bar">
+            <button class="btn-approve" onclick="verifyStep(3,'approve')"><i class="las la-check-circle"></i> Approve</button>
+            <button class="btn-reject"  onclick="showReject(3)"><i class="las la-times-circle"></i> Reject</button>
+          </div>
+          <div class="reject-box" id="rejectBox3">
+            <textarea id="reason3" rows="3" placeholder="Enter reject reason..."></textarea>
+            <button class="btn-submit-reject" onclick="verifyStep(3,'reject')"><i class="las la-paper-plane"></i> Submit Reject</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4 FINAL -->
+  <div id="tab4" style="display:none;">
+    <div class="final-card">
+      <i class="las la-check-double"></i>
+      <h4>Final Activation</h4>
+      <p>All steps verified. Click below to activate this restaurant.</p>
+      <button class="btn-activate" onclick="verifyStep(3,'approve')">
+        <i class="las la-bolt"></i> Activate Restaurant
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showTab(step) {
+  document.querySelectorAll("[id^='tab']").forEach(t => t.style.display = 'none');
+  document.getElementById("tab" + step).style.display = 'block';
+}
+
+function showReject(step) {
+  document.getElementById("rejectBox" + step).style.display = 'block';
+}
+
+function verifyStep(step, action) {
+  const reason = document.getElementById("reason" + step)?.value || "";
+  fetch(`/restaurants/<%= restaurant.id %>/verify-step`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ step, status: action, reason })
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.success) {
+      alert("Updated Successfully!");
+      location.reload();
+    }
+  });
+}
+</script>

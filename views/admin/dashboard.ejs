@@ -1,0 +1,263 @@
+<style>
+  /* ── STAT CARDS ── */
+  .dash-stat-card {
+    border: none;
+    border-radius: 16px;
+    padding: 24px 20px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .dash-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 32px rgba(0,0,0,0.18);
+  }
+  .dash-stat-card .bg-icon {
+    position: absolute;
+    right: -14px;
+    bottom: -14px;
+    font-size: 90px;
+    opacity: 0.12;
+    line-height: 1;
+  }
+  .dash-stat-card .label {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    opacity: 0.88;
+    margin-bottom: 8px;
+  }
+  .dash-stat-card .value {
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1;
+    margin: 0;
+  }
+  .dash-stat-card .icon-box {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+
+  .grad-orange  { background: linear-gradient(135deg, #f97316, #ea580c); }
+  .grad-blue    { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+  .grad-green   { background: linear-gradient(135deg, #22c55e, #15803d); }
+  .grad-purple  { background: linear-gradient(135deg, #a855f7, #7e22ce); }
+
+  /* ── ORDER STATUS SECTION ── */
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: #f1f5f9;
+    border-radius: 2px;
+  }
+
+  .status-card {
+    border: none;
+    border-radius: 14px;
+    padding: 20px 16px;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    transition: transform 0.2s ease;
+    background: #fff;
+  }
+  .status-card:hover { transform: translateY(-3px); }
+
+  .status-card .s-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin: 0 auto 12px;
+  }
+  .status-card .s-count {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .status-card .s-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+
+  .s-pending  .s-icon { background: #fff7ed; color: #f97316; }
+  .s-pending  .s-count { color: #f97316; }
+  .s-pending  .s-label { color: #f97316; }
+
+  .s-preparing .s-icon { background: #eff6ff; color: #3b82f6; }
+  .s-preparing .s-count { color: #3b82f6; }
+  .s-preparing .s-label { color: #3b82f6; }
+
+  .s-delivery .s-icon { background: #faf5ff; color: #a855f7; }
+  .s-delivery .s-count { color: #a855f7; }
+  .s-delivery .s-label { color: #a855f7; }
+
+  .s-delivered .s-icon { background: #f0fdf4; color: #22c55e; }
+  .s-delivered .s-count { color: #22c55e; }
+  .s-delivered .s-label { color: #22c55e; }
+
+  .s-cancelled .s-icon { background: #fff1f2; color: #ef4444; }
+  .s-cancelled .s-count { color: #ef4444; }
+  .s-cancelled .s-label { color: #ef4444; }
+
+  /* ── WRAPPER ── */
+  .dash-wrapper {
+    padding: 28px 20px;
+    background: #f8fafc;
+    min-height: 100vh;
+  }
+
+  .dash-page-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 24px;
+  }
+  .dash-page-title span {
+    color: #e63946;
+  }
+</style>
+
+<div class="dash-wrapper">
+
+  <!-- Page Heading -->
+  <div class="dash-page-title">
+    <i class="las la-tachometer-alt me-2" style="color:#e63946"></i>
+    Dashboard <span>Overview</span>
+  </div>
+
+  <!-- ── STAT CARDS ROW ── -->
+  <div class="row g-3 mb-4">
+
+    <!-- Total Orders -->
+    <div class="col-6 col-lg-3">
+      <div class="dash-stat-card grad-orange">
+        <div class="icon-box"><i class="las la-shopping-bag"></i></div>
+        <p class="label">Total Orders</p>
+        <p class="value"><%= totalOrders %></p>
+        <i class="las la-shopping-bag bg-icon"></i>
+      </div>
+    </div>
+
+    <!-- Restaurants -->
+    <div class="col-6 col-lg-3">
+      <div class="dash-stat-card grad-blue">
+        <div class="icon-box"><i class="las la-store"></i></div>
+        <p class="label">Restaurants</p>
+        <p class="value"><%= totalRestaurants %></p>
+        <i class="las la-store bg-icon"></i>
+      </div>
+    </div>
+
+    <!-- Users -->
+    <div class="col-6 col-lg-3">
+      <div class="dash-stat-card grad-purple">
+        <div class="icon-box"><i class="las la-users"></i></div>
+        <p class="label">Total Users</p>
+        <p class="value"><%= totalUsers %></p>
+        <i class="las la-users bg-icon"></i>
+      </div>
+    </div>
+
+    <!-- Revenue -->
+    <div class="col-6 col-lg-3">
+      <div class="dash-stat-card grad-green">
+        <div class="icon-box"><i class="las la-rupee-sign"></i></div>
+        <p class="label">Total Revenue</p>
+        <p class="value">₹<%= totalRevenue %></p>
+        <i class="las la-rupee-sign bg-icon"></i>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── ORDER STATUS ROW ── -->
+  <div class="section-title">
+    <i class="las la-clipboard-list" style="color:#e63946; font-size:20px;"></i>
+    Order Status Breakdown
+  </div>
+
+  <div class="row g-3">
+
+    <!-- Pending -->
+    <div class="col-6 col-md-4 col-lg-2-4">
+      <div class="status-card s-pending">
+        <div class="s-icon"><i class="las la-clock"></i></div>
+        <div class="s-count"><%= orderStatus.pending || 0 %></div>
+        <div class="s-label">Pending</div>
+      </div>
+    </div>
+
+    <!-- Preparing -->
+    <div class="col-6 col-md-4 col-lg-2-4">
+      <div class="status-card s-preparing">
+        <div class="s-icon"><i class="las la-fire"></i></div>
+        <div class="s-count"><%= orderStatus.preparing || 0 %></div>
+        <div class="s-label">Preparing</div>
+      </div>
+    </div>
+
+    <!-- Out for Delivery -->
+    <div class="col-6 col-md-4 col-lg-2-4">
+      <div class="status-card s-delivery">
+        <div class="s-icon"><i class="las la-motorcycle"></i></div>
+        <div class="s-count"><%= orderStatus.out_for_delivery || 0 %></div>
+        <div class="s-label">Out for Delivery</div>
+      </div>
+    </div>
+
+    <!-- Delivered -->
+    <div class="col-6 col-md-4 col-lg-2-4">
+      <div class="status-card s-delivered">
+        <div class="s-icon"><i class="las la-check-circle"></i></div>
+        <div class="s-count"><%= orderStatus.delivered || 0 %></div>
+        <div class="s-label">Delivered</div>
+      </div>
+    </div>
+
+    <!-- Cancelled -->
+    <div class="col-6 col-md-4 col-lg-2-4">
+      <div class="status-card s-cancelled">
+        <div class="s-icon"><i class="las la-times-circle"></i></div>
+        <div class="s-count"><%= orderStatus.cancelled || 0 %></div>
+        <div class="s-label">Cancelled</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<style>
+  /* 5 equal columns on large screens */
+  @media (min-width: 992px) {
+    .col-lg-2-4 {
+      flex: 0 0 20%;
+      max-width: 20%;
+    }
+  }
+</style>

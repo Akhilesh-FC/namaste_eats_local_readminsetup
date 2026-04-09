@@ -1,0 +1,319 @@
+<style>
+  .cat-wrapper { padding: 28px 20px; background: #f8fafc; min-height: 100vh; }
+  .page-heading { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 24px; }
+  .page-heading span { color: #e63946; }
+
+  .dash-card { background: #fff; border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.07); overflow: hidden; margin-bottom: 28px; }
+  .dash-card-header { background: #0f172a; padding: 16px 22px; display: flex; align-items: center; justify-content: space-between; }
+  .dash-card-header-left { display: flex; align-items: center; gap: 10px; }
+  .dash-card-header i { color: #e63946; font-size: 20px; }
+  .dash-card-header span { color: #fff; font-size: 15px; font-weight: 600; }
+
+  .btn-add { background: linear-gradient(135deg,#e63946,#c1121f); color:#fff; border:none; border-radius:10px; padding:8px 18px; font-size:13px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:opacity 0.2s; }
+  .btn-add:hover { opacity: 0.88; }
+
+  .cat-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .cat-table thead tr th { background: #0f172a; color: rgba(255,255,255,0.75); font-size: 12px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; padding: 13px 16px; border: none; white-space: nowrap; }
+  .cat-table thead tr th:first-child { border-radius: 10px 0 0 0; }
+  .cat-table thead tr th:last-child  { border-radius: 0 10px 0 0; }
+  .cat-table tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.15s; }
+  .cat-table tbody tr:hover { background: #fafafa; }
+  .cat-table tbody tr:last-child { border-bottom: none; }
+  .cat-table tbody td { padding: 13px 16px; font-size: 13.5px; color: #334155; vertical-align: middle; }
+
+  .sno-badge { background: #f1f5f9; color: #64748b; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 6px; }
+  .code-badge { background: #faf5ff; color: #7c3aed; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 8px; letter-spacing: 1px; }
+  .disc-badge { background: #fff7ed; color: #ea580c; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 8px; }
+  .type-flat { background: #eff6ff; color: #3b82f6; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .type-pct  { background: #f0fdf4; color: #16a34a; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .date-text { font-size: 12px; color: #94a3b8; }
+
+  .btn-edit { background: #eff6ff; color: #3b82f6; border: none; border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-edit:hover { background: #3b82f6; color: #fff; }
+  .btn-del  { background: #fff1f2; color: #e63946; border: none; border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-del:hover { background: #e63946; color: #fff; }
+
+  .empty-state { text-align: center; padding: 48px 20px; color: #94a3b8; }
+  .empty-state i { font-size: 48px; margin-bottom: 12px; display: block; }
+
+  /* modal */
+  .modal-content { border: none; border-radius: 16px; overflow: hidden; }
+  .modal-header-dark { background: #0f172a; padding: 16px 22px; display: flex; align-items: center; justify-content: space-between; }
+  .modal-header-dark span { color: #fff; font-size: 15px; font-weight: 600; }
+  .modal-header-dark button { background: none; border: none; color: rgba(255,255,255,0.6); font-size: 20px; cursor: pointer; line-height: 1; }
+  .modal-header-dark button:hover { color: #e63946; }
+  .modal-body-pad { padding: 22px; }
+  .form-label { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; display: block; }
+  .form-control, .form-select { border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 13.5px; padding: 9px 14px; color: #1e293b; width: 100%; outline: none; transition: border-color 0.2s; }
+  .form-control:focus, .form-select:focus { border-color: #e63946; box-shadow: 0 0 0 3px rgba(230,57,70,0.1); }
+  textarea.form-control { resize: none; }
+  .btn-save { background: linear-gradient(135deg,#e63946,#c1121f); color:#fff; border:none; border-radius:10px; padding:10px 28px; font-size:14px; font-weight:600; cursor:pointer; transition:opacity 0.2s; }
+  .btn-save:hover { opacity: 0.88; }
+
+  /* toast */
+  .toast-msg { position: fixed; top: 24px; right: 24px; z-index: 99999; background: #0f172a; color: #fff; padding: 14px 22px; border-radius: 12px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); opacity: 0; transform: translateY(-10px); transition: all 0.3s ease; pointer-events: none; }
+  .toast-msg.show { opacity: 1; transform: translateY(0); }
+  .toast-msg i { color: #22c55e; font-size: 18px; }
+</style>
+
+<div class="cat-wrapper">
+
+  <div class="page-heading">
+    <i class="las la-ticket-alt" style="color:#e63946; margin-right:8px;"></i>
+    Manage <span>Coupons</span>
+  </div>
+
+  <div class="dash-card">
+    <div class="dash-card-header">
+      <div class="dash-card-header-left">
+        <i class="las la-ticket-alt"></i>
+        <span>Coupon List</span>
+      </div>
+      <button class="btn-add" onclick="openAddModal()">
+        <i class="las la-plus"></i> Add Coupon
+      </button>
+    </div>
+
+    <div style="padding:0;">
+      <div class="table-responsive">
+        <table class="cat-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Code</th>
+              <th>Discount</th>
+              <th>Type</th>
+              <th>Min Amount</th>
+              <th>Validity</th>
+              <th>Description</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="couponTableBody">
+            <tr><td colspan="8"><div class="empty-state"><i class="las la-spinner"></i><p>Loading...</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-msg" id="toastMsg">
+  <i class="las la-check-circle"></i>
+  <span id="toastText">Done!</span>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header-dark">
+        <span><i class="las la-plus-circle" style="color:#e63946;margin-right:8px;"></i>Add New Coupon</span>
+        <button type="button" onclick="closeModal('addModal')">✕</button>
+      </div>
+      <div class="modal-body-pad">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Coupon Code</label>
+            <input type="text" id="add_coupon_code" class="form-control" placeholder="e.g. SAVE20">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Discount Value</label>
+            <input type="number" id="add_discount" class="form-control" placeholder="e.g. 20">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Coupon Type</label>
+            <select id="add_type" class="form-select">
+              <option value="1">Flat (₹)</option>
+              <option value="2">Percentage (%)</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Min Order Amount (₹)</label>
+            <input type="number" id="add_min" class="form-control" placeholder="e.g. 200">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Validity Date</label>
+            <input type="date" id="add_validity" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Description</label>
+            <textarea id="add_title" class="form-control" rows="2" placeholder="Short description..."></textarea>
+          </div>
+          <div class="col-12 text-end">
+            <button class="btn-save" id="saveAdd"><i class="las la-plus" style="margin-right:6px;"></i>Add Coupon</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header-dark">
+        <span><i class="las la-pen" style="color:#e63946;margin-right:8px;"></i>Edit Coupon</span>
+        <button type="button" onclick="closeModal('editModal')">✕</button>
+      </div>
+      <div class="modal-body-pad">
+        <input type="hidden" id="edit_id">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Coupon Code</label>
+            <input type="text" id="edit_coupon_code" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Discount Value</label>
+            <input type="number" id="edit_discount" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Coupon Type</label>
+            <select id="edit_type" class="form-select">
+              <option value="1">Flat (₹)</option>
+              <option value="2">Percentage (%)</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Min Order Amount (₹)</label>
+            <input type="number" id="edit_min" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Validity Date</label>
+            <input type="date" id="edit_validity" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Description</label>
+            <textarea id="edit_title" class="form-control" rows="2"></textarea>
+          </div>
+          <div class="col-12 text-end">
+            <button class="btn-save" id="saveUpdate">Update Coupon</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function closeModal(id) {
+    const m = bootstrap.Modal.getInstance(document.getElementById(id));
+    if (m) m.hide();
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toastMsg');
+    document.getElementById('toastText').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function loadCoupons() {
+    $.get('/coupons/get', function(res) {
+      if (!res.status || !res.data.length) {
+        $('#couponTableBody').html('<tr><td colspan="8"><div class="empty-state"><i class="las la-ticket-alt"></i><p>No coupons found.</p></div></td></tr>');
+        return;
+      }
+      let rows = '';
+      res.data.forEach((c, i) => {
+        const disc = c.type == 2 ? c.discount_percentage + '%' : '₹' + c.discount_percentage;
+        const typeBadge = c.type == 1
+          ? '<span class="type-flat">Flat</span>'
+          : '<span class="type-pct">Percentage</span>';
+        rows += `<tr id="couponRow-${c.id}">
+          <td><span class="sno-badge">${i+1}</span></td>
+          <td><span class="code-badge">${c.coupon_code}</span></td>
+          <td><span class="disc-badge">${disc}</span></td>
+          <td>${typeBadge}</td>
+          <td>₹${c.min_availability || 0}</td>
+          <td><span class="date-text">${c.validity || '—'}</span></td>
+          <td style="max-width:160px;color:#64748b;">${c.title_description || '—'}</td>
+          <td style="display:flex;gap:6px;">
+            <button class="btn-edit" onclick="openEdit(${c.id},'${c.coupon_code}','${c.discount_percentage}','${c.validity}','${c.min_availability}','${(c.title_description||'').replace(/'/g,'&#39;')}','${c.type}')">
+              <i class="las la-pen"></i> Edit
+            </button>
+            <button class="btn-del" onclick="deleteCoupon(${c.id})">
+              <i class="las la-trash"></i> Del
+            </button>
+          </td>
+        </tr>`;
+      });
+      $('#couponTableBody').html(rows);
+    });
+  }
+
+  loadCoupons();
+
+  function openAddModal() {
+    document.getElementById('add_coupon_code').value = '';
+    document.getElementById('add_discount').value = '';
+    document.getElementById('add_validity').value = '';
+    document.getElementById('add_min').value = '';
+    document.getElementById('add_title').value = '';
+    document.getElementById('add_type').value = '1';
+    new bootstrap.Modal(document.getElementById('addModal')).show();
+  }
+
+  function openEdit(id, code, discount, validity, min, title, type) {
+    $('#edit_id').val(id);
+    $('#edit_coupon_code').val(code);
+    $('#edit_discount').val(discount);
+    $('#edit_validity').val(validity);
+    $('#edit_min').val(min);
+    $('#edit_title').val(title);
+    $('#edit_type').val(type);
+    new bootstrap.Modal(document.getElementById('editModal')).show();
+  }
+
+  $('#saveAdd').click(function() {
+    $.post('/coupons/store', {
+      coupon_code: $('#add_coupon_code').val(),
+      discount_percentage: $('#add_discount').val(),
+      validity: $('#add_validity').val(),
+      min_availability: $('#add_min').val(),
+      title_description: $('#add_title').val(),
+      type: $('#add_type').val()
+    }, function(res) {
+      if (res.status) {
+        closeModal('addModal');
+        showToast('Coupon added successfully!');
+        loadCoupons();
+      } else { alert(res.message || 'Failed'); }
+    });
+  });
+
+  $('#saveUpdate').click(function() {
+    const id = $('#edit_id').val();
+    $.post('/coupons/update/' + id, {
+      coupon_code: $('#edit_coupon_code').val(),
+      discount_percentage: $('#edit_discount').val(),
+      validity: $('#edit_validity').val(),
+      min_availability: $('#edit_min').val(),
+      title_description: $('#edit_title').val(),
+      type: $('#edit_type').val()
+    }, function(res) {
+      if (res.status) {
+        closeModal('editModal');
+        showToast('Coupon updated successfully!');
+        loadCoupons();
+      } else { alert(res.message || 'Failed'); }
+    });
+  });
+
+  function deleteCoupon(id) {
+    if (!confirm('Delete this coupon?')) return;
+    $.ajax({
+      url: '/coupons/delete/' + id, type: 'DELETE',
+      success: function(res) {
+        if (res.status) {
+          $('#couponRow-' + id).fadeOut(300, function(){ $(this).remove(); });
+          showToast('Coupon deleted!');
+        }
+      }
+    });
+  }
+</script>

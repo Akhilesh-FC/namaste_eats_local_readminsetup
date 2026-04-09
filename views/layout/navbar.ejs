@@ -1,0 +1,243 @@
+<style>
+/* ═══════════════════════════════
+   TOP NAVBAR
+═══════════════════════════════ */
+.iq-top-navbar {
+  background: #fff !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+  min-height: 70px;
+}
+
+.iq-navbar-custom .navbar {
+  min-height: 70px;
+  padding: 0 20px;
+}
+
+/* burger on navbar side */
+.iq-navbar-custom .iq-menu-bt .wrapper-menu .main-circle i {
+  font-size: 22px;
+  color: #64748b;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.iq-navbar-custom .iq-menu-bt .wrapper-menu .main-circle i:hover {
+  color: #e63946;
+}
+
+/* ── SEARCH BAR ── */
+.iq-search-bar .searchbox {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.iq-search-bar .search-input {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 8px 40px 8px 16px;
+  font-size: 13px;
+  color: #334155;
+  width: 220px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.iq-search-bar .search-input:focus {
+  border-color: #e63946;
+}
+.iq-search-bar .search-link {
+  position: absolute;
+  right: 12px;
+  color: #94a3b8;
+  font-size: 15px;
+}
+
+/* ── NAV ICONS ── */
+.navbar-list .nav-item.nav-icon > a {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  color: #64748b !important;
+  font-size: 18px;
+  transition: all 0.2s;
+  position: relative;
+  text-decoration: none;
+}
+.navbar-list .nav-item.nav-icon > a:hover {
+  background: #fff1f2;
+  color: #e63946 !important;
+}
+
+/* notification dot */
+.navbar-list .nav-item.nav-icon > a .dots {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e63946 !important;
+  border: 2px solid #fff;
+}
+
+/* ── USER AVATAR ── */
+.navbar-list .line-height > a img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e63946;
+  cursor: pointer;
+}
+
+/* ── DROPDOWN ── */
+.iq-sub-dropdown {
+  border-radius: 14px !important;
+  border: none !important;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+  overflow: hidden;
+}
+
+.iq-sub-dropdown .bg-primary {
+  background: linear-gradient(135deg, #e63946, #c1121f) !important;
+  padding: 14px 16px !important;
+}
+
+.iq-sub-dropdown .bg-primary h5 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.iq-sub-card {
+  padding: 10px 16px !important;
+  transition: background 0.2s;
+}
+.iq-sub-card:hover {
+  background: #fff1f2 !important;
+}
+
+.iq-sign-btn {
+  background: linear-gradient(135deg, #e63946, #c1121f) !important;
+  border-radius: 8px !important;
+  padding: 8px 20px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #fff !important;
+  text-decoration: none !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s;
+}
+.iq-sign-btn:hover { opacity: 0.88; }
+
+/* ── PAGE TITLE AREA ── */
+.iq-page-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+}
+.iq-page-header .breadcrumb-item {
+  font-size: 13px;
+  color: #94a3b8;
+}
+.iq-page-header .breadcrumb-item.active {
+  color: #e63946;
+}
+</style>
+
+<div class="iq-navbar-custom">
+  <nav class="navbar navbar-expand-lg navbar-light p-0">
+
+    <!-- Burger toggle -->
+    <div class="iq-menu-bt d-flex align-items-center">
+      <div class="wrapper-menu">
+        <div class="main-circle"><i class="las la-bars"></i></div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="iq-search-bar ml-3">
+      <form action="#" class="searchbox">
+        <input type="text" class="text search-input" placeholder="Search...">
+        <a class="search-link" href="#"><i class="ri-search-line"></i></a>
+      </form>
+    </div>
+
+    <!-- Right side icons -->
+    <div class="collapse navbar-collapse ml-auto" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto navbar-list align-items-center" style="gap:8px;">
+
+        <!-- Notification -->
+        <li class="nav-item nav-icon">
+          <a href="#" class="search-toggle iq-waves-effect">
+            <i class="ri-notification-2-line"></i>
+            <span class="dots"></span>
+          </a>
+          <div class="iq-sub-dropdown" style="min-width:280px;">
+            <div class="iq-card shadow-none m-0">
+              <div class="iq-card-body p-0">
+                <div class="bg-primary p-3">
+                  <h5 class="mb-0 text-white">Notifications
+                    <small class="badge badge-light float-right pt-1">1</small>
+                  </h5>
+                </div>
+                <a href="#" class="iq-sub-card">
+                  <div class="media align-items-center">
+                    <img class="avatar-40 rounded" src="/assets/images/user/01.jpg" alt="">
+                    <div class="media-body ml-3">
+                      <h6 class="mb-0">Namaste Eat Delivery</h6>
+                      <small class="text-muted">Just Now</small>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </li>
+
+        <!-- User dropdown -->
+        <li class="nav-item nav-icon dropdown line-height">
+          <a href="#" class="search-toggle iq-waves-effect d-flex align-items-center">
+            <img src="/uploads/admin/namasteatslogo.png" alt="Admin"
+                 onerror="this.src='https://root.namasteats.com/public/uploads/admin/namasteatslogo.png'">
+          </a>
+          <div class="iq-sub-dropdown iq-user-dropdown" style="min-width:220px;">
+            <div class="iq-card shadow-none m-0">
+              <div class="iq-card-body p-0">
+                <div class="bg-primary p-3">
+                  <h5 class="mb-0 text-white">Hello, Admin 👋</h5>
+                  <span class="text-white font-size-12" style="opacity:0.8;">Namaste Eats</span>
+                </div>
+                <a href="/admin/change-password" class="iq-sub-card">
+                  <div class="media align-items-center">
+                    <div class="rounded iq-card-icon" style="background:#fff1f2; color:#e63946; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:8px;">
+                      <i class="las la-key"></i>
+                    </div>
+                    <div class="media-body ml-3">
+                      <h6 class="mb-0" style="font-size:13px;">Change Password</h6>
+                    </div>
+                  </div>
+                </a>
+                <div class="d-inline-block w-100 text-center p-3">
+                  <a class="iq-sign-btn" href="/admin/logout">
+                    Sign out <i class="ri-login-box-line"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+
+      </ul>
+    </div>
+
+  </nav>
+</div>

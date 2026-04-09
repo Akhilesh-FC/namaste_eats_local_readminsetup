@@ -1,0 +1,109 @@
+<style>
+  .cat-wrapper { padding: 28px 20px; background: #f8fafc; min-height: 100vh; }
+  .page-heading { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 24px; }
+  .page-heading span { color: #e63946; }
+
+  .dash-card { background: #fff; border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.07); overflow: hidden; margin-bottom: 28px; }
+  .dash-card-header { background: #0f172a; padding: 16px 22px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .dash-card-header-left { display: flex; align-items: center; gap: 10px; }
+  .dash-card-header i { color: #e63946; font-size: 20px; }
+  .dash-card-header span { color: #fff; font-size: 15px; font-weight: 600; }
+
+  .search-bar { padding: 16px 22px; border-bottom: 1px solid #f1f5f9; display: flex; gap: 10px; flex-wrap: wrap; }
+  .search-bar input { flex: 1; min-width: 200px; max-width: 360px; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 9px 14px; font-size: 13.5px; color: #1e293b; outline: none; transition: border-color 0.2s; }
+  .search-bar input:focus { border-color: #e63946; box-shadow: 0 0 0 3px rgba(230,57,70,0.1); }
+  .btn-search { background: #0f172a; color: #fff; border: none; border-radius: 10px; padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .btn-reset  { background: #f1f5f9; color: #64748b; border: none; border-radius: 10px; padding: 9px 14px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-reset:hover { background: #e2e8f0; }
+
+  /* pagination */
+  .pagination-wrapper { display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; border-top: 1px solid #f1f5f9; flex-wrap: wrap; gap: 10px; }
+  .pagination-info { font-size: 13px; color: #64748b; }
+  .pagination-info strong { color: #0f172a; }
+  .pag-btns { display: flex; gap: 6px; align-items: center; }
+  .pag-btn { min-width: 36px; height: 36px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #fff; color: #334155; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.2s; padding: 0 10px; }
+  .pag-btn:hover { border-color: #e63946; color: #e63946; background: #fff1f2; }
+  .pag-btn.active { background: linear-gradient(135deg,#e63946,#c1121f); color: #fff; border-color: transparent; box-shadow: 0 4px 12px rgba(230,57,70,0.3); }
+  .pag-btn.disabled { opacity: 0.4; pointer-events: none; }
+</style>
+
+<div class="cat-wrapper">
+
+  <div class="page-heading">
+    <i class="las la-shopping-cart" style="color:#e63946; margin-right:8px;"></i>
+    Manage <span>Orders</span>
+  </div>
+
+  <div class="dash-card">
+    <div class="dash-card-header">
+      <div class="dash-card-header-left">
+        <i class="las la-list-alt"></i>
+        <span>Order List</span>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search by Order ID, User, Restaurant, Status..." value="<%= typeof search !== 'undefined' ? search : '' %>">
+      <button class="btn-search" onclick="fetchOrders(1)"><i class="las la-search"></i> Search</button>
+      <button class="btn-reset" onclick="document.getElementById('searchInput').value=''; fetchOrders(1);">Reset</button>
+    </div>
+
+    <div style="padding:0;">
+      <div id="orders-container">
+        <%- include("../orders/table", { orders: orders }) %>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-wrapper" id="paginationWrapper">
+        <div class="pagination-info">
+          Page <strong id="curPageLabel"><%= currentPage %></strong> of <strong id="totalPageLabel"><%= totalPages %></strong>
+        </div>
+        <div class="pag-btns" id="pag-btns"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  function buildPagHTML(cur, total) {
+    // called from EJS only on first load — JS version below
+  }
+
+  function renderPagination(cur, total) {
+    let html = '';
+    html += `<a href="#" class="pag-btn ${cur<=1?'disabled':''}" onclick="fetchOrders(${cur-1});return false;"><i class="las la-angle-left"></i></a>`;
+    for (let i = 1; i <= total; i++) {
+      if (i===1 || i===total || (i>=cur-1 && i<=cur+1)) {
+        html += `<a href="#" class="pag-btn ${i===cur?'active':''}" onclick="fetchOrders(${i});return false;">${i}</a>`;
+      } else if (i===cur-2 || i===cur+2) {
+        html += `<span class="pag-btn disabled">…</span>`;
+      }
+    }
+    html += `<a href="#" class="pag-btn ${cur>=total?'disabled':''}" onclick="fetchOrders(${cur+1});return false;"><i class="las la-angle-right"></i></a>`;
+    return html;
+  }
+
+  // Init pagination buttons on load
+  document.getElementById('pag-btns').innerHTML = renderPagination(<%= currentPage %>, <%= totalPages %>);
+
+  function fetchOrders(page) {
+    const search = document.getElementById('searchInput').value;
+    $.ajax({
+      url: `/orders?page=${page}&search=${encodeURIComponent(search)}&ajax=true`,
+      type: 'GET',
+      dataType: 'json',
+      success: function(res) {
+        $('#orders-container').html(res.html);
+        $('#curPageLabel').text(res.currentPage);
+        $('#totalPageLabel').text(res.totalPages);
+        $('#pag-btns').html(renderPagination(res.currentPage, res.totalPages));
+      }
+    });
+  }
+
+  document.getElementById('searchInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') fetchOrders(1);
+  });
+</script>

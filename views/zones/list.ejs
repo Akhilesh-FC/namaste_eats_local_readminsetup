@@ -1,0 +1,186 @@
+<style>
+  .cat-wrapper { padding: 28px 20px; background: #f8fafc; min-height: 100vh; }
+  .page-heading { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 24px; }
+  .page-heading span { color: #e63946; }
+
+  .dash-card { background: #fff; border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.07); overflow: hidden; margin-bottom: 28px; }
+  .dash-card-header { background: #0f172a; padding: 16px 22px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .dash-card-header-left { display: flex; align-items: center; gap: 10px; }
+  .dash-card-header i { color: #e63946; font-size: 20px; }
+  .dash-card-header span { color: #fff; font-size: 15px; font-weight: 600; }
+
+  .btn-add { background: linear-gradient(135deg,#e63946,#c1121f); color:#fff; border:none; border-radius:10px; padding:8px 18px; font-size:13px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:opacity 0.2s; }
+  .btn-add:hover { opacity:0.88; color:#fff; }
+
+  /* search bar */
+  .search-bar { padding: 16px 22px; border-bottom: 1px solid #f1f5f9; display: flex; gap: 10px; }
+  .search-bar input { flex:1; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 9px 14px; font-size: 13.5px; color: #1e293b; outline: none; transition: border-color 0.2s; max-width: 360px; }
+  .search-bar input:focus { border-color: #e63946; box-shadow: 0 0 0 3px rgba(230,57,70,0.1); }
+  .btn-search { background: #0f172a; color: #fff; border: none; border-radius: 10px; padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: opacity 0.2s; }
+  .btn-search:hover { opacity: 0.85; }
+  .btn-clear-search { background: #f1f5f9; color: #64748b; border: none; border-radius: 10px; padding: 9px 14px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-clear-search:hover { background: #e2e8f0; color: #0f172a; }
+
+  /* table */
+  .cat-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .cat-table thead tr th { background: #0f172a; color: rgba(255,255,255,0.75); font-size: 12px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; padding: 13px 16px; border: none; white-space: nowrap; }
+  .cat-table thead tr th:first-child { border-radius: 10px 0 0 0; }
+  .cat-table thead tr th:last-child  { border-radius: 0 10px 0 0; }
+  .cat-table tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.15s; }
+  .cat-table tbody tr:hover { background: #fafafa; }
+  .cat-table tbody tr:last-child { border-bottom: none; }
+  .cat-table tbody td { padding: 14px 16px; font-size: 13.5px; color: #334155; vertical-align: middle; }
+
+  .sno-badge { background: #f1f5f9; color: #64748b; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 6px; }
+
+  .status-toggle-btn { border: none; border-radius: 20px; padding: 6px 16px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .status-toggle-btn.active   { background: #dcfce7; color: #16a34a; }
+  .status-toggle-btn.inactive { background: #f1f5f9; color: #94a3b8; }
+  .status-toggle-btn:hover { filter: brightness(0.93); }
+
+  .btn-del { background:#fff1f2; color:#e63946; border:none; border-radius:8px; padding:5px 12px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; }
+  .btn-del:hover { background:#e63946; color:#fff; }
+
+  .empty-state { text-align: center; padding: 48px 20px; color: #94a3b8; }
+  .empty-state i { font-size: 48px; margin-bottom: 12px; display: block; }
+
+  /* pagination */
+  .pagination-wrapper { display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; border-top: 1px solid #f1f5f9; flex-wrap: wrap; gap: 10px; }
+  .pagination-info { font-size: 13px; color: #64748b; }
+  .pagination-info strong { color: #0f172a; }
+  .pag-btns { display: flex; gap: 6px; align-items: center; }
+  .pag-btn { min-width: 36px; height: 36px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #fff; color: #334155; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.2s; padding: 0 10px; }
+  .pag-btn:hover { border-color: #e63946; color: #e63946; background: #fff1f2; }
+  .pag-btn.active { background: linear-gradient(135deg,#e63946,#c1121f); color: #fff; border-color: transparent; box-shadow: 0 4px 12px rgba(230,57,70,0.3); }
+  .pag-btn.disabled { opacity: 0.4; pointer-events: none; }
+</style>
+
+<div class="cat-wrapper">
+
+  <div class="page-heading">
+    <i class="las la-map" style="color:#e63946; margin-right:8px;"></i>
+    Manage <span>Zones</span>
+  </div>
+
+  <div class="dash-card">
+    <div class="dash-card-header">
+      <div class="dash-card-header-left">
+        <i class="las la-map"></i>
+        <span>Zone List</span>
+      </div>
+      <a href="/zones/create" class="btn-add">
+        <i class="las la-plus"></i> Create Zone
+      </a>
+    </div>
+
+    <!-- Search Bar -->
+    <form class="search-bar" method="GET" action="/zones">
+      <input type="text" name="search" value="<%= search %>" placeholder="Search zone by name...">
+      <button type="submit" class="btn-search"><i class="las la-search"></i> Search</button>
+      <% if (search) { %>
+        <a href="/zones" class="btn-clear-search"><i class="las la-times"></i> Clear</a>
+      <% } %>
+    </form>
+
+    <div style="padding:0;">
+      <div class="table-responsive">
+        <table class="cat-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Zone Name</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (zones && zones.length > 0) { %>
+              <% zones.forEach((zone, index) => { %>
+                <tr id="zoneRow-<%= zone.id %>">
+                  <td><span class="sno-badge"><%= (page - 1) * 10 + index + 1 %></span></td>
+                  <td style="font-weight:600; color:#0f172a;"><%= zone.zone_name %></td>
+                  <td>
+                    <button class="status-toggle-btn <%= zone.is_active == 1 ? 'active' : 'inactive' %>" data-id="<%= zone.id %>">
+                      <%= zone.is_active == 1 ? '✓ Active' : '✗ Inactive' %>
+                    </button>
+                  </td>
+                  <td>
+                    <button class="btn-del delete-zone-btn" data-id="<%= zone.id %>">
+                      <i class="las la-trash"></i> Delete
+                    </button>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="4">
+                  <div class="empty-state">
+                    <i class="las la-map"></i>
+                    <p><%= search ? 'No zones found for "' + search + '"' : 'No zones found.' %> <% if (!search) { %><a href="/zones/create" style="color:#e63946;">Create one</a><% } %></p>
+                  </div>
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <% if (totalPages > 1) { %>
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          Page <strong><%= page %></strong> of <strong><%= totalPages %></strong>
+        </div>
+        <div class="pag-btns">
+          <a href="/zones?page=<%= page-1 %>&search=<%= search %>" class="pag-btn <%= page <= 1 ? 'disabled' : '' %>">
+            <i class="las la-angle-left"></i>
+          </a>
+          <% for(let i = 1; i <= totalPages; i++) { %>
+            <% if (i === 1 || i === totalPages || (i >= page-1 && i <= page+1)) { %>
+              <a href="/zones?page=<%= i %>&search=<%= search %>" class="pag-btn <%= i === page ? 'active' : '' %>"><%= i %></a>
+            <% } else if (i === page-2 || i === page+2) { %>
+              <span class="pag-btn disabled">…</span>
+            <% } %>
+          <% } %>
+          <a href="/zones?page=<%= page+1 %>&search=<%= search %>" class="pag-btn <%= page >= totalPages ? 'disabled' : '' %>">
+            <i class="las la-angle-right"></i>
+          </a>
+        </div>
+      </div>
+      <% } %>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(".status-toggle-btn").click(function(){
+  const btn = $(this);
+  $.post("/zones/toggle/" + btn.data("id"), {}, function(res){
+    if (res.status) {
+      if (res.zone.is_active == 1) {
+        btn.removeClass("inactive").addClass("active").text("✓ Active");
+      } else {
+        btn.removeClass("active").addClass("inactive").text("✗ Inactive");
+      }
+    }
+  });
+});
+
+$(document).on("click", ".delete-zone-btn", function(){
+  if (!confirm("Are you sure you want to delete this zone?")) return;
+  const id = $(this).data("id");
+  $.ajax({
+    url: "/zones/delete/" + id,
+    type: "DELETE",
+    success: function(res){
+      if (res.status) {
+        $("#zoneRow-" + id).fadeOut(300, function(){ $(this).remove(); });
+      } else {
+        alert("Error deleting zone.");
+      }
+    }
+  });
+});
+</script>
