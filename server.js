@@ -30,13 +30,16 @@ app.use((req, res, next) => {
 
 app.use(
   session({
-    key: "namaste_admin_session_v2", // 🔥 CHANGE NAME
-    secret: "namasteeats_super_secret_key",
+    key: "namaste_admin_session_v2",
+    secret: process.env.JWT_SECRET || "namasteeats_super_secret_key",
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
     cookie: {
       maxAge: 86400000,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: "lax"
     },
   })
 );
@@ -81,6 +84,16 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 // -------------------------
+// ROOT REDIRECT
+// -------------------------
+app.get("/", (req, res) => {
+  if (req.session && req.session.admin) {
+    return res.redirect("/admin/dashboard");
+  }
+  return res.redirect("/admin/login");
+});
+
+// -------------------------
 // SMART LAYOUT HANDLER
 // -------------------------
 app.use((req, res, next) => {
@@ -114,6 +127,8 @@ const chargesRoutes = require("./routes/Admin/chargesRoutes");
 const unitTypeRoutes = require("./routes/Admin/unitTypeRoutes");
 const zoneRoutes = require("./routes/Admin/zoneRoutes");
 const CouponAdminRoutes = require("./routes/Admin/CouponAdminRoutes");
+const deliveryBoyAdminRoutes = require("./routes/Admin/deliveryBoyAdminRoutes");
+const productAdminRoutes = require("./routes/Admin/productAdminRoutes");
 //const admin =  require("./routes/Admin/dashboard");
 
 
@@ -149,6 +164,8 @@ app.use("/", chargesRoutes);
 app.use("/", unitTypeRoutes);
 app.use("/", zoneRoutes);
 app.use("/", CouponAdminRoutes);
+app.use("/", deliveryBoyAdminRoutes);
+app.use("/", productAdminRoutes);
 
 
 app.use("/api/user", userRoutes);

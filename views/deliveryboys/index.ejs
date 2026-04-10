@@ -25,24 +25,23 @@
   .cat-table tbody td { padding:13px 16px; font-size:13px; color:#334155; vertical-align:middle; }
 
   .sno-badge { background:#f1f5f9; color:#64748b; font-size:12px; font-weight:600; padding:3px 9px; border-radius:6px; }
-  .user-img { width:44px; height:44px; object-fit:cover; border-radius:50%; border:2px solid #f1f5f9; cursor:zoom-in; transition:transform 0.2s; }
-  .user-img:hover { transform:scale(1.08); }
+  .db-img { width:44px; height:44px; object-fit:cover; border-radius:50%; border:2px solid #f1f5f9; cursor:zoom-in; }
   .no-img { width:44px; height:44px; background:#f1f5f9; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#94a3b8; font-size:18px; }
 
-  .status-btn { border:none; border-radius:20px; padding:5px 14px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; }
-  .status-btn.active   { background:#dcfce7; color:#16a34a; }
-  .status-btn.inactive { background:#f1f5f9; color:#94a3b8; }
-
-  .gender-badge { font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; }
-  .g-male   { background:#eff6ff; color:#3b82f6; }
-  .g-female { background:#fdf2f8; color:#db2777; }
-  .g-other  { background:#f1f5f9; color:#64748b; }
+  .badge-pill { font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; }
+  .s-active   { background:#dcfce7; color:#16a34a; }
+  .s-inactive { background:#f1f5f9; color:#94a3b8; }
+  .s-busy     { background:#fff7ed; color:#ea580c; }
+  .s-free     { background:#f0fdf4; color:#16a34a; }
+  .s-on       { background:#dcfce7; color:#16a34a; }
+  .s-off      { background:#fee2e2; color:#e63946; }
 
   .order-count { background:#eff6ff; color:#3b82f6; font-size:12px; font-weight:700; padding:3px 10px; border-radius:6px; }
-  .date-text { font-size:12px; color:#94a3b8; }
 
   .btn-view { background:#fff7ed; color:#ea580c; border:none; border-radius:8px; padding:5px 12px; font-size:12px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:4px; transition:all 0.2s; }
   .btn-view:hover { background:#ea580c; color:#fff; }
+
+  .doc-img { width:48px; height:36px; object-fit:cover; border-radius:6px; border:1px solid #e2e8f0; cursor:zoom-in; }
 
   .empty-state { text-align:center; padding:48px 20px; color:#94a3b8; }
   .empty-state i { font-size:48px; margin-bottom:12px; display:block; }
@@ -60,29 +59,29 @@
   .img-modal-overlay.active { display:flex; }
   .img-modal-box { position:relative; animation:zoomIn 0.2s ease; }
   @keyframes zoomIn { from{transform:scale(0.8);opacity:0} to{transform:scale(1);opacity:1} }
-  .img-modal-box img { max-width:400px; max-height:400px; border-radius:50%; box-shadow:0 20px 60px rgba(0,0,0,0.4); display:block; }
+  .img-modal-box img { max-width:480px; max-height:480px; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.4); display:block; }
   .img-modal-close { position:absolute; top:-14px; right:-14px; width:32px; height:32px; background:#e63946; color:#fff; border:none; border-radius:50%; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
 </style>
 
 <div class="cat-wrapper">
   <div class="page-heading">
-    <i class="las la-users" style="color:#e63946; margin-right:8px;"></i>
-    Manage <span>Users</span>
+    <i class="las la-motorcycle" style="color:#e63946; margin-right:8px;"></i>
+    Manage <span>Delivery Boys</span>
   </div>
 
   <div class="dash-card">
     <div class="dash-card-header">
       <div class="dash-card-header-left">
-        <i class="las la-users"></i>
-        <span>User List</span>
+        <i class="las la-motorcycle"></i>
+        <span>Delivery Boy List</span>
       </div>
     </div>
 
-    <form class="search-bar" method="GET" action="/users">
-      <input type="text" name="search" value="<%= search %>" placeholder="Search by name, email, mobile...">
+    <form class="search-bar" method="GET" action="/delivery-boys">
+      <input type="text" name="search" value="<%= search %>" placeholder="Search by name, mobile, email...">
       <button type="submit" class="btn-search"><i class="las la-search"></i> Search</button>
       <% if (search) { %>
-        <a href="/users" class="btn-clear-s"><i class="las la-times"></i> Clear</a>
+        <a href="/delivery-boys" class="btn-clear-s"><i class="las la-times"></i> Clear</a>
       <% } %>
     </form>
 
@@ -94,56 +93,64 @@
               <th>#</th>
               <th>Photo</th>
               <th>Name</th>
-              <th>Email</th>
               <th>Mobile</th>
-              <th>Gender</th>
-              <th>DOB</th>
-              <th>Anniversary</th>
+              <th>Email</th>
+              <th>Vehicle</th>
+              <th>Identity</th>
+              <th>ID Image</th>
+              <th>License No.</th>
+              <th>License Img</th>
               <th>Status</th>
               <th>Orders</th>
-              <th>Joined</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            <% if (users && users.length > 0) { %>
-              <% users.forEach((u, idx) => { %>
+            <% if (boys && boys.length > 0) { %>
+              <% boys.forEach((b, idx) => { %>
                 <tr>
                   <td><span class="sno-badge"><%= (page-1)*10 + idx + 1 %></span></td>
                   <td>
-                    <% if (u.profile_image) { %>
-                      <img src="<%= u.profile_image %>" class="user-img" onclick="openImg(this.src)">
+                    <% if (b.profile_picture) { %>
+                      <img src="<%= b.profile_picture %>" class="db-img" onclick="openImg(this.src)">
                     <% } else { %>
                       <div class="no-img"><i class="las la-user"></i></div>
                     <% } %>
                   </td>
-                  <td style="font-weight:600; color:#0f172a;"><%= u.name || '—' %></td>
-                  <td style="color:#64748b;"><%= u.email || '—' %></td>
-                  <td><%= u.mobile_no || '—' %></td>
+                  <td style="font-weight:600; color:#0f172a; white-space:nowrap;"><%= b.first_name %> <%= b.last_name %></td>
+                  <td><%= b.mobile_number %></td>
+                  <td style="color:#64748b;"><%= b.email %></td>
+                  <td><span class="badge-pill s-free" style="background:#f1f5f9;color:#334155;"><%= b.vehicle_type %></span></td>
                   <td>
-                    <% const g = (u.gender||'').toLowerCase(); %>
-                    <span class="gender-badge <%= g==='male'?'g-male':g==='female'?'g-female':'g-other' %>">
-                      <%= u.gender || '—' %>
-                    </span>
+                    <div style="font-size:11px;color:#64748b;"><%= b.identity_type %></div>
+                    <div style="font-size:12px;font-weight:600;color:#0f172a;"><%= b.identity_number %></div>
                   </td>
-                  <td><span class="date-text"><%= u.dob ? new Date(u.dob).toLocaleDateString() : '—' %></span></td>
-                  <td><span class="date-text"><%= u.anniversary ? new Date(u.anniversary).toLocaleDateString() : '—' %></span></td>
                   <td>
-                    <button class="status-btn <%= u.status === 'active' ? 'active' : 'inactive' %>" data-id="<%= u.id %>">
-                      <%= u.status === 'active' ? '✓ Active' : '✗ Inactive' %>
-                    </button>
+                    <% if (b.identity_image) { %>
+                      <img src="<%= b.identity_image %>" class="doc-img" onclick="openImg(this.src)">
+                    <% } else { %>
+                      <span style="color:#94a3b8;font-size:12px;">—</span>
+                    <% } %>
                   </td>
-                  <td><span class="order-count"><%= u.total_orders %> orders</span></td>
-                  <td><span class="date-text"><%= new Date(u.created_at).toLocaleDateString() %></span></td>
+                  <td style="font-size:12px;"><%= b.driving_license_number %></td>
                   <td>
-                    <a href="/users/<%= u.id %>/orders" class="btn-view">
-                      <i class="las la-eye"></i> Orders
+                    <% if (b.driving_license_image) { %>
+                      <img src="<%= b.driving_license_image %>" class="doc-img" onclick="openImg(this.src)">
+                    <% } else { %>
+                      <span style="color:#94a3b8;font-size:12px;">—</span>
+                    <% } %>
+                  </td>
+                  <td><span class="badge-pill <%= b.status == 1 ? 's-active' : 's-inactive' %>"><%= b.status == 1 ? 'Active' : 'Inactive' %></span></td>
+                  <td><span class="order-count"><%= b.total_orders %> orders</span></td>
+                  <td>
+                    <a href="/delivery-boys/<%= b.id %>/orders" class="btn-view">
+                      <i class="las la-eye"></i> View Orders
                     </a>
                   </td>
                 </tr>
               <% }) %>
             <% } else { %>
-              <tr><td colspan="12"><div class="empty-state"><i class="las la-users"></i><p>No users found.</p></div></td></tr>
+              <tr><td colspan="15"><div class="empty-state"><i class="las la-motorcycle"></i><p>No delivery boys found.</p></div></td></tr>
             <% } %>
           </tbody>
         </table>
@@ -153,15 +160,15 @@
       <div class="pagination-wrapper">
         <div class="pagination-info">Page <strong><%= page %></strong> of <strong><%= totalPages %></strong></div>
         <div class="pag-btns">
-          <a href="/users?page=<%= page-1 %>&search=<%= search %>" class="pag-btn <%= page<=1?'disabled':'' %>"><i class="las la-angle-left"></i></a>
+          <a href="/delivery-boys?page=<%= page-1 %>&search=<%= search %>" class="pag-btn <%= page<=1?'disabled':'' %>"><i class="las la-angle-left"></i></a>
           <% for(let i=1;i<=totalPages;i++){ %>
             <% if(i===1||i===totalPages||(i>=page-1&&i<=page+1)){ %>
-              <a href="/users?page=<%= i %>&search=<%= search %>" class="pag-btn <%= i===page?'active':'' %>"><%= i %></a>
+              <a href="/delivery-boys?page=<%= i %>&search=<%= search %>" class="pag-btn <%= i===page?'active':'' %>"><%= i %></a>
             <% } else if(i===page-2||i===page+2){ %>
               <span class="pag-btn disabled">…</span>
             <% } %>
           <% } %>
-          <a href="/users?page=<%= page+1 %>&search=<%= search %>" class="pag-btn <%= page>=totalPages?'disabled':'' %>"><i class="las la-angle-right"></i></a>
+          <a href="/delivery-boys?page=<%= page+1 %>&search=<%= search %>" class="pag-btn <%= page>=totalPages?'disabled':'' %>"><i class="las la-angle-right"></i></a>
         </div>
       </div>
       <% } %>
@@ -176,24 +183,10 @@
   </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
   function openImg(src) {
     document.getElementById('imgModalSrc').src = src;
     document.getElementById('imgModal').classList.add('active');
   }
   document.addEventListener('keydown', e => { if(e.key==='Escape') document.getElementById('imgModal').classList.remove('active'); });
-
-  $(document).on('click', '.status-btn', function(){
-    const btn = $(this);
-    $.post('/users/' + btn.data('id') + '/toggle', function(res){
-      if(res.success){
-        if(res.status === 'active'){
-          btn.removeClass('inactive').addClass('active').text('✓ Active');
-        } else {
-          btn.removeClass('active').addClass('inactive').text('✗ Inactive');
-        }
-      }
-    });
-  });
 </script>

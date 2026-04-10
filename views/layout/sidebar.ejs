@@ -79,7 +79,7 @@
 
 /* ── NAV MENU ── */
 .iq-sidebar-menu {
-  padding: 12px 10px 20px;
+  padding: 2px 10px 20px;
 }
 
 .iq-sidebar-menu .iq-menu {
@@ -95,7 +95,7 @@
   letter-spacing: 1.2px;
   color: rgba(255,255,255,0.3);
   text-transform: uppercase;
-  padding: 18px 12px 6px;
+  padding: 2px 12px 6px;
   display: block;
 }
 
@@ -137,13 +137,24 @@
 /* active */
 .iq-sidebar-menu .iq-menu li.active > a,
 .iq-sidebar-menu .iq-menu li.active-menu > a {
-  background: linear-gradient(135deg, #e63946, #c1121f) !important;
-  color: #fff !important;
-  box-shadow: 0 4px 14px rgba(230,57,70,0.35);
+  background: rgba(230,57,70,0.15) !important;
+  color: #e63946 !important;
+  font-weight: 600;
 }
 .iq-sidebar-menu .iq-menu li.active > a i,
 .iq-sidebar-menu .iq-menu li.active-menu > a i {
-  color: #fff !important;
+  color: #e63946 !important;
+}
+.iq-sidebar-menu .iq-menu li.active > a::before,
+.iq-sidebar-menu .iq-menu li.active-menu > a::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  background: #e63946;
+  border-radius: 0 3px 3px 0;
 }
 
 /* divider */
@@ -215,6 +226,13 @@
       </li>
 
       <li>
+        <a href="/products" class="iq-waves-effect">
+          <i class="las la-box-open"></i>
+          <span>Products</span>
+        </a>
+      </li>
+
+      <li>
         <a href="/zone" class="iq-waves-effect">
           <i class="las la-map"></i>
           <span>Zone List</span>
@@ -239,6 +257,13 @@
       </li>
 
       <li>
+        <a href="/delivery-boys" class="iq-waves-effect">
+          <i class="las la-motorcycle"></i>
+          <span>Delivery Boys</span>
+        </a>
+      </li>
+
+      <li>
         <a href="/orders" class="iq-waves-effect">
           <i class="las la-shopping-cart"></i>
           <span>Orders List</span>
@@ -259,13 +284,6 @@
         <a href="/charges" class="iq-waves-effect">
           <i class="las la-money-bill"></i>
           <span>Addon Charges</span>
-        </a>
-      </li>
-
-      <li>
-        <a href="/unit-types" class="iq-waves-effect">
-          <i class="las la-boxes"></i>
-          <span>Unit Types</span>
         </a>
       </li>
 

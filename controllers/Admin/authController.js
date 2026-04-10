@@ -71,52 +71,82 @@ exports.showLogin = (req, res) => {
 
 exports.dashboard = async (req, res) => {
   try {
+    const q = (sql) => sequelize.query(sql, { type: QueryTypes.SELECT }).then(r => r[0]);
 
-    // USERS COUNT
-    const [users] = await db.query(
-      "SELECT COUNT(id) AS totalUsers FROM users"
+    const [
+      totalUsers, totalRestaurants, totalOrders, totalDeliveryBoys,
+      totalProducts, totalCategories, totalSubCategories, totalCoupons,
+      revenue,
+      todayOrders, todayUsers, todayDeliveryBoys,
+      pendingOrders, preparingOrders, outOrders, deliveredOrders, cancelledOrders
+    ] = await Promise.all([
+      q("SELECT COUNT(id) AS v FROM users"),
+      q("SELECT COUNT(id) AS v FROM restaurants"),
+      q("SELECT COUNT(id) AS v FROM orders"),
+      q("SELECT COUNT(id) AS v FROM deliveryboys"),
+      q("SELECT COUNT(id) AS v FROM products"),
+      q("SELECT COUNT(id) AS v FROM categories"),
+      q("SELECT COUNT(id) AS v FROM sub_categories"),
+      q("SELECT COUNT(id) AS v FROM coupons"),
+      q("SELECT COALESCE(total_balance, 0) AS v FROM wallets WHERE id = 1"),
+      q("SELECT COUNT(id) AS v FROM orders WHERE DATE(created_at) = CURDATE()"),
+      q("SELECT COUNT(id) AS v FROM users WHERE DATE(created_at) = CURDATE()"),
+      q("SELECT COUNT(id) AS v FROM deliveryboys WHERE DATE(createdAt) = CURDATE()"),
+      q("SELECT COUNT(id) AS v FROM orders WHERE order_status = 'pending'"),
+      q("SELECT COUNT(id) AS v FROM orders WHERE order_status = 'preparing'"),
+      q("SELECT COUNT(id) AS v FROM orders WHERE order_status = 'out_for_delivery'"),
+      q("SELECT COUNT(id) AS v FROM orders WHERE order_status = 'delivered'"),
+      q("SELECT COUNT(id) AS v FROM orders WHERE order_status = 'cancelled'"),
+    ]);
+
+    // Last 7 days orders
+    const last7 = await sequelize.query(
+      `SELECT DATE(created_at) as day, COUNT(id) as cnt
+       FROM orders
+       WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+       GROUP BY DATE(created_at)
+       ORDER BY day ASC`,
+      { type: QueryTypes.SELECT }
     );
 
-    // RESTAURANTS COUNT
-    const [restaurants] = await db.query(
-      "SELECT COUNT(id) AS totalRestaurants FROM restaurants"
-    );
-
-    // ORDERS COUNT
-    const [orders] = await db.query(
-      "SELECT COUNT(id) AS totalOrders FROM orders"
-    );
-
-    // REVENUE (wallet id = 1)
-    const [revenue] = await db.query(
-      "SELECT total_balance FROM wallets WHERE id = 1"
-    );
-
-    // ORDER STATUS COUNTS
-    const [orderStatus] = await db.query(`
-      SELECT 
-        SUM(order_status = 'pending') AS pending,
-        SUM(order_status = 'preparing') AS preparing,
-        SUM(order_status = 'out_for_delivery') AS out_for_delivery,
-        SUM(order_status = 'delivered') AS delivered
-      FROM orders
-    `);
+    const days7 = [], orders7 = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const label = d.toLocaleDateString('en-IN', { month:'short', day:'numeric' });
+      const iso   = d.toISOString().split('T')[0];
+      days7.push(label);
+      const found = last7.find(r => r.day && r.day.toString().startsWith(iso));
+      orders7.push(found ? parseInt(found.cnt) : 0);
+    }
 
     res.render("admin/dashboard", {
       layout: "layout/administrator",
       admin: req.session.admin,
-
-      totalUsers: users[0].totalUsers,
-      totalRestaurants: restaurants[0].totalRestaurants,
-      totalOrders: orders[0].totalOrders,
-      totalRevenue: revenue[0]?.total_balance || 0,
-
-      orderStatus: orderStatus[0]
+      totalUsers:         totalUsers?.v || 0,
+      totalRestaurants:   totalRestaurants?.v || 0,
+      totalOrders:        totalOrders?.v || 0,
+      totalDeliveryBoys:  totalDeliveryBoys?.v || 0,
+      totalProducts:      totalProducts?.v || 0,
+      totalCategories:    totalCategories?.v || 0,
+      totalSubCategories: totalSubCategories?.v || 0,
+      totalCoupons:       totalCoupons?.v || 0,
+      totalRevenue:       revenue?.v || 0,
+      todayOrders:        todayOrders?.v || 0,
+      todayUsers:         todayUsers?.v || 0,
+      todayDeliveryBoys:  todayDeliveryBoys?.v || 0,
+      orderStatus: {
+        pending:          pendingOrders?.v || 0,
+        preparing:        preparingOrders?.v || 0,
+        out_for_delivery: outOrders?.v || 0,
+        delivered:        deliveredOrders?.v || 0,
+        cancelled:        cancelledOrders?.v || 0,
+      },
+      days7:   JSON.stringify(days7),
+      orders7: JSON.stringify(orders7),
     });
-
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Dashboard Error");
+    console.error("Dashboard Error:", error);
+    res.status(500).send("Dashboard Error: " + error.message);
   }
 };
 

@@ -1,263 +1,398 @@
 <style>
-  /* ── STAT CARDS ── */
-  .dash-stat-card {
-    border: none;
-    border-radius: 16px;
-    padding: 24px 20px;
-    color: #fff;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  .dash-wrapper { padding: 28px 20px; background: #f8fafc; min-height: 100vh; }
+  .dash-page-title { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 24px; }
+  .dash-page-title span { color: #e63946; }
+
+  .section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    color: #94a3b8; text-transform: uppercase;
+    margin: 24px 0 12px; display: flex; align-items: center; gap: 8px;
   }
-  .dash-stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 14px 32px rgba(0,0,0,0.18);
+  .section-label::after { content:''; flex:1; height:1px; background:#e2e8f0; }
+
+  .stat-card {
+    border: none; border-radius: 16px; padding: 20px;
+    color: #fff; position: relative; overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    transition: transform 0.25s, box-shadow 0.25s;
+    min-height: 120px;
   }
-  .dash-stat-card .bg-icon {
-    position: absolute;
-    right: -14px;
-    bottom: -14px;
-    font-size: 90px;
-    opacity: 0.12;
-    line-height: 1;
-  }
-  .dash-stat-card .label {
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    opacity: 0.88;
-    margin-bottom: 8px;
-  }
-  .dash-stat-card .value {
-    font-size: 34px;
-    font-weight: 700;
-    line-height: 1;
-    margin: 0;
-  }
-  .dash-stat-card .icon-box {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
+  .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.15); }
+  .stat-card .bg-icon { position:absolute; right:-8px; bottom:-8px; font-size:70px; opacity:0.12; line-height:1; pointer-events:none; }
+  .stat-card .s-icon {
+    width: 42px; height: 42px; border-radius: 10px;
     background: rgba(255,255,255,0.22);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; margin-bottom: 14px;
+  }
+  .stat-card .s-label {
+    font-size: 11px; font-weight: 600; opacity: 0.85;
+    letter-spacing: 0.3px; display: block; margin-bottom: 4px;
+  }
+  .stat-card .s-value {
+    font-size: 26px; font-weight: 700; line-height: 1;
+    display: block; margin: 0;
   }
 
-  .grad-orange  { background: linear-gradient(135deg, #f97316, #ea580c); }
-  .grad-blue    { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
-  .grad-green   { background: linear-gradient(135deg, #22c55e, #15803d); }
-  .grad-purple  { background: linear-gradient(135deg, #a855f7, #7e22ce); }
+  .g-orange { background: linear-gradient(135deg,#f97316,#ea580c); }
+  .g-blue   { background: linear-gradient(135deg,#3b82f6,#1d4ed8); }
+  .g-green  { background: linear-gradient(135deg,#22c55e,#15803d); }
+  .g-purple { background: linear-gradient(135deg,#a855f7,#7e22ce); }
+  .g-red    { background: linear-gradient(135deg,#e63946,#c1121f); }
+  .g-teal   { background: linear-gradient(135deg,#14b8a6,#0f766e); }
+  .g-yellow { background: linear-gradient(135deg,#eab308,#a16207); }
+  .g-pink   { background: linear-gradient(135deg,#ec4899,#be185d); }
 
-  /* ── ORDER STATUS SECTION ── */
-  .section-title {
-    font-size: 17px;
-    font-weight: 700;
-    color: #1e293b;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  .today-card {
+    background: #fff; border-radius: 14px; padding: 18px 20px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: none;
+    display: flex; align-items: center; gap: 14px; height: 100%;
+    transition: transform 0.2s;
   }
-  .section-title::after {
-    content: '';
-    flex: 1;
-    height: 2px;
-    background: #f1f5f9;
-    border-radius: 2px;
-  }
+  .today-card:hover { transform: translateY(-3px); }
+  .today-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+  .today-card .t-label { font-size: 12px; color: #94a3b8; font-weight: 500; margin-bottom: 4px; }
+  .today-card .t-value { font-size: 24px; font-weight: 700; color: #0f172a; line-height: 1; }
 
   .status-card {
-    border: none;
-    border-radius: 14px;
-    padding: 20px 16px;
-    text-align: center;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
-    transition: transform 0.2s ease;
-    background: #fff;
+    background: #fff; border-radius: 14px; padding: 18px 16px;
+    text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    transition: transform 0.2s; height: 100%;
   }
   .status-card:hover { transform: translateY(-3px); }
+  .status-card .s-icon2 { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 10px; }
+  .status-card .s-count { font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+  .status-card .s-name  { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
 
-  .status-card .s-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 26px;
-    margin: 0 auto 12px;
-  }
-  .status-card .s-count {
-    font-size: 28px;
-    font-weight: 700;
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-  .status-card .s-label {
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-  }
+  .sc-pending  .s-icon2 { background:#fff7ed; color:#f97316; }
+  .sc-pending  .s-count,.sc-pending  .s-name { color:#f97316; }
+  .sc-preparing .s-icon2 { background:#eff6ff; color:#3b82f6; }
+  .sc-preparing .s-count,.sc-preparing .s-name { color:#3b82f6; }
+  .sc-out      .s-icon2 { background:#faf5ff; color:#a855f7; }
+  .sc-out      .s-count,.sc-out      .s-name { color:#a855f7; }
+  .sc-delivered .s-icon2 { background:#f0fdf4; color:#22c55e; }
+  .sc-delivered .s-count,.sc-delivered .s-name { color:#22c55e; }
+  .sc-cancelled .s-icon2 { background:#fff1f2; color:#e63946; }
+  .sc-cancelled .s-count,.sc-cancelled .s-name { color:#e63946; }
 
-  .s-pending  .s-icon { background: #fff7ed; color: #f97316; }
-  .s-pending  .s-count { color: #f97316; }
-  .s-pending  .s-label { color: #f97316; }
+  .chart-card { background:#fff; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,0.07); padding:22px; height:100%; }
+  .chart-title { font-size:14px; font-weight:700; color:#0f172a; margin-bottom:2px; }
+  .chart-sub   { font-size:12px; color:#94a3b8; margin-bottom:18px; }
 
-  .s-preparing .s-icon { background: #eff6ff; color: #3b82f6; }
-  .s-preparing .s-count { color: #3b82f6; }
-  .s-preparing .s-label { color: #3b82f6; }
-
-  .s-delivery .s-icon { background: #faf5ff; color: #a855f7; }
-  .s-delivery .s-count { color: #a855f7; }
-  .s-delivery .s-label { color: #a855f7; }
-
-  .s-delivered .s-icon { background: #f0fdf4; color: #22c55e; }
-  .s-delivered .s-count { color: #22c55e; }
-  .s-delivered .s-label { color: #22c55e; }
-
-  .s-cancelled .s-icon { background: #fff1f2; color: #ef4444; }
-  .s-cancelled .s-count { color: #ef4444; }
-  .s-cancelled .s-label { color: #ef4444; }
-
-  /* ── WRAPPER ── */
-  .dash-wrapper {
-    padding: 28px 20px;
-    background: #f8fafc;
-    min-height: 100vh;
-  }
-
-  .dash-page-title {
-    font-size: 22px;
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 24px;
-  }
-  .dash-page-title span {
-    color: #e63946;
+  @media (min-width: 992px) {
+    .col-md-2-4 { flex: 0 0 20%; max-width: 20%; }
   }
 </style>
 
 <div class="dash-wrapper">
 
-  <!-- Page Heading -->
   <div class="dash-page-title">
-    <i class="las la-tachometer-alt me-2" style="color:#e63946"></i>
+    <i class="las la-tachometer-alt" style="color:#e63946;margin-right:8px;"></i>
     Dashboard <span>Overview</span>
   </div>
 
-  <!-- ── STAT CARDS ROW ── -->
+  <!-- TOTAL STATS -->
+  <div class="section-label"><i class="las la-chart-bar"></i> Overall Stats</div>
   <div class="row g-3 mb-4">
-
-    <!-- Total Orders -->
-    <div class="col-6 col-lg-3">
-      <div class="dash-stat-card grad-orange">
-        <div class="icon-box"><i class="las la-shopping-bag"></i></div>
-        <p class="label">Total Orders</p>
-        <p class="value"><%= totalOrders %></p>
+    <div class="col-6 col-md-3">
+      <div class="stat-card g-orange">
+        <div class="s-icon"><i class="las la-shopping-bag"></i></div>
+        <div>
+          <span class="s-label">Total Orders</span>
+          <span class="s-value"><%= totalOrders %></span>
+        </div>
         <i class="las la-shopping-bag bg-icon"></i>
       </div>
     </div>
-
-    <!-- Restaurants -->
-    <div class="col-6 col-lg-3">
-      <div class="dash-stat-card grad-blue">
-        <div class="icon-box"><i class="las la-store"></i></div>
-        <p class="label">Restaurants</p>
-        <p class="value"><%= totalRestaurants %></p>
-        <i class="las la-store bg-icon"></i>
-      </div>
-    </div>
-
-    <!-- Users -->
-    <div class="col-6 col-lg-3">
-      <div class="dash-stat-card grad-purple">
-        <div class="icon-box"><i class="las la-users"></i></div>
-        <p class="label">Total Users</p>
-        <p class="value"><%= totalUsers %></p>
+    <div class="col-6 col-md-3">
+      <div class="stat-card g-blue">
+        <div class="s-icon"><i class="las la-users"></i></div>
+        <div>
+          <span class="s-label">Total Users</span>
+          <span class="s-value"><%= totalUsers %></span>
+        </div>
         <i class="las la-users bg-icon"></i>
       </div>
     </div>
-
-    <!-- Revenue -->
-    <div class="col-6 col-lg-3">
-      <div class="dash-stat-card grad-green">
-        <div class="icon-box"><i class="las la-rupee-sign"></i></div>
-        <p class="label">Total Revenue</p>
-        <p class="value">₹<%= totalRevenue %></p>
+    <div class="col-6 col-md-3">
+      <div class="stat-card g-green">
+        <div class="s-icon"><i class="las la-rupee-sign"></i></div>
+        <div>
+          <span class="s-label">Total Revenue</span>
+          <span class="s-value">₹<%= totalRevenue %></span>
+        </div>
         <i class="las la-rupee-sign bg-icon"></i>
       </div>
     </div>
-
+    <div class="col-6 col-md-3">
+      <div class="stat-card g-purple">
+        <div class="s-icon"><i class="las la-store"></i></div>
+        <div>
+          <span class="s-label">Restaurants</span>
+          <span class="s-value"><%= totalRestaurants %></span>
+        </div>
+        <i class="las la-store bg-icon"></i>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card g-red">
+        <div class="s-icon"><i class="las la-motorcycle"></i></div>
+        <div>
+          <span class="s-label">Delivery Boys</span>
+          <span class="s-value"><%= totalDeliveryBoys %></span>
+        </div>
+        <i class="las la-motorcycle bg-icon"></i>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card g-teal">
+        <div class="s-icon"><i class="las la-box"></i></div>
+        <div>
+          <span class="s-label">Total Products</span>
+          <span class="s-value"><%= totalProducts %></span>
+        </div>
+        <i class="las la-box bg-icon"></i>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card g-yellow">
+        <div class="s-icon"><i class="las la-list"></i></div>
+        <div>
+          <span class="s-label">Categories</span>
+          <span class="s-value"><%= totalCategories %></span>
+        </div>
+        <i class="las la-list bg-icon"></i>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card g-pink">
+        <div class="s-icon"><i class="las la-ticket-alt"></i></div>
+        <div>
+          <span class="s-label">Coupons</span>
+          <span class="s-value"><%= totalCoupons %></span>
+        </div>
+        <i class="las la-ticket-alt bg-icon"></i>
+      </div>
+    </div>
   </div>
 
-  <!-- ── ORDER STATUS ROW ── -->
-  <div class="section-title">
-    <i class="las la-clipboard-list" style="color:#e63946; font-size:20px;"></i>
-    Order Status Breakdown
+  <!-- TODAY STATS -->
+  <div class="section-label"><i class="las la-calendar-day"></i> Today's Activity</div>
+  <div class="row g-3 mb-2">
+    <div class="col-6 col-md-3">
+      <div class="today-card">
+        <div class="today-icon" style="background:#fff7ed;color:#f97316;"><i class="las la-shopping-cart"></i></div>
+        <div><div class="t-label">Today's Orders</div><div class="t-value"><%= todayOrders %></div></div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="today-card">
+        <div class="today-icon" style="background:#eff6ff;color:#3b82f6;"><i class="las la-user-plus"></i></div>
+        <div><div class="t-label">New Users Today</div><div class="t-value"><%= todayUsers %></div></div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="today-card">
+        <div class="today-icon" style="background:#f0fdf4;color:#22c55e;"><i class="las la-motorcycle"></i></div>
+        <div><div class="t-label">New Delivery Boys</div><div class="t-value"><%= todayDeliveryBoys %></div></div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="today-card">
+        <div class="today-icon" style="background:#faf5ff;color:#a855f7;"><i class="las la-layer-group"></i></div>
+        <div><div class="t-label">Sub Categories</div><div class="t-value"><%= totalSubCategories %></div></div>
+      </div>
+    </div>
   </div>
 
+  <!-- ORDER STATUS -->
+  <div class="section-label"><i class="las la-clipboard-list"></i> Order Status Breakdown</div>
+  <div class="row g-3">
+    <div class="col-6 col-md-2-4">
+      <div class="status-card sc-pending">
+        <div class="s-icon2"><i class="las la-clock"></i></div>
+        <div class="s-count"><%= orderStatus.pending || 0 %></div>
+        <div class="s-name">Pending</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2-4">
+      <div class="status-card sc-preparing">
+        <div class="s-icon2"><i class="las la-fire"></i></div>
+        <div class="s-count"><%= orderStatus.preparing || 0 %></div>
+        <div class="s-name">Preparing</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2-4">
+      <div class="status-card sc-out">
+        <div class="s-icon2"><i class="las la-motorcycle"></i></div>
+        <div class="s-count"><%= orderStatus.out_for_delivery || 0 %></div>
+        <div class="s-name">Out for Delivery</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2-4">
+      <div class="status-card sc-delivered">
+        <div class="s-icon2"><i class="las la-check-circle"></i></div>
+        <div class="s-count"><%= orderStatus.delivered || 0 %></div>
+        <div class="s-name">Delivered</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2-4">
+      <div class="status-card sc-cancelled">
+        <div class="s-icon2"><i class="las la-times-circle"></i></div>
+        <div class="s-count"><%= orderStatus.cancelled || 0 %></div>
+        <div class="s-name">Cancelled</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="section-label" style="margin-top:28px;"><i class="las la-chart-line"></i> Analytics</div>
   <div class="row g-3">
 
-    <!-- Pending -->
-    <div class="col-6 col-md-4 col-lg-2-4">
-      <div class="status-card s-pending">
-        <div class="s-icon"><i class="las la-clock"></i></div>
-        <div class="s-count"><%= orderStatus.pending || 0 %></div>
-        <div class="s-label">Pending</div>
+    <div class="col-12 col-lg-8">
+      <div class="chart-card">
+        <div class="chart-title">Orders — Last 7 Days</div>
+        <div class="chart-sub">Daily order trend for the past week</div>
+        <canvas id="ordersLineChart" height="100"></canvas>
       </div>
     </div>
 
-    <!-- Preparing -->
-    <div class="col-6 col-md-4 col-lg-2-4">
-      <div class="status-card s-preparing">
-        <div class="s-icon"><i class="las la-fire"></i></div>
-        <div class="s-count"><%= orderStatus.preparing || 0 %></div>
-        <div class="s-label">Preparing</div>
+    <div class="col-12 col-lg-4">
+      <div class="chart-card">
+        <div class="chart-title">Order Status Distribution</div>
+        <div class="chart-sub">Current breakdown of all orders</div>
+        <canvas id="statusDoughnut" height="180"></canvas>
       </div>
     </div>
 
-    <!-- Out for Delivery -->
-    <div class="col-6 col-md-4 col-lg-2-4">
-      <div class="status-card s-delivery">
-        <div class="s-icon"><i class="las la-motorcycle"></i></div>
-        <div class="s-count"><%= orderStatus.out_for_delivery || 0 %></div>
-        <div class="s-label">Out for Delivery</div>
+    <div class="col-12 col-lg-6">
+      <div class="chart-card">
+        <div class="chart-title">Platform Overview</div>
+        <div class="chart-sub">Key numbers at a glance</div>
+        <canvas id="overviewBar" height="120"></canvas>
       </div>
     </div>
 
-    <!-- Delivered -->
-    <div class="col-6 col-md-4 col-lg-2-4">
-      <div class="status-card s-delivered">
-        <div class="s-icon"><i class="las la-check-circle"></i></div>
-        <div class="s-count"><%= orderStatus.delivered || 0 %></div>
-        <div class="s-label">Delivered</div>
-      </div>
-    </div>
-
-    <!-- Cancelled -->
-    <div class="col-6 col-md-4 col-lg-2-4">
-      <div class="status-card s-cancelled">
-        <div class="s-icon"><i class="las la-times-circle"></i></div>
-        <div class="s-count"><%= orderStatus.cancelled || 0 %></div>
-        <div class="s-label">Cancelled</div>
+    <div class="col-12 col-lg-6">
+      <div class="chart-card">
+        <div class="chart-title">Today's Activity vs Total</div>
+        <div class="chart-sub">Comparison of today's numbers</div>
+        <canvas id="todayBar" height="120"></canvas>
       </div>
     </div>
 
   </div>
-
 </div>
 
-<style>
-  /* 5 equal columns on large screens */
-  @media (min-width: 992px) {
-    .col-lg-2-4 {
-      flex: 0 0 20%;
-      max-width: 20%;
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+  const days7   = <%- days7 %>;
+  const orders7 = <%- orders7 %>;
+
+  const pending   = <%= orderStatus.pending || 0 %>;
+  const preparing = <%= orderStatus.preparing || 0 %>;
+  const outDel    = <%= orderStatus.out_for_delivery || 0 %>;
+  const delivered = <%= orderStatus.delivered || 0 %>;
+  const cancelled = <%= orderStatus.cancelled || 0 %>;
+
+  // 1. LINE CHART
+  new Chart(document.getElementById('ordersLineChart'), {
+    type: 'line',
+    data: {
+      labels: days7,
+      datasets: [{
+        label: 'Orders',
+        data: orders7,
+        borderColor: '#e63946',
+        backgroundColor: 'rgba(230,57,70,0.08)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#e63946',
+        pointRadius: 4,
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#f1f5f9' } },
+        x: { grid: { display: false } }
+      }
     }
-  }
-</style>
+  });
+
+  // 2. DOUGHNUT
+  new Chart(document.getElementById('statusDoughnut'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Pending','Preparing','Out for Delivery','Delivered','Cancelled'],
+      datasets: [{
+        data: [pending, preparing, outDel, delivered, cancelled],
+        backgroundColor: ['#f97316','#3b82f6','#a855f7','#22c55e','#e63946'],
+        borderWidth: 0,
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '68%',
+      plugins: { legend: { position: 'bottom', labels: { padding: 14, font: { size: 12 } } } }
+    }
+  });
+
+  // 3. BAR - OVERVIEW
+  new Chart(document.getElementById('overviewBar'), {
+    type: 'bar',
+    data: {
+      labels: ['Users','Restaurants','Products','Delivery Boys','Categories'],
+      datasets: [{
+        label: 'Count',
+        data: [<%= totalUsers %>, <%= totalRestaurants %>, <%= totalProducts %>, <%= totalDeliveryBoys %>, <%= totalCategories %>],
+        backgroundColor: ['#3b82f6','#a855f7','#14b8a6','#e63946','#eab308'],
+        borderRadius: 8,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // 4. TODAY vs TOTAL
+  new Chart(document.getElementById('todayBar'), {
+    type: 'bar',
+    data: {
+      labels: ['Orders','New Users','New Delivery Boys'],
+      datasets: [
+        {
+          label: 'Today',
+          data: [<%= todayOrders %>, <%= todayUsers %>, <%= todayDeliveryBoys %>],
+          backgroundColor: '#e63946',
+          borderRadius: 8,
+          borderSkipped: false
+        },
+        {
+          label: 'Total',
+          data: [<%= totalOrders %>, <%= totalUsers %>, <%= totalDeliveryBoys %>],
+          backgroundColor: '#e2e8f0',
+          borderRadius: 8,
+          borderSkipped: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'top', labels: { font: { size: 12 } } } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+</script>
