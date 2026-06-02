@@ -19,6 +19,8 @@ module.exports = async (req, res, next) => {
 
     const { session_version, session_token } = result[0];
 
+    console.log("DB token:", session_token, "| Session token:", req.session.admin.session_token);
+
     // session_version check
     if (session_version !== undefined && req.session.admin.session_version !== undefined) {
       if (session_version !== req.session.admin.session_version) {
