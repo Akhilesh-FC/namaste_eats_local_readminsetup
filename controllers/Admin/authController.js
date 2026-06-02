@@ -34,12 +34,23 @@ exports.doLogin = async (req, res) => {
       return res.redirect("/admin/login");
     }
 
-    // ✅ SAVE SESSION (WITH session_version)
+    // ✅ Single session — naya token generate karo
+    const crypto = require("crypto");
+    const newToken = crypto.randomBytes(32).toString("hex");
+
+    // DB mein token update karo — purani session automatically invalid ho jayegi
+    await sequelize.query(
+      "UPDATE admins SET session_token = :token WHERE id = :id",
+      { replacements: { token: newToken, id: adminData.id }, type: QueryTypes.UPDATE }
+    );
+
+    // ✅ SAVE SESSION
     req.session.admin = {
       id: adminData.id,
       name: adminData.name,
       email: adminData.email,
-      session_version: adminData.session_version
+      session_version: adminData.session_version,
+      session_token: newToken
     };
 
     return res.redirect("/admin/dashboard");

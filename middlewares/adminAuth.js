@@ -7,29 +7,32 @@ module.exports = async (req, res, next) => {
       return res.redirect("/admin/login");
     }
 
-    // session_version check — agar column na ho to skip karo
-    try {
-      const result = await sequelize.query(
-        "SELECT session_version FROM admins WHERE id = :id",
-        { replacements: { id: req.session.admin.id }, type: QueryTypes.SELECT }
-      );
+    const result = await sequelize.query(
+      "SELECT session_version, session_token FROM admins WHERE id = :id LIMIT 1",
+      { replacements: { id: req.session.admin.id }, type: QueryTypes.SELECT }
+    );
 
-      if (!result || result.length === 0) {
+    if (!result || result.length === 0) {
+      req.session.destroy(() => res.redirect("/admin/login"));
+      return;
+    }
+
+    const { session_version, session_token } = result[0];
+
+    // session_version check
+    if (session_version !== undefined && req.session.admin.session_version !== undefined) {
+      if (session_version !== req.session.admin.session_version) {
         req.session.destroy(() => res.redirect("/admin/login"));
         return;
       }
+    }
 
-      const dbVersion = result[0].session_version;
-      // only check if both exist
-      if (dbVersion !== undefined && req.session.admin.session_version !== undefined) {
-        if (dbVersion !== req.session.admin.session_version) {
-          req.session.destroy(() => res.redirect("/admin/login"));
-          return;
-        }
+    // single session check — agar DB token aur session token alag ho to logout
+    if (session_token && req.session.admin.session_token) {
+      if (session_token !== req.session.admin.session_token) {
+        req.session.destroy(() => res.redirect("/admin/login"));
+        return;
       }
-    } catch (vErr) {
-      // session_version column missing — ignore, allow access
-      console.warn("session_version check skipped:", vErr.message);
     }
 
     next();

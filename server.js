@@ -36,7 +36,6 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      maxAge: 86400000,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: "lax"
