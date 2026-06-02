@@ -13,9 +13,9 @@ const {
 const adminAuth = require("../../middlewares/adminAuth");
 
 router.get("/subcategories", adminAuth, subCategories);
-router.post("/subcategories/create", upload, createSubCategory);
+router.post("/subcategories/create", ...upload, createSubCategory);
 router.get("/subcategories/:id", getSubCategory);
-router.post("/subcategories/:id/update", uploadMiddleware, updateSubCategory);
+router.post("/subcategories/:id/update", ...uploadMiddleware, updateSubCategory);
 router.delete("/subcategories/:id/delete", deleteSubCategory);
 router.post("/subcategories/toggle/:id", toggleSubCategoryStatus);
 
