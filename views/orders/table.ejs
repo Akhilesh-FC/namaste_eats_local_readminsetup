@@ -1,0 +1,111 @@
+<style>
+  .cat-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .cat-table thead tr th { background: #0f172a; color: rgba(255,255,255,0.75); font-size: 12px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; padding: 13px 16px; border: none; white-space: nowrap; }
+  .cat-table thead tr th:first-child { border-radius: 10px 0 0 0; }
+  .cat-table thead tr th:last-child  { border-radius: 0 10px 0 0; }
+  .cat-table tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.15s; }
+  .cat-table tbody tr:hover { background: #fafafa; }
+  .cat-table tbody tr:last-child { border-bottom: none; }
+  .cat-table tbody td { padding: 13px 16px; font-size: 13px; color: #334155; vertical-align: middle; }
+
+  .order-id-badge { background: #f1f5f9; color: #64748b; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+
+  .status-badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
+  .s-pending    { background: #fff7ed; color: #ea580c; }
+  .s-preparing  { background: #eff6ff; color: #3b82f6; }
+  .s-out        { background: #faf5ff; color: #a855f7; }
+  .s-delivered  { background: #f0fdf4; color: #16a34a; }
+  .s-completed  { background: #f0fdf4; color: #16a34a; }
+  .s-cancelled  { background: #fff1f2; color: #e63946; }
+  .s-default    { background: #f1f5f9; color: #64748b; }
+
+  .pay-paid     { background: #f0fdf4; color: #16a34a; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+  .pay-failed   { background: #fff1f2; color: #e63946; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+  .pay-pending  { background: #fff7ed; color: #ea580c; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+
+  .amount-text  { font-weight: 700; color: #0f172a; }
+  .muted-text   { color: #94a3b8; font-size: 12px; }
+  .name-text    { font-weight: 600; color: #0f172a; }
+
+  .empty-state  { text-align: center; padding: 48px 20px; color: #94a3b8; }
+  .empty-state i { font-size: 48px; margin-bottom: 12px; display: block; }
+</style>
+
+<div class="table-responsive">
+  <table class="cat-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Order ID</th>
+        <th>Customer</th>
+        <th>Restaurant</th>
+        <th>Product</th>
+        <th>Variant</th>
+        <th>Qty</th>
+        <th>Amount</th>
+        <th>Paymode</th>
+        <th>Order Status</th>
+        <th>Payment</th>
+        <th>Discount</th>
+        <th>GST</th>
+        <th>Delivery</th>
+        <th>Address</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (orders && orders.length > 0) { %>
+        <% orders.forEach((o, i) => { %>
+          <tr>
+            <td><span class="order-id-badge"><%= i + 1 %></span></td>
+            <td><span class="order-id-badge">#<%= o.order_id %></span></td>
+            <td><span class="name-text"><%= o.user_name || '—' %></span></td>
+            <td><span class="name-text"><%= o.restaurant_name || '—' %></span></td>
+            <td style="max-width:140px;"><%= o.product_name || '—' %></td>
+            <td><%= o.variant_name || '—' %></td>
+            <td style="text-align:center;"><%= o.product_quantity %></td>
+            <td><span class="amount-text">₹<%= o.amount %></span></td>
+            <td><span class="muted-text"><%= o.paymode || '—' %></span></td>
+            <td>
+              <%
+                const st = (o.order_status || '').toLowerCase();
+                let sc = 's-default';
+                if (st==='pending')          sc='s-pending';
+                else if (st==='preparing')   sc='s-preparing';
+                else if (st==='out_for_delivery') sc='s-out';
+                else if (st==='delivered')   sc='s-delivered';
+                else if (st==='completed')   sc='s-completed';
+                else if (st==='cancelled')   sc='s-cancelled';
+              %>
+              <span class="status-badge <%= sc %>"><%= o.order_status %></span>
+            </td>
+            <td>
+              <%
+                const ps = (o.payment_status || '').toLowerCase();
+              %>
+              <span class="<%= ps==='paid' ? 'pay-paid' : ps==='failed' ? 'pay-failed' : 'pay-pending' %>">
+                <%= o.payment_status || '—' %>
+              </span>
+            </td>
+            <td><span class="muted-text">₹<%= o.coupon_discount_amount || 0 %></span></td>
+            <td><span class="muted-text">₹<%= o.gst || 0 %></span></td>
+            <td><span class="muted-text">₹<%= o.delivery_charges || 0 %></span></td>
+            <td style="max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              <span class="muted-text"><%= o.current_address || '—' %></span>
+            </td>
+            <td><span class="muted-text"><%= new Date(o.created_at).toLocaleString() %></span></td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr>
+          <td colspan="16">
+            <div class="empty-state">
+              <i class="las la-shopping-cart"></i>
+              <p>No orders found.</p>
+            </div>
+          </td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>

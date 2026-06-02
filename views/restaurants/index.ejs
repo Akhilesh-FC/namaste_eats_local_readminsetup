@@ -1,0 +1,234 @@
+<style>
+  .cat-wrapper { padding: 28px 20px; background: #f8fafc; min-height: 100vh; }
+  .page-heading { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 24px; }
+  .page-heading span { color: #e63946; }
+
+  .dash-card { background: #fff; border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.07); overflow: hidden; margin-bottom: 28px; }
+  .dash-card-header { background: #0f172a; padding: 16px 22px; display: flex; align-items: center; gap: 10px; }
+  .dash-card-header i { color: #e63946; font-size: 20px; }
+  .dash-card-header span { color: #fff; font-size: 15px; font-weight: 600; }
+
+  /* table */
+  .cat-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .cat-table thead tr th { background: #0f172a; color: rgba(255,255,255,0.75); font-size: 12px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; padding: 13px 16px; border: none; white-space: nowrap; }
+  .cat-table thead tr th:first-child { border-radius: 10px 0 0 0; }
+  .cat-table thead tr th:last-child  { border-radius: 0 10px 0 0; }
+  .cat-table tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.15s; }
+  .cat-table tbody tr:hover { background: #fafafa; }
+  .cat-table tbody tr:last-child { border-bottom: none; }
+  .cat-table tbody td { padding: 13px 16px; font-size: 13.5px; color: #334155; vertical-align: middle; }
+
+  .id-badge { background: #f1f5f9; color: #64748b; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 6px; }
+
+  /* restaurant image */
+  .rest-img { width: 52px; height: 52px; object-fit: cover; border-radius: 10px; border: 2px solid #f1f5f9; cursor: zoom-in; transition: transform 0.2s; }
+  .rest-img:hover { transform: scale(1.08); }
+  .no-img { width: 52px; height: 52px; background: #f1f5f9; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 20px; }
+
+  /* veg badge */
+  .badge-veg    { background: #dcfce7; color: #16a34a; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+  .badge-nonveg { background: #fee2e2; color: #dc2626; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+  .badge-both   { background: #fef9c3; color: #ca8a04; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+
+  /* rating */
+  .rating-badge { background: #fef9c3; color: #ca8a04; font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 6px; }
+
+  /* cod badge */
+  .cod-yes { background: #dcfce7; color: #16a34a; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 6px; }
+  .cod-no  { background: #f1f5f9; color: #94a3b8; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 6px; }
+
+  /* step badge */
+  .step-badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 6px; }
+  .step-1 { background: #fee2e2; color: #dc2626; }
+  .step-2 { background: #ffedd5; color: #ea580c; }
+  .step-3 { background: #fef9c3; color: #ca8a04; }
+  .step-4 { background: #dcfce7; color: #16a34a; }
+
+  /* toggle switch */
+  .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
+  .switch input { display: none; }
+  .slider { position: absolute; cursor: pointer; inset: 0; background: #e2e8f0; transition: .3s; border-radius: 34px; }
+  .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background: #fff; transition: .3s; border-radius: 50%; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+  input:checked + .slider { background: #22c55e; }
+  input:checked + .slider:before { transform: translateX(22px); }
+
+  /* action btns */
+  .btn-verify { background: #fff7ed; color: #ea580c; border: none; border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s; }
+  .btn-verify:hover { background: #ea580c; color: #fff; }
+
+  /* empty */
+  .empty-state { text-align: center; padding: 48px 20px; color: #94a3b8; }
+  .empty-state i { font-size: 48px; margin-bottom: 12px; display: block; }
+
+  /* pagination */
+  .pagination-wrapper { display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; border-top: 1px solid #f1f5f9; flex-wrap: wrap; gap: 10px; }
+  .pagination-info { font-size: 13px; color: #64748b; }
+  .pagination-info strong { color: #0f172a; }
+  .pag-btns { display: flex; gap: 6px; align-items: center; }
+  .pag-btn { min-width: 36px; height: 36px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #fff; color: #334155; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.2s; padding: 0 10px; }
+  .pag-btn:hover { border-color: #e63946; color: #e63946; background: #fff1f2; }
+  .pag-btn.active { background: linear-gradient(135deg,#e63946,#c1121f); color: #fff; border-color: transparent; box-shadow: 0 4px 12px rgba(230,57,70,0.3); }
+  .pag-btn.disabled { opacity: 0.4; pointer-events: none; }
+
+  /* image zoom modal */
+  .img-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+  .img-modal-overlay.active { display: flex; }
+  .img-modal-box { position: relative; animation: zoomIn 0.2s ease; }
+  @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .img-modal-box img { max-width: 480px; max-height: 480px; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); display: block; }
+  .img-modal-close { position: absolute; top: -14px; right: -14px; width: 32px; height: 32px; background: #e63946; color: #fff; border: none; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+</style>
+
+<div class="cat-wrapper">
+
+  <div class="page-heading">
+    <i class="las la-store" style="color:#e63946; margin-right:8px;"></i>
+    Manage <span>Restaurants</span>
+  </div>
+
+  <div class="dash-card">
+    <div class="dash-card-header">
+      <i class="las la-store"></i>
+      <span>Restaurant List</span>
+    </div>
+    <div style="padding:0;">
+      <div class="table-responsive">
+        <table class="cat-table">
+          <thead>
+            <tr>
+              <th>#ID</th>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Title</th>
+              <th>Mobile</th>
+              <th>Veg Type</th>
+              <th>Rating</th>
+              <th>COD</th>
+              <th>Step</th>
+              <th>Active</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (restaurants && restaurants.length > 0) { %>
+              <% restaurants.forEach(r => { %>
+                <tr>
+                  <td><span class="id-badge">#<%= r.id %></span></td>
+                  <td>
+                    <% if (r.image) { %>
+                      <img src="<%= r.image %>" class="rest-img" onclick="openImgModal(this.src)"
+                           onerror="this.parentElement.innerHTML='<div class=\'no-img\'><i class=\'las la-store\'></i></div>'">
+                    <% } else { %>
+                      <div class="no-img"><i class="las la-store"></i></div>
+                    <% } %>
+                  </td>
+                  <td style="font-weight:600; color:#0f172a; max-width:140px;"><%= r.name %></td>
+                  <td style="color:#64748b; max-width:140px;"><%= r.restaurant_title || '—' %></td>
+                  <td style="white-space:nowrap;"><%= r.mobile || '—' %></td>
+                  <td>
+                    <% if (r.veg_type === 'veg') { %>
+                      <span class="badge-veg">🟢 Veg</span>
+                    <% } else if (r.veg_type === 'non-veg') { %>
+                      <span class="badge-nonveg">🔴 Non-Veg</span>
+                    <% } else { %>
+                      <span class="badge-both">🟡 Both</span>
+                    <% } %>
+                  </td>
+                  <td><span class="rating-badge">⭐ <%= r.rating || '0' %></span></td>
+                  <td>
+                    <% if (r.cod_available) { %>
+                      <span class="cod-yes">✓ Yes</span>
+                    <% } else { %>
+                      <span class="cod-no">✗ No</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <span class="step-badge step-<%= r.step_id || 1 %>">
+                      Step <%= r.step_id || 1 %>
+                    </span>
+                  </td>
+                  <td>
+                    <label class="switch">
+                      <input type="checkbox" class="toggle-switch" data-id="<%= r.id %>" <%= r.is_active==1 ? 'checked' : '' %>>
+                      <span class="slider"></span>
+                    </label>
+                  </td>
+                  <td>
+                    <a href="/restaurants/<%= r.id %>/verify" class="btn-verify">
+                      <i class="las la-shield-alt"></i> Verify
+                    </a>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="11">
+                  <div class="empty-state">
+                    <i class="las la-store"></i>
+                    <p>No restaurants found.</p>
+                  </div>
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PAGINATION -->
+      <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          Page <strong><%= typeof page !== 'undefined' ? page : 1 %></strong> of <strong><%= totalPages %></strong>
+        </div>
+        <div class="pag-btns">
+          <a href="/restaurants?page=<%= (typeof page !== 'undefined' ? page : 1) - 1 %>" class="pag-btn <%= (typeof page === 'undefined' || page <= 1) ? 'disabled' : '' %>">
+            <i class="las la-angle-left"></i>
+          </a>
+          <% for(let i = 1; i <= totalPages; i++) { %>
+            <% const curPage = typeof page !== 'undefined' ? page : 1; %>
+            <% if (i === 1 || i === totalPages || (i >= curPage-1 && i <= curPage+1)) { %>
+              <a href="/restaurants?page=<%= i %>" class="pag-btn <%= i === curPage ? 'active' : '' %>"><%= i %></a>
+            <% } else if (i === curPage-2 || i === curPage+2) { %>
+              <span class="pag-btn disabled">…</span>
+            <% } %>
+          <% } %>
+          <a href="/restaurants?page=<%= (typeof page !== 'undefined' ? page : 1) + 1 %>" class="pag-btn <%= (typeof page === 'undefined' || page >= totalPages) ? 'disabled' : '' %>">
+            <i class="las la-angle-right"></i>
+          </a>
+        </div>
+      </div>
+      <% } %>
+
+    </div>
+  </div>
+</div>
+
+<!-- Image Zoom Modal -->
+<div class="img-modal-overlay" id="imgModal" onclick="if(event.target===this)this.classList.remove('active')">
+  <div class="img-modal-box">
+    <button class="img-modal-close" onclick="document.getElementById('imgModal').classList.remove('active')">✕</button>
+    <img id="imgModalSrc" src="" alt="">
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  function openImgModal(src) {
+    document.getElementById('imgModalSrc').src = src;
+    document.getElementById('imgModal').classList.add('active');
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.getElementById('imgModal').classList.remove('active');
+  });
+
+  $(document).ready(function(){
+    $(".toggle-switch").change(function(){
+      const checkbox = $(this);
+      checkbox.prop("disabled", true);
+      $.post(`/restaurants/${checkbox.data("id")}/toggle`, function(res){
+        if (!res.success) alert("Error updating status");
+        checkbox.prop("disabled", false);
+      });
+    });
+  });
+</script>

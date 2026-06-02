@@ -1,0 +1,269 @@
+<style>
+  .cat-wrapper { padding: 28px 20px; background: #f8fafc; min-height: 100vh; }
+  .page-heading { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 24px; }
+  .page-heading span { color: #e63946; }
+
+  .dash-card { background: #fff; border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.07); overflow: hidden; margin-bottom: 28px; }
+  .dash-card-header { background: #0f172a; padding: 16px 22px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .dash-card-header-left { display: flex; align-items: center; gap: 10px; }
+  .dash-card-header i { color: #e63946; font-size: 20px; }
+  .dash-card-header span { color: #fff; font-size: 15px; font-weight: 600; }
+
+  .filter-bar { padding: 16px 22px; border-bottom: 1px solid #f1f5f9; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .filter-bar input, .filter-bar select { border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 9px 14px; font-size: 13.5px; color: #1e293b; outline: none; transition: border-color 0.2s; background: #fff; }
+  .filter-bar input { flex:1; min-width:180px; max-width:280px; }
+  .filter-bar select { min-width:180px; max-width:240px; }
+  .filter-bar input:focus, .filter-bar select:focus { border-color:#e63946; box-shadow:0 0 0 3px rgba(230,57,70,0.1); }
+  .btn-search { background:#0f172a; color:#fff; border:none; border-radius:10px; padding:9px 18px; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; }
+  .btn-clear-s { background:#f1f5f9; color:#64748b; border:none; border-radius:10px; padding:9px 14px; font-size:13px; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
+
+  /* table */
+  .cat-table { width:100%; border-collapse:separate; border-spacing:0; }
+  .cat-table thead tr th { background:#0f172a; color:rgba(255,255,255,0.75); font-size:12px; font-weight:600; letter-spacing:0.6px; text-transform:uppercase; padding:13px 16px; border:none; white-space:nowrap; }
+  .cat-table thead tr th:first-child { border-radius:10px 0 0 0; }
+  .cat-table thead tr th:last-child  { border-radius:0 10px 0 0; }
+  .cat-table tbody tr { border-bottom:1px solid #f1f5f9; transition:background 0.15s; }
+  .cat-table tbody tr:hover { background:#fafafa; }
+  .cat-table tbody tr:last-child { border-bottom:none; }
+  .cat-table tbody td { padding:13px 16px; font-size:13px; color:#334155; vertical-align:top; }
+
+  .sno-badge { background:#f1f5f9; color:#64748b; font-size:12px; font-weight:600; padding:3px 9px; border-radius:6px; }
+
+  /* media gallery */
+  .media-gallery { display:flex; gap:6px; flex-wrap:wrap; }
+  .media-thumb { width:48px; height:48px; object-fit:cover; border-radius:8px; border:2px solid #f1f5f9; cursor:zoom-in; transition:transform 0.2s, box-shadow 0.2s; flex-shrink:0; }
+  .media-thumb:hover { transform:scale(1.12); box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+  .media-video-thumb { width:48px; height:48px; border-radius:8px; background:#0f172a; display:flex; align-items:center; justify-content:center; color:#e63946; font-size:20px; flex-shrink:0; cursor:pointer; }
+  .no-img { width:48px; height:48px; background:#f1f5f9; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#94a3b8; font-size:18px; }
+
+  /* variants */
+  .variant-list { display:flex; flex-direction:column; gap:4px; }
+  .variant-item { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:5px 10px; font-size:12px; display:flex; align-items:center; gap:8px; }
+  .variant-name { font-weight:600; color:#0f172a; }
+  .variant-price { color:#16a34a; font-weight:700; }
+  .variant-qty   { color:#64748b; }
+  .variant-avail { font-size:10px; font-weight:600; padding:2px 7px; border-radius:10px; }
+  .v-yes { background:#dcfce7; color:#16a34a; }
+  .v-no  { background:#fee2e2; color:#dc2626; }
+
+  .badge-veg    { background:#dcfce7; color:#16a34a; font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; }
+  .badge-nonveg { background:#fee2e2; color:#dc2626; font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; }
+  .status-active   { background:#dcfce7; color:#16a34a; font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; }
+  .status-inactive { background:#f1f5f9; color:#94a3b8; font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; }
+  .price-badge { background:#f0fdf4; color:#16a34a; font-weight:700; font-size:13px; padding:3px 10px; border-radius:6px; }
+  .date-text { font-size:12px; color:#94a3b8; }
+
+  .empty-state { text-align:center; padding:48px 20px; color:#94a3b8; }
+  .empty-state i { font-size:48px; margin-bottom:12px; display:block; }
+
+  /* pagination */
+  .pagination-wrapper { display:flex; align-items:center; justify-content:space-between; padding:16px 22px; border-top:1px solid #f1f5f9; flex-wrap:wrap; gap:10px; }
+  .pagination-info { font-size:13px; color:#64748b; }
+  .pagination-info strong { color:#0f172a; }
+  .pag-btns { display:flex; gap:6px; align-items:center; }
+  .pag-btn { min-width:36px; height:36px; border:1.5px solid #e2e8f0; border-radius:8px; background:#fff; color:#334155; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; text-decoration:none; transition:all 0.2s; padding:0 10px; }
+  .pag-btn:hover { border-color:#e63946; color:#e63946; background:#fff1f2; }
+  .pag-btn.active { background:linear-gradient(135deg,#e63946,#c1121f); color:#fff; border-color:transparent; }
+  .pag-btn.disabled { opacity:0.4; pointer-events:none; }
+
+  /* image zoom modal */
+  .img-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(6px); }
+  .img-modal-overlay.active { display:flex; }
+  .img-modal-box { position:relative; animation:zoomIn 0.2s ease; text-align:center; }
+  @keyframes zoomIn { from{transform:scale(0.8);opacity:0} to{transform:scale(1);opacity:1} }
+  .img-modal-box img { max-width:460px; max-height:460px; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.5); display:block; object-fit:cover; }
+  .img-modal-close { position:absolute; top:-14px; right:-14px; width:32px; height:32px; background:#e63946; color:#fff; border:none; border-radius:50%; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .img-modal-name { color:#fff; font-size:13px; font-weight:600; margin-top:10px; opacity:0.8; }
+</style>
+
+<div class="cat-wrapper">
+
+  <div class="page-heading">
+    <i class="las la-box-open" style="color:#e63946; margin-right:8px;"></i>
+    Manage <span>Products</span>
+  </div>
+
+  <div class="dash-card">
+    <div class="dash-card-header">
+      <div class="dash-card-header-left">
+        <i class="las la-box-open"></i>
+        <span>Product List</span>
+      </div>
+    </div>
+
+    <form class="filter-bar" method="GET" action="/products">
+      <input type="text" name="search" value="<%= search %>" placeholder="Search by name, category...">
+      <select name="restaurant_id">
+        <option value="">All Restaurants</option>
+        <% restaurants.forEach(r => { %>
+          <option value="<%= r.id %>" <%= restId == r.id ? 'selected' : '' %>><%= r.name %></option>
+        <% }) %>
+      </select>
+      <button type="submit" class="btn-search"><i class="las la-search"></i> Search</button>
+      <% if (search || restId) { %>
+        <a href="/products" class="btn-clear-s"><i class="las la-times"></i> Clear</a>
+      <% } %>
+    </form>
+
+    <div style="padding:0;">
+      <div class="table-responsive">
+        <table class="cat-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Main Image</th>
+              <th>All Images</th>
+              <th>Product</th>
+              <th>Restaurant</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Veg</th>
+              <th>Status</th>
+              <th>Variants</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (products && products.length > 0) { %>
+              <% products.forEach((p, idx) => { %>
+                <%
+                  const media    = mediaMap[p.id] || [];
+                  const variants = variantMap[p.id] || [];
+                %>
+                <tr>
+                  <td><span class="sno-badge"><%= (page-1)*10 + idx + 1 %></span></td>
+
+                  <!-- MAIN IMAGE -->
+                  <td>
+                    <% if (p.thumbnail_image) { %>
+                      <img src="<%= p.thumbnail_image %>" class="media-thumb"
+                           onclick="openImg('<%= p.thumbnail_image %>', '<%= (p.name||'').replace(/'/g,'') %>')">
+                    <% } else { %>
+                      <div class="no-img"><i class="las la-image"></i></div>
+                    <% } %>
+                  </td>
+
+                  <!-- ALL IMAGES from product_media -->
+                  <td>
+                    <div class="media-gallery">
+                      <% if (media.length > 0) { %>
+                        <% media.forEach(m => { %>
+                          <% if (m.type === 'image' || m.file_url.match(/\.(jpg|jpeg|png|webp|gif)$/i)) { %>
+                            <img src="<%= m.file_url %>" class="media-thumb"
+                                 onclick="openImg('<%= m.file_url %>', '<%= (p.name||'').replace(/'/g,'') %>')">
+                          <% } else { %>
+                            <div class="media-video-thumb" title="Video"><i class="las la-play-circle"></i></div>
+                          <% } %>
+                        <% }) %>
+                      <% } else { %>
+                        <span style="color:#94a3b8;font-size:12px;">—</span>
+                      <% } %>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div style="font-weight:600;color:#0f172a;max-width:140px;"><%= p.name %></div>
+                    <% if (p.description) { %>
+                      <div style="font-size:11px;color:#94a3b8;margin-top:2px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%= p.description %></div>
+                    <% } %>
+                  </td>
+
+                  <td style="font-weight:600;color:#0f172a;"><%= p.restaurant_name || '—' %></td>
+
+                  <td>
+                    <div style="font-size:12px;font-weight:600;color:#334155;"><%= p.category_name || '—' %></div>
+                    <div style="font-size:11px;color:#94a3b8;"><%= p.sub_category_name || '' %></div>
+                  </td>
+
+                  <td><span class="price-badge">₹<%= p.price %></span></td>
+
+                  <td>
+                    <% if ((p.veg_type||'').toLowerCase() === 'veg') { %>
+                      <span class="badge-veg">🟢 Veg</span>
+                    <% } else { %>
+                      <span class="badge-nonveg">🔴 Non-Veg</span>
+                    <% } %>
+                  </td>
+
+                  <td>
+                    <span class="<%= p.status == 1 || p.status === 'active' ? 'status-active' : 'status-inactive' %>">
+                      <%= p.status == 1 || p.status === 'active' ? '✓ Active' : '✗ Inactive' %>
+                    </span>
+                  </td>
+
+                  <!-- VARIANTS -->
+                  <td>
+                    <% if (variants.length > 0) { %>
+                      <div class="variant-list">
+                        <% variants.forEach(v => { %>
+                          <div class="variant-item">
+                            <span class="variant-name"><%= v.name %></span>
+                            <span class="variant-price">₹<%= v.price %></span>
+                            <span class="variant-qty"><%= v.quantity %> <%= v.unit_name || '' %></span>
+                            <span class="variant-avail <%= v.is_available == 1 ? 'v-yes' : 'v-no' %>">
+                              <%= v.is_available == 1 ? 'Available' : 'N/A' %>
+                            </span>
+                          </div>
+                        <% }) %>
+                      </div>
+                    <% } else { %>
+                      <span style="color:#94a3b8;font-size:12px;">No variants</span>
+                    <% } %>
+                  </td>
+
+                  <td><span class="date-text"><%= new Date(p.created_at).toLocaleDateString() %></span></td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="11">
+                  <div class="empty-state">
+                    <i class="las la-box-open"></i>
+                    <p>No products found.</p>
+                  </div>
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <% if (totalPages > 1) { %>
+      <div class="pagination-wrapper">
+        <div class="pagination-info">Page <strong><%= page %></strong> of <strong><%= totalPages %></strong></div>
+        <div class="pag-btns">
+          <a href="/products?page=<%= page-1 %>&search=<%= search %>&restaurant_id=<%= restId %>" class="pag-btn <%= page<=1?'disabled':'' %>"><i class="las la-angle-left"></i></a>
+          <% for(let i=1;i<=totalPages;i++){ %>
+            <% if(i===1||i===totalPages||(i>=page-1&&i<=page+1)){ %>
+              <a href="/products?page=<%= i %>&search=<%= search %>&restaurant_id=<%= restId %>" class="pag-btn <%= i===page?'active':'' %>"><%= i %></a>
+            <% } else if(i===page-2||i===page+2){ %>
+              <span class="pag-btn disabled">…</span>
+            <% } %>
+          <% } %>
+          <a href="/products?page=<%= page+1 %>&search=<%= search %>&restaurant_id=<%= restId %>" class="pag-btn <%= page>=totalPages?'disabled':'' %>"><i class="las la-angle-right"></i></a>
+        </div>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<!-- Image Zoom Modal -->
+<div class="img-modal-overlay" id="imgModal" onclick="if(event.target===this)this.classList.remove('active')">
+  <div class="img-modal-box">
+    <button class="img-modal-close" onclick="document.getElementById('imgModal').classList.remove('active')">✕</button>
+    <img id="imgModalSrc" src="" alt="">
+    <div class="img-modal-name" id="imgModalName"></div>
+  </div>
+</div>
+
+<script>
+  function openImg(src, name) {
+    document.getElementById('imgModalSrc').src = src;
+    document.getElementById('imgModalName').textContent = name;
+    document.getElementById('imgModal').classList.add('active');
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.getElementById('imgModal').classList.remove('active');
+  });
+</script>

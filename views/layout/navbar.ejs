@@ -1,0 +1,237 @@
+<style>
+.iq-top-navbar {
+  background: #fff !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+  min-height: 70px;
+}
+.iq-navbar-custom .navbar {
+  min-height: 70px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* burger */
+.iq-navbar-custom .iq-menu-bt .main-circle i {
+  font-size: 22px; color: #64748b; cursor: pointer; transition: color 0.2s;
+}
+.iq-navbar-custom .iq-menu-bt .main-circle i:hover { color: #e63946; }
+
+/* tagline block */
+.nav-tagline-block {
+  display: flex;
+  flex-direction: column;
+  margin-left: 18px;
+}
+.nav-tagline-block .nav-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+}
+.nav-tagline-block .nav-subtitle {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 400;
+  margin-top: 1px;
+}
+.nav-tagline-block .nav-subtitle span {
+  color: #e63946;
+  font-weight: 600;
+}
+
+/* right side */
+.nav-right { display: flex; align-items: center; gap: 10px; }
+
+/* date-time pill */
+.nav-datetime {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.nav-datetime i { color: #e63946; font-size: 14px; }
+
+/* icon btns */
+.nav-icon-btn {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1.5px solid #f1f5f9;
+  display: flex; align-items: center; justify-content: center;
+  color: #64748b;
+  font-size: 18px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+  position: relative;
+}
+.nav-icon-btn:hover { background: #fff1f2; color: #e63946; border-color: #fecaca; }
+.nav-icon-btn .dot {
+  position: absolute; top: 7px; right: 7px;
+  width: 8px; height: 8px;
+  border-radius: 50%; background: #e63946;
+  border: 2px solid #fff;
+}
+
+/* user avatar */
+.nav-user {
+  display: flex; align-items: center; gap: 10px;
+  background: #f8fafc;
+  border: 1.5px solid #f1f5f9;
+  border-radius: 12px;
+  padding: 6px 12px 6px 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.nav-user:hover { border-color: #fecaca; background: #fff1f2; }
+.nav-user img {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid #e63946;
+}
+.nav-user .u-name { font-size: 13px; font-weight: 600; color: #0f172a; }
+.nav-user .u-role { font-size: 11px; color: #94a3b8; }
+
+/* dropdown */
+.nav-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  min-width: 200px;
+  overflow: hidden;
+  z-index: 9999;
+}
+.nav-dropdown.show { display: block; animation: fadeDown 0.2s ease; }
+@keyframes fadeDown { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+.nav-dropdown-header {
+  background: linear-gradient(135deg,#e63946,#c1121f);
+  padding: 14px 16px;
+}
+.nav-dropdown-header p { color:#fff; font-size:13px; font-weight:600; margin:0; }
+.nav-dropdown-header small { color:rgba(255,255,255,0.7); font-size:11px; }
+.nav-dropdown-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 16px;
+  font-size: 13px; color: #334155; font-weight: 500;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.nav-dropdown-item:hover { background: #fff1f2; color: #e63946; }
+.nav-dropdown-item i { font-size: 16px; color: #94a3b8; }
+.nav-dropdown-item:hover i { color: #e63946; }
+.nav-dropdown-divider { height: 1px; background: #f1f5f9; margin: 4px 0; }
+.nav-signout {
+  display: block; text-align: center;
+  margin: 10px 14px 14px;
+  background: linear-gradient(135deg,#e63946,#c1121f);
+  color: #fff; font-size: 13px; font-weight: 600;
+  padding: 9px; border-radius: 10px;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.nav-signout:hover { opacity: 0.88; color: #fff; }
+</style>
+
+<div class="iq-navbar-custom">
+  <nav class="navbar navbar-expand-lg navbar-light p-0">
+
+    <!-- Left: burger + tagline -->
+    <div class="d-flex align-items-center">
+      <div class="iq-menu-bt">
+        <div class="wrapper-menu">
+          <div class="main-circle"><i class="las la-bars"></i></div>
+        </div>
+      </div>
+
+      <div class="nav-tagline-block d-none d-md-flex">
+        <span class="nav-title">Namaste Eats — Admin Panel</span>
+        <span class="nav-subtitle">
+          रेस्टोरेंट जोड़ें, ऑर्डर ट्रैक करें, <span>डिलीवरी मैनेज करें</span> — सब कुछ एक जगह
+        </span>
+      </div>
+    </div>
+
+    <!-- Right: datetime + icons + user -->
+    <div class="nav-right">
+
+      <!-- Live Date Time -->
+      <div class="nav-datetime d-none d-lg-flex">
+        <i class="las la-calendar-alt"></i>
+        <span id="navDateTime">--</span>
+      </div>
+
+      <!-- Notification -->
+      <a href="#" class="nav-icon-btn">
+        <i class="las la-bell"></i>
+        <span class="dot"></span>
+      </a>
+
+      <!-- User dropdown -->
+      <div class="nav-user" id="navUserBtn" onclick="toggleNavDropdown()">
+        <img src="/uploads/admin/namasteatslogo.png" alt="Admin"
+             onerror="this.src='https://root.namasteats.com/public/uploads/admin/namasteatslogo.png'">
+        <div class="d-none d-sm-block">
+          <div class="u-name">Admin</div>
+          <div class="u-role">Super Admin</div>
+        </div>
+        <i class="las la-angle-down" style="font-size:12px;color:#94a3b8;margin-left:4px;"></i>
+
+        <div class="nav-dropdown" id="navDropdown">
+          <div class="nav-dropdown-header">
+            <p>Hello, Admin 👋</p>
+            <small>Namaste Eats</small>
+          </div>
+          <a href="/admin/change-password" class="nav-dropdown-item">
+            <i class="las la-key"></i> Change Password
+          </a>
+          <a href="/admin/dashboard" class="nav-dropdown-item">
+            <i class="las la-tachometer-alt"></i> Dashboard
+          </a>
+          <div class="nav-dropdown-divider"></div>
+          <a href="/admin/logout" class="nav-signout">
+            <i class="las la-sign-out-alt"></i> Sign Out
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </nav>
+</div>
+
+<script>
+  // Live date time
+  function updateDateTime() {
+    const now = new Date();
+    const opts = { weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' };
+    const el = document.getElementById('navDateTime');
+    if (el) el.textContent = now.toLocaleString('en-IN', opts);
+  }
+  updateDateTime();
+  setInterval(updateDateTime, 60000);
+
+  // User dropdown toggle
+  function toggleNavDropdown() {
+    document.getElementById('navDropdown').classList.toggle('show');
+  }
+  document.addEventListener('click', function(e) {
+    const btn = document.getElementById('navUserBtn');
+    const dd  = document.getElementById('navDropdown');
+    if (btn && !btn.contains(e.target)) dd.classList.remove('show');
+  });
+</script>

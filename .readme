@@ -1,0 +1,169 @@
+Namaste_Eats_Backend
+│
+├── config
+│   ├── cashfreeConfig.js
+│   ├── db.js
+│   └── mysql.js
+│
+├── controllers
+│   ├── Admin
+│   │   ├── adminController.js
+│   │   ├── adminDashboard.js
+│   │   ├── authController.js
+│   │   └── authMiddleware.js
+|	|	└── CategoryController.js
+|	|	└── ChargesController.js
+|	|	└── OrderController.js
+|	|	└── RestaurantController.js
+|	|	└── SliderController.js
+|	|	└── SubCategoryController.js
+|	|	└── UnitTypeController.js
+|	|	└── UserController.js
+|	|	└── zoneController.js
+│   │
+│   ├── Api
+│   │   ├── accountController.js
+│   │   ├── addressController.js
+│   │   ├── cartController.js
+│   │   └── cashfree_webhook_log.txt
+| 	|	└── categoryController.js
+| 	|	└── couponController.js
+| 	|	└── deliveryBoyController.js
+| 	|	└── ewithdrawRequestDBController.js
+| 	|	└── favoriteController.js
+| 	|	└── feedbackController.js
+| 	|	└── orderController.js
+| 	|	└── payment_callback.txt
+| 	|	└── paymentGatewayController.js
+| 	|	└── productController.js
+| 	|	└── restaurantController.js
+| 	|	└── searchController.js
+| 	|	└── settingController.js
+| 	|	└── userController.js
+| 	|	└── vendorController.js
+│
+├── routes
+│   ├── Admin
+│   │   ├── admincategoryRoutes.js
+│   │   ├── adminDashboardRoutes.js
+│   │   ├── adminRestaurantRoutes.js
+│   │   └── adminRoutes.js
+│   │   └── adminsliderRoutes.js
+│   │   └── adminSubCategoryRoutes.js
+│   │   └── chargesRoutes.js
+│   │   └── orderRoutes.js
+│   │   └── unitTypeRoutes.js
+│   │   └── usersRoutes.js
+│   │   └── zoneRoutes.js
+│   │
+│   ├── api
+│   │   ├── accountRoutes.js
+│   │   ├── addressRoutes.js
+│   │   ├── cartRoutes.js
+│   │   └── categoriesRoutes.js
+│   │   └── couponRoutes.js
+│   │   └── deliveryBoyRoutes.js
+│   │   └── ewithdrawDBRequest.js
+│   │   └── favoriteRoutes.js
+│   │   └── feedbackRoutes.js
+│   │   └── orderRoutes.js
+│   │   └── paymentGatewayRoutes.js
+│   │   └── productsRoutes.js
+│   │   └── restaurantRoutes.js
+│   │   └── searchRoutes.js
+│   │   └── settingRoutes.js
+│   │   └── userRoutes.js
+│   │   └── vendorRoutes.js
+│
+├── models
+│   ├── Account.js
+│   ├── AddonCharge.js
+│   ├── Address.js
+│   └── Cart.js
+│   └── Category.js
+│   └── Charge.js
+│   └── Coupon.js
+│   └── CouponHistory.js
+│   └── DeliveryBoy.js
+│   └── DeliverySetting.js
+│   └── ewithdraw_request_DB.js
+│   └── Favorite.js
+│   └── Feedback.js
+│   └── Filter.js
+│   └── index.js
+│   └── Menu.js
+│   └── Order.js
+│   └── OrderItem.js
+│   └── Payin.js
+│   └── Paymode.js
+│   └── Product.js
+│   └── ProductMedia.js
+│   └── ProductVariant.js
+│   └── Restaurant.js
+│   └── RestaurantDocument.js
+│   └── RestaurantFeedback.js
+│   └── RestaurantOffer.js
+│   └── RestaurantRating.js
+│   └── RestaurantSetting..js
+│   └── RestaurantTiming.js
+│   └── Slider.js
+│   └── SubCategory.js
+│   └── Transaction.js
+│   └── UnitType.js
+│   └── User.js
+│   └── Vendor.js
+│   └── Wallet.js
+│   └── WithdrawRequest.js
+│   └── WithdrawRequest.js
+│
+├── middlewares
+│   ├── adminAuth.js
+│   ├── upload.js
+│   └── uploadDeliveryBoy.js
+│
+├── utils
+│   ├── jwt.js
+│   ├── response.js
+│   └── helper.js
+│
+├── services
+│   ├── AdminService.js
+│   ├── UserService.js
+│   ├── CategoryService.js
+│   └── WalletService.js
+│
+├── validations
+│   ├── admin.validation.js
+│   ├── user.validation.js
+│   └── category.validation.js
+│
+├── views
+│   ├── admin
+│   │   ├── dashboard.ejs
+│   │   ├── login.ejs
+│   │
+│   │   ├── category
+│   │   │   └── index.ejs
+│   │
+│   │   ├── user
+│   │   │   └── index.ejs
+│   │
+│   │   └── layout
+│   │       ├── administrator.ejs
+│   │       ├── navbar.ejs
+│   │       └── sidebar.ejs
+│   │
+│   └── home.ejs
+│
+├── public
+│   ├── assets
+│   ├── photos
+│   └── uploads
+│       └── images
+│
+├── app.js
+├── server.js
+├── .env
+├── .gitignore
+├── package.json
+└── README.md

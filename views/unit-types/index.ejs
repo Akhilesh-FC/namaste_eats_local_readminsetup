@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Unit Types</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .table th, .table td { vertical-align: middle; }
+    .action-btn { margin-right: 5px; }
+    .pagination { justify-content: center; }
+    .card { margin-bottom: 30px; }
+  </style>
+</head>
+<body class="py-5">
+
+  <h2 class="mb-4">Unit Types</h2>
+
+  <!-- Add New Unit Type Form -->
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white">Add New Unit Type</div>
+    <div class="card-body">
+      <form action="/admin/unit-types/store" method="POST">
+        <div class="row">
+          <div class="col-md-5 mb-3">
+            <label class="form-label">Name</label>
+            <input type="text" name="name" class="form-control" required>
+          </div>
+          <div class="col-md-5 mb-3">
+            <label class="form-label">Short Code</label>
+            <input type="text" name="short_code" class="form-control" required>
+          </div>
+          <div class="col-md-2 mb-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-success w-100">Add</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Unit Type List -->
+  <div class="card">
+    <div class="card-header bg-dark text-white">Unit Type List</div>
+    <div class="card-body">
+      <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Short Code</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% unitTypes.forEach(unit => { %>
+            <tr>
+              <td><%= unit.id %></td>
+              <td><%= unit.name %></td>
+              <td><%= unit.short_code %></td>
+              <td>
+                <% if (unit.is_active == 1) { %>
+                  <span class="badge bg-success">Active</span>
+                <% } else { %>
+                  <span class="badge bg-danger">Inactive</span>
+                <% } %>
+              </td>
+              <td>
+                <a href="/admin/unit-types/edit/<%= unit.id %>" class="btn btn-primary btn-sm action-btn">Edit</a>
+                <a href="/admin/unit-types/toggle/<%= unit.id %>" class="btn btn-warning btn-sm action-btn">Toggle</a>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      <nav>
+        <ul class="pagination">
+          <% if (currentPage > 1) { %>
+            <li class="page-item"><a class="page-link" href="?page=<%= currentPage-1 %>">Previous</a></li>
+          <% } %>
+          <% for (let i=1; i<=totalPages; i++) { %>
+            <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+              <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+            </li>
+          <% } %>
+          <% if (currentPage < totalPages) { %>
+            <li class="page-item"><a class="page-link" href="?page=<%= currentPage+1 %>">Next</a></li>
+          <% } %>
+        </ul>
+      </nav>
+
+    </div>
+  </div>
+
+</body>
+</html>

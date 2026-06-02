@@ -1,0 +1,568 @@
+<style>
+  .cat-wrapper { padding: 28px 20px; background: #f8fafc; min-height: 100vh; }
+
+  /* ── PAGE TITLE ── */
+  .page-heading { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 24px; }
+  .page-heading span { color: #e63946; }
+
+  /* ── CARD ── */
+  .dash-card {
+    background: #fff;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .dash-card-header {
+    background: #0f172a;
+    padding: 16px 22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .dash-card-header i { color: #e63946; font-size: 20px; }
+  .dash-card-header span { color: #fff; font-size: 15px; font-weight: 600; }
+  .dash-card-body { padding: 24px 22px; }
+
+  /* ── FORM ── */
+  .form-label { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+  .form-control, .form-select {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 13.5px;
+    padding: 9px 14px;
+    color: #1e293b;
+    transition: border-color 0.2s;
+  }
+  .form-control::placeholder { color: #94a3b8; opacity: 1; }
+  .form-control::-webkit-input-placeholder { color: #94a3b8; }
+  .form-control::-moz-placeholder { color: #94a3b8; }
+  .form-control:focus, .form-select:focus {
+    border-color: #e63946;
+    box-shadow: 0 0 0 3px rgba(230,57,70,0.1);
+  }
+  textarea.form-control { resize: none; }
+
+  .btn-create {
+    background: linear-gradient(135deg, #e63946, #c1121f);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 28px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .btn-create:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  /* ── TABLE ── */
+  .cat-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .cat-table thead tr th {
+    background: #e9ebef;
+    /* color: rgba(255,255,255,0.75); */
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    padding: 13px 16px;
+    border: none;
+    white-space: nowrap;
+  }
+  .cat-table thead tr th:first-child { border-radius: 10px 0 0 0; }
+  .cat-table thead tr th:last-child  { border-radius: 0 10px 0 0; }
+
+  .cat-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.15s;
+  }
+  .cat-table tbody tr:hover { background: #fafafa; }
+  .cat-table tbody tr:last-child { border-bottom: none; }
+
+  .cat-table tbody td {
+    padding: 13px 16px;
+    font-size: 13.5px;
+    color: #334155;
+    vertical-align: middle;
+  }
+
+  /* id badge */
+  .id-badge {
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 6px;
+  }
+
+  /* ── FILE INPUT FIX ── */
+  .file-upload-wrapper input[type="file"] { display: none; }
+  .file-upload-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1.5px dashed #e2e8f0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    background: #f8fafc;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .file-upload-label:hover { border-color: #e63946; background: #fff1f2; }
+  .file-upload-label .upload-icon {
+    width: 36px; height: 36px;
+    background: #fff1f2;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: #e63946; font-size: 18px; flex-shrink: 0;
+  }
+  .file-upload-label .upload-text { font-size: 13px; color: #64748b; }
+  .file-upload-label .upload-text strong { display: block; color: #1e293b; font-size: 13.5px; }
+  .file-name-display { font-size: 12px; color: #e63946; margin-top: 5px; display: none; }
+
+  /* category image */
+  .cat-img {
+    width: 52px;
+    height: 52px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid #f1f5f9;
+    cursor: zoom-in;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .cat-img:hover { transform: scale(1.08); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+  .no-img {
+    width: 52px; height: 52px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: #94a3b8; font-size: 20px;
+  }
+
+  /* ── IMAGE ZOOM MODAL ── */
+  .img-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .img-modal-overlay.active { display: flex; }
+  .img-modal-box {
+    position: relative;
+    animation: zoomIn 0.2s ease;
+  }
+  @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .img-modal-box img {
+    max-width: 480px;
+    max-height: 480px;
+    width: auto; height: auto;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    display: block;
+  }
+  .img-modal-close {
+    position: absolute;
+    top: -14px; right: -14px;
+    width: 32px; height: 32px;
+    background: #e63946;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(230,57,70,0.4);
+  }
+
+  /* veg badge */
+  .badge-veg    { background: #dcfce7; color: #16a34a; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+  .badge-nonveg { background: #fee2e2; color: #dc2626; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+
+  /* status toggle */
+  .toggle-status {
+    border: none;
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .toggle-status.btn-success   { background: #dcfce7; color: #16a34a; }
+  .toggle-status.btn-secondary { background: #f1f5f9; color: #94a3b8; }
+  .toggle-status:hover { filter: brightness(0.95); }
+
+  /* edit btn */
+  .btn-edit { background:#eff6ff; color:#3b82f6; border:none; border-radius:8px; padding:5px 12px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; }
+  .btn-edit:hover { background:#3b82f6; color:#fff; }
+
+  /* modal */
+  .modal-content { border:none; border-radius:16px; overflow:hidden; }
+  .modal-header-dark { background:#0f172a; padding:16px 22px; display:flex; align-items:center; justify-content:space-between; }
+  .modal-header-dark span { color:#fff; font-size:15px; font-weight:600; }
+  .modal-header-dark button { background:none; border:none; color:rgba(255,255,255,0.6); font-size:20px; cursor:pointer; }
+  .modal-header-dark button:hover { color:#e63946; }
+
+  /* toast */
+  .toast-msg { position:fixed; top:24px; right:24px; z-index:99999; background:#0f172a; color:#fff; padding:14px 22px; border-radius:12px; font-size:14px; font-weight:600; display:flex; align-items:center; gap:10px; box-shadow:0 8px 24px rgba(0,0,0,0.2); opacity:0; transform:translateY(-10px); transition:all 0.3s ease; pointer-events:none; }
+  .toast-msg.show { opacity:1; transform:translateY(0); }
+  .toast-msg i { color:#22c55e; font-size:18px; }
+
+  /* empty state */
+  .empty-state { text-align: center; padding: 48px 20px; color: #94a3b8; }
+  .empty-state i { font-size: 48px; margin-bottom: 12px; display: block; }
+  .empty-state p { font-size: 14px; }
+
+  /* ── PAGINATION ── */
+  .pagination-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 22px;
+    border-top: 1px solid #f1f5f9;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .pagination-info { font-size: 13px; color: #64748b; }
+  .pagination-info strong { color: #0f172a; }
+  .pag-btns { display: flex; gap: 6px; align-items: center; }
+  .pag-btn {
+    min-width: 36px; height: 36px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    background: #fff;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none;
+    transition: all 0.2s;
+    padding: 0 10px;
+  }
+  .pag-btn:hover { border-color: #e63946; color: #e63946; background: #fff1f2; }
+  .pag-btn.active { background: linear-gradient(135deg,#e63946,#c1121f); color: #fff; border-color: transparent; box-shadow: 0 4px 12px rgba(230,57,70,0.3); }
+  .pag-btn.disabled { opacity: 0.4; pointer-events: none; }
+</style>
+
+<div class="cat-wrapper">
+
+  <!-- Page Heading -->
+  <div class="page-heading">
+    <i class="las la-list" style="color:#e63946; margin-right:8px;"></i>
+    Manage <span>Categories</span>
+  </div>
+
+  <!-- ── CREATE FORM CARD ── -->
+  <div class="dash-card">
+    <div class="dash-card-header">
+      <i class="las la-plus-circle"></i>
+      <span>Create New Category</span>
+    </div>
+    <div class="dash-card-body">
+      <form action="/categories/create" method="POST" enctype="multipart/form-data">
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <label class="form-label">Category Name</label>
+            <input type="text" name="name" class="form-control" placeholder="e.g. Biryani" required>
+          </div>
+
+         
+
+          <div class="col-md-6">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+              <option value="1">Active</option>
+              <option value="0">Inactive</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Category Image</label>
+            <div class="file-upload-wrapper">
+              <label class="file-upload-label" for="categoryImageInput">
+                <div class="upload-icon"><i class="las la-cloud-upload-alt"></i></div>
+                <div class="upload-text">
+                  <strong>Click to upload image</strong>
+                  PNG, JPG, JPEG supported
+                </div>
+              </label>
+              <input type="file" id="categoryImageInput" name="image" accept="image/*">
+              <div class="file-name-display" id="fileNameDisplay"></div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control" rows="3" placeholder="Short description..."></textarea>
+          </div>
+
+          <div class="col-12 text-end">
+            <button type="submit" class="btn-create">
+              <i class="las la-plus" style="margin-right:6px;"></i> Create Category
+            </button>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── CATEGORY LIST CARD ── -->
+  <div class="dash-card">
+    <div class="dash-card-header">
+      <i class="las la-th-list"></i>
+      <span>Category List</span>
+    </div>
+    <div class="dash-card-body" style="padding: 0;">
+      <div class="table-responsive">
+        <table class="cat-table">
+          <thead>
+            <tr>
+              <th>#ID</th>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th>Created At</th>
+              <th>Updated At</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (categories && categories.length > 0) { %>
+              <% categories.forEach(cat => { %>
+                <tr>
+                  <td><span class="id-badge">#<%= cat.id %></span></td>
+                  <td>
+                    <% if (cat.image) { %>
+                      <img src="<%= cat.image %>" alt="<%= cat.name %>" class="cat-img" onclick="openImgModal(this.src, this.alt)">
+                    <% } else { %>
+                      <div class="no-img"><i class="las la-image"></i></div>
+                    <% } %>
+                  </td>
+                  <td style="font-weight:600; color:#0f172a;"><%= cat.name %></td>
+                  <td style="max-width:180px; color:#64748b;"><%= cat.description || '—' %></td>
+                  
+                  <td>
+                    <% if (cat.status == 1) { %>
+                      <button class="toggle-status btn-success" data-id="<%= cat.id %>">✓ Active</button>
+                    <% } else { %>
+                      <button class="toggle-status btn-secondary" data-id="<%= cat.id %>">✗ Inactive</button>
+                    <% } %>
+                  </td>
+                  <td><span class="date-text"><%= new Date(cat.created_at).toLocaleString() %></span></td>
+                  <td><span class="date-text"><%= new Date(cat.updated_at).toLocaleString() %></span></td>
+                  <td>
+                    <button class="btn-edit" onclick="openEditModal(<%= cat.id %>, '<%= (cat.name||'').replace(/'/g,'&#39;') %>', '<%= (cat.description||'').replace(/'/g,'&#39;') %>', '<%= cat.status %>', '<%= cat.image||'' %>')">
+                      <i class="las la-pen"></i> Edit
+                    </button>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="8">
+                  <div class="empty-state">
+                    <i class="las la-folder-open"></i>
+                    <p>No categories found. Create one above!</p>
+                  </div>
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── PAGINATION ── -->
+      <div class="pagination-wrapper">
+        <div class="pagination-info">
+          Page <strong><%= page %></strong> of <strong><%= totalPages %></strong>
+        </div>
+        <div class="pag-btns">
+          <!-- Prev -->
+          <a href="/categories?page=<%= page - 1 %>" class="pag-btn <%= page <= 1 ? 'disabled' : '' %>">
+            <i class="las la-angle-left"></i>
+          </a>
+
+          <!-- Page numbers -->
+          <% for(let i = 1; i <= totalPages; i++) { %>
+            <% if (i === 1 || i === totalPages || (i >= page - 1 && i <= page + 1)) { %>
+              <a href="/categories?page=<%= i %>" class="pag-btn <%= i === page ? 'active' : '' %>"><%= i %></a>
+            <% } else if (i === page - 2 || i === page + 2) { %>
+              <span class="pag-btn disabled">…</span>
+            <% } %>
+          <% } %>
+
+          <!-- Next -->
+          <a href="/categories?page=<%= page + 1 %>" class="pag-btn <%= page >= totalPages ? 'disabled' : '' %>">
+            <i class="las la-angle-right"></i>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Image Zoom Modal -->
+<div class="img-modal-overlay" id="imgModal" onclick="closeImgModal(event)">
+  <div class="img-modal-box">
+    <button class="img-modal-close" onclick="document.getElementById('imgModal').classList.remove('active')">✕</button>
+    <img id="imgModalSrc" src="" alt="">
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header-dark">
+        <span><i class="las la-pen" style="color:#e63946;margin-right:8px;"></i>Edit Category</span>
+        <button type="button" onclick="closeEditModal()">✕</button>
+      </div>
+      <div class="dash-card-body">
+        <form id="editForm" enctype="multipart/form-data">
+          <input type="hidden" id="edit_id" name="id">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Category Name</label>
+              <input type="text" id="edit_name" name="name" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Status</label>
+              <select id="edit_status" name="status" class="form-select">
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Image <span style="color:#94a3b8;font-weight:400;">(leave empty to keep current)</span></label>
+              <div class="file-upload-wrapper">
+                <label class="file-upload-label" for="editImageInput">
+                  <div class="upload-icon"><i class="las la-cloud-upload-alt"></i></div>
+                  <div class="upload-text"><strong>Click to change image</strong>PNG, JPG supported</div>
+                </label>
+                <input type="file" id="editImageInput" name="image" accept="image/*">
+                <div class="file-name-display" id="editFileName"></div>
+              </div>
+              <img id="edit_current_img" src="" style="width:60px;height:60px;object-fit:cover;border-radius:10px;margin-top:8px;display:none;">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Description</label>
+              <textarea id="edit_description" name="description" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="col-12 text-end">
+              <button type="submit" class="btn-create">Update Category</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-msg" id="toastMsg"><i class="las la-check-circle"></i><span id="toastText">Updated!</span></div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.getElementById('categoryImageInput').addEventListener('change', function() {
+    const d = document.getElementById('fileNameDisplay');
+    if (this.files[0]) { d.textContent = '📎 ' + this.files[0].name; d.style.display = 'block'; }
+  });
+  document.getElementById('editImageInput').addEventListener('change', function() {
+    const d = document.getElementById('editFileName');
+    if (this.files[0]) { d.textContent = '📎 ' + this.files[0].name; d.style.display = 'block'; }
+  });
+
+  function showToast(msg) {
+    const t = document.getElementById('toastMsg');
+    document.getElementById('toastText').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function openEditModal(id, name, desc, status, image) {
+    document.getElementById('edit_id').value = id;
+    document.getElementById('edit_name').value = name;
+    document.getElementById('edit_description').value = desc;
+    document.getElementById('edit_status').value = status;
+    const img = document.getElementById('edit_current_img');
+    if (image) { img.src = image; img.style.display = 'block'; } else { img.style.display = 'none'; }
+    document.getElementById('editFileName').style.display = 'none';
+    new bootstrap.Modal(document.getElementById('editModal')).show();
+  }
+
+  function closeEditModal() {
+    const m = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+    if (m) m.hide();
+  }
+
+  document.getElementById('editForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const btn = this.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = 'Updating...';
+    const fd = new FormData(this);
+    fetch('/categories/update', { method: 'POST', body: fd })
+      .then(r => {
+        console.log('Response status:', r.status, 'Content-Type:', r.headers.get('content-type'));
+        return r.text();
+      })
+      .then(text => {
+        console.log('Raw response:', text);
+        btn.disabled = false;
+        btn.textContent = 'Update Category';
+        let res;
+        try { res = JSON.parse(text); } catch(e) { alert('Server error: ' + text.substring(0,200)); return; }
+        if (res.success) {
+          document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+          document.body.classList.remove('modal-open');
+          document.body.style.removeProperty('padding-right');
+          showToast('Category updated successfully!');
+          setTimeout(() => location.reload(), 1200);
+        } else {
+          alert(res.message || 'Update failed');
+        }
+      })
+      .catch(err => { btn.disabled = false; btn.textContent = 'Update Category'; console.error(err); });
+  });
+
+  function openImgModal(src, alt) {
+    document.getElementById('imgModalSrc').src = src;
+    document.getElementById('imgModalSrc').alt = alt;
+    document.getElementById('imgModal').classList.add('active');
+  }
+  function closeImgModal(e) {
+    if (e.target === document.getElementById('imgModal'))
+      document.getElementById('imgModal').classList.remove('active');
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.getElementById('imgModal').classList.remove('active');
+    }
+  });
+
+  document.querySelectorAll(".toggle-status").forEach((btn) => {
+    btn.addEventListener("click", async function () {
+      const id = this.getAttribute("data-id");
+      const response = await fetch(`/categories/toggle/${id}`, { method: "POST", headers: { "Content-Type": "application/json" } });
+      const data = await response.json();
+      if (data.success) {
+        if (data.newStatus === 1) { this.classList.remove("btn-secondary"); this.classList.add("btn-success"); this.textContent = "✓ Active"; }
+        else { this.classList.remove("btn-success"); this.classList.add("btn-secondary"); this.textContent = "✗ Inactive"; }
+      }
+    });
+  });
+</script>

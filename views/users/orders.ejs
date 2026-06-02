@@ -1,0 +1,130 @@
+<style>
+  .cat-wrapper { padding: 28px 20px; background: #f8fafc; min-height: 100vh; }
+  .page-heading { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 24px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .page-heading span { color: #e63946; }
+  .btn-back { background:#f1f5f9; color:#334155; border:none; border-radius:10px; padding:9px 18px; font-size:13px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; text-decoration:none; transition:all 0.2s; }
+  .btn-back:hover { background:#e2e8f0; }
+
+  .info-bar { background:#0f172a; border-radius:14px; padding:16px 22px; display:flex; align-items:center; gap:16px; margin-bottom:24px; flex-wrap:wrap; }
+  .info-avatar { width:52px; height:52px; border-radius:50%; object-fit:cover; border:2px solid rgba(255,255,255,0.2); flex-shrink:0; }
+  .no-avatar { width:52px; height:52px; border-radius:50%; background:rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.5); font-size:22px; }
+  .info-bar .name { color:#fff; font-size:16px; font-weight:700; }
+  .info-bar .sub  { color:rgba(255,255,255,0.55); font-size:13px; margin-top:2px; }
+  .total-pill { background:rgba(230,57,70,0.2); color:#fca5a5; font-size:13px; font-weight:600; padding:5px 14px; border-radius:20px; margin-left:auto; }
+
+  .dash-card { background:#fff; border:none; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,0.07); overflow:hidden; }
+  .dash-card-header { background:#0f172a; padding:16px 22px; display:flex; align-items:center; gap:10px; }
+  .dash-card-header i { color:#e63946; font-size:20px; }
+  .dash-card-header span { color:#fff; font-size:15px; font-weight:600; }
+
+  .cat-table { width:100%; border-collapse:separate; border-spacing:0; }
+  .cat-table thead tr th { background:#0f172a; color:rgba(255,255,255,0.75); font-size:12px; font-weight:600; letter-spacing:0.6px; text-transform:uppercase; padding:13px 16px; border:none; white-space:nowrap; }
+  .cat-table thead tr th:first-child { border-radius:10px 0 0 0; }
+  .cat-table thead tr th:last-child  { border-radius:0 10px 0 0; }
+  .cat-table tbody tr { border-bottom:1px solid #f1f5f9; transition:background 0.15s; }
+  .cat-table tbody tr:hover { background:#fafafa; }
+  .cat-table tbody tr:last-child { border-bottom:none; }
+  .cat-table tbody td { padding:13px 16px; font-size:13.5px; color:#334155; vertical-align:middle; }
+
+  .sno-badge { background:#f1f5f9; color:#64748b; font-size:12px; font-weight:600; padding:3px 9px; border-radius:6px; }
+  .order-id-badge { background:#f1f5f9; color:#64748b; font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px; }
+  .amount-text { font-weight:700; color:#0f172a; }
+  .date-text { font-size:12px; color:#94a3b8; }
+
+  .status-badge { font-size:11px; font-weight:600; padding:4px 10px; border-radius:20px; }
+  .s-pending   { background:#fff7ed; color:#ea580c; }
+  .s-preparing { background:#eff6ff; color:#3b82f6; }
+  .s-out       { background:#faf5ff; color:#a855f7; }
+  .s-delivered { background:#f0fdf4; color:#16a34a; }
+  .s-completed { background:#f0fdf4; color:#16a34a; }
+  .s-cancelled { background:#fff1f2; color:#e63946; }
+  .s-default   { background:#f1f5f9; color:#64748b; }
+
+  .pay-paid    { background:#f0fdf4; color:#16a34a; font-size:11px; font-weight:600; padding:4px 10px; border-radius:20px; }
+  .pay-failed  { background:#fff1f2; color:#e63946; font-size:11px; font-weight:600; padding:4px 10px; border-radius:20px; }
+  .pay-pending { background:#fff7ed; color:#ea580c; font-size:11px; font-weight:600; padding:4px 10px; border-radius:20px; }
+
+  .empty-state { text-align:center; padding:48px 20px; color:#94a3b8; }
+  .empty-state i { font-size:48px; margin-bottom:12px; display:block; }
+</style>
+
+<div class="cat-wrapper">
+
+  <div class="page-heading">
+    <a href="/users" class="btn-back"><i class="las la-arrow-left"></i> Back</a>
+    <i class="las la-shopping-bag" style="color:#e63946;"></i>
+    User <span>Orders</span>
+  </div>
+
+  <div class="info-bar">
+    <% if (user && user.profile_image) { %>
+      <img src="<%= user.profile_image %>" class="info-avatar">
+    <% } else { %>
+      <div class="no-avatar"><i class="las la-user"></i></div>
+    <% } %>
+    <div>
+      <div class="name"><%= user ? user.name : '—' %></div>
+      <div class="sub"><%= user ? user.email : '' %> &nbsp;|&nbsp; <%= user ? user.mobile_no : '' %></div>
+    </div>
+    <span class="total-pill"><%= orders.length %> Total Orders</span>
+  </div>
+
+  <div class="dash-card">
+    <div class="dash-card-header">
+      <i class="las la-list-alt"></i>
+      <span>Order History</span>
+    </div>
+    <div style="padding:0;">
+      <div class="table-responsive">
+        <table class="cat-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Order ID</th>
+              <th>Restaurant</th>
+              <th>Product</th>
+              <th>Amount</th>
+              <th>Order Status</th>
+              <th>Payment</th>
+              <th>Address</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (orders && orders.length > 0) { %>
+              <% orders.forEach((o, i) => { %>
+                <tr>
+                  <td><span class="sno-badge"><%= i+1 %></span></td>
+                  <td><span class="order-id-badge">#<%= o.order_id %></span></td>
+                  <td style="font-weight:600;color:#0f172a;"><%= o.restaurant_name || '—' %></td>
+                  <td style="color:#64748b;max-width:140px;"><%= o.product_name || '—' %></td>
+                  <td><span class="amount-text">₹<%= o.amount %></span></td>
+                  <td>
+                    <%
+                      const st = (o.order_status||'').toLowerCase();
+                      let sc = 's-default';
+                      if(st==='pending') sc='s-pending';
+                      else if(st==='preparing') sc='s-preparing';
+                      else if(st==='out_for_delivery') sc='s-out';
+                      else if(st==='delivered'||st==='completed') sc='s-delivered';
+                      else if(st==='cancelled') sc='s-cancelled';
+                    %>
+                    <span class="status-badge <%= sc %>"><%= o.order_status %></span>
+                  </td>
+                  <td>
+                    <% const ps = (o.payment_status||'').toLowerCase(); %>
+                    <span class="<%= ps==='paid'?'pay-paid':ps==='failed'?'pay-failed':'pay-pending' %>"><%= o.payment_status || '—' %></span>
+                  </td>
+                  <td style="max-width:160px;color:#64748b;font-size:12px;"><%= o.current_address || '—' %></td>
+                  <td><span class="date-text"><%= new Date(o.created_at).toLocaleString() %></span></td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr><td colspan="9"><div class="empty-state"><i class="las la-shopping-bag"></i><p>No orders found for this user.</p></div></td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

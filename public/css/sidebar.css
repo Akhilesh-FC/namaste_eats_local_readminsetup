@@ -1,0 +1,35 @@
+/* =========================
+   NAMASTE EATS LOGO
+========================= */
+.iq-sidebar-logo .logo-title span {
+    color: #e63946 !important;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: 1px;
+}
+
+/* =========================
+   SIDEBAR LINKS
+========================= */
+.iq-sidebar-menu .iq-menu li a {
+    padding: 12px 15px;
+    border-radius: 8px;
+    color: #555;
+    transition: all 0.3s ease;
+}
+
+/* HOVER */
+.iq-sidebar-menu .iq-menu li a:hover {
+    background: rgba(230, 57, 70, 0.12);
+    color: #e63946 !important;
+}
+
+/* ACTIVE */
+.iq-sidebar-menu .iq-menu li.active > a {
+    background: #e63946;
+    color: #fff !important;
+}
+
+.iq-sidebar-menu .iq-menu li.active > a i {
+    color: #fff !important;
+}
