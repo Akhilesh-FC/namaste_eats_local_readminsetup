@@ -13,19 +13,13 @@ const { fcm,firestore } = require("../../config/firebase"); // ✅ import fixed
 const axios = require("axios"); // ✅ for internal API call
 
 
-const formatUrl = (filePath) => {
-  if (!filePath) return null;
+const formatUrl = (filename, folder) => {
+  if (!filename) return null;
   const base = BASE_URL.endsWith("/") ? BASE_URL.slice(0, -1) : BASE_URL;
-  const filename = path.basename(filePath);
-  // restaurant media folder
-  return `${base}/uploads/restaurant_media/${filename}`;
+  return `${base}/uploads/${folder}/${path.basename(filename)}`;
 };
 
-const formatProductUrl = (filePath) => {
-  if (!filePath) return null;
-  const base = BASE_URL.endsWith("/") ? BASE_URL.slice(0, -1) : BASE_URL;
-  return `${base}/uploads/products/${path.basename(filePath)}`;
-};
+const formatProductUrl = (filename) => formatUrl(filename, "products");
 
 
 // === Multer setup ===
@@ -2321,7 +2315,7 @@ exports.menuSetupStepId3 = async (req, res) => {
 
     const imageFile = req.files.find(f => f.fieldname === "image");
     const thumbnail_image = imageFile
-      ? `${BASE_URL.replace(/\/$/, "")}/uploads/products/${path.basename(imageFile.path)}`
+      ? `${BASE_URL.replace(/\/$/, "")}/uploads/products/${imageFile.filename}`
       : null;
 
     const galleryImages = req.files.filter(f => f.fieldname.startsWith("images["));
@@ -2346,7 +2340,7 @@ exports.menuSetupStepId3 = async (req, res) => {
         await ProductMedia.create({
           product_id: newProduct.id,
           type: "image",
-          file_url: `${BASE_URL.replace(/\/$/, "")}/uploads/products/${path.basename(img.path)}`,
+          file_url: `${BASE_URL.replace(/\/$/, "")}/uploads/products/${img.filename}`,
         });
       }
     }
@@ -2613,8 +2607,8 @@ exports.restaurantInformationStepId1 = async (req, res) => {
       step_id: 1,
     };
 
-    if (imageFile) updatedData.image = formatUrl(imageFile.path);
-    if (videoFile) updatedData.video = formatUrl(videoFile.path);
+    if (imageFile) updatedData.image = formatUrl(imageFile.filename, "restaurant_media");
+    if (videoFile) updatedData.video = formatUrl(videoFile.filename, "restaurant_media");
 
     // ✅ Update restaurant info
     await restaurant.update(updatedData);
@@ -2676,8 +2670,8 @@ exports.restaurantInformationStepId1 = async (req, res) => {
         mobile,
         cooking_time,
         cod_available,
-        image: imageFile ? formatUrl(imageFile.path) : restaurant.image ? formatUrl(restaurant.image) : null,
-        video: videoFile ? formatUrl(videoFile.path) : restaurant.video ? formatUrl(restaurant.video) : null,
+        image: imageFile ? formatUrl(imageFile.filename, "restaurant_media") : restaurant.image || null,
+        video: videoFile ? formatUrl(videoFile.filename, "restaurant_media") : restaurant.video || null,
         working_days: workingDaysParsed,
         step_id: 1,
       },

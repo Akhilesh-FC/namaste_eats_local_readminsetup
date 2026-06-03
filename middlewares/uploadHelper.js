@@ -24,7 +24,7 @@ const convertFields = (dirs) => async (req, res, next) => {
             const filename = Date.now() + "_" + Math.random().toString(36).slice(2) + ".webp";
             const result = await toWebp(file.buffer, destDir, filename);
             file.filename = result.filename;
-            file.path = result.path;
+            file.path = result.filename; // sirf filename, absolute path nahi
         }
         next();
     } catch (e) { next(e); }
@@ -36,7 +36,7 @@ const convertSingle = (destDir) => async (req, res, next) => {
         const filename = Date.now() + ".webp";
         const result = await toWebp(req.file.buffer, destDir, filename);
         req.file.filename = result.filename;
-        req.file.path = result.path;
+        req.file.path = result.filename; // sirf filename, absolute path nahi
         next();
     } catch (e) { next(e); }
 };
