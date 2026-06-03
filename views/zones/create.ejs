@@ -215,6 +215,10 @@ function saveZone() {
   if (!zoneName) return alert("Please enter a zone name.");
   if (!selectedPolygon) return alert("Please draw a polygon or circle on the map.");
 
+  const btn = document.querySelector('.btn-save');
+  btn.disabled = true;
+  btn.innerHTML = '<svg style="animation:spin 0.8s linear infinite;width:16px;height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Saving...';
+
   let coordinates = [];
 
   if (selectedType === 'circle') {
@@ -239,6 +243,8 @@ function saveZone() {
       alert("Zone saved successfully!");
       window.location.href = "/zones";
     } else {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="las la-save"></i> Save Zone';
       alert(res.message || "Error saving zone.");
     }
   });
