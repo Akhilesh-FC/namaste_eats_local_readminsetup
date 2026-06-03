@@ -2,15 +2,13 @@ const { QueryTypes } = require("sequelize");
 const sequelize = require("../../config/db");
 const admin = require("../../config/firebase.js");
 const { Category,Order, SubCategory, Product, Restaurant, RestaurantOffer, RestaurantDocument, RestaurantRating, RestaurantTiming, ProductMedia, UnitType, ProductVariant,RestaurantFeedback ,User, Wallet,RestaurantSetting,WithdrawRequest,DeliveryBoy } = require("../../models");
-const { AddonCharge } = require("../../models"); 
-const multer = require("multer");
+const { AddonCharge } = require("../../models");
 const path = require("path");
 const fs = require("fs");
 require("dotenv").config();
 const BASE_URL = process.env.BASE_URL;
-const { fcm,firestore } = require("../../config/firebase"); // ✅ import fixed
-
-const axios = require("axios"); // ✅ for internal API call
+const { fcm,firestore } = require("../../config/firebase");
+const axios = require("axios");
 
 
 const formatUrl = (filename, folder) => {
@@ -21,38 +19,6 @@ const formatUrl = (filename, folder) => {
 
 const formatProductUrl = (filename) => formatUrl(filename, "products");
 
-
-// === Multer setup ===
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const dir = "uploads/products";
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: function (req, file, cb) {
-    // Use original name but with timestamp to avoid conflicts
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + '-' + file.originalname);
-  },
-});
-
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) {
-    cb(null, true);
-  } else {
-    cb(new Error('Only image files are allowed!'), false);
-  }
-};
-
-// Create upload instance
-const upload = multer({ 
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: { 
-    fileSize: 10 * 1024 * 1024,
-    files: 50
-  }
-});
 
 
 exports.restaurantWithdrawHistory = async (req, res) => {
