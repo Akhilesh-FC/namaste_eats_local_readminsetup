@@ -4,6 +4,8 @@ const fs = require("fs");
 const multer = require("multer");
 const sharp = require("sharp");
 
+const BASE_URL = "https://root.namasteats.com";
+
 const uploadDir = path.join(__dirname, "../../public/uploads/category");
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
@@ -56,8 +58,7 @@ exports.createCategory = async (req, res) => {
     let imageUrl = null;
 
     if (req.file) {
-      const baseUrl = `${req.protocol}://${req.get("host")}`;
-      imageUrl = `${baseUrl}/uploads/category/${req.file.filename}`;
+      imageUrl = `${BASE_URL}/uploads/category/${req.file.filename}`;
     }
 
     await sequelize.query(
@@ -79,8 +80,7 @@ exports.updateCategory = async (req, res) => {
     let imageUrl = null;
 
     if (req.file) {
-      const baseUrl = `${req.protocol}://${req.get("host")}`;
-      imageUrl = `${baseUrl}/uploads/category/${req.file.filename}`;
+      imageUrl = `${BASE_URL}/uploads/category/${req.file.filename}`;
     }
 
     let sql = `UPDATE categories SET name=:name, description=:description, status=:status, updated_at=NOW()`;

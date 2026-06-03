@@ -16,7 +16,15 @@ const axios = require("axios"); // ✅ for internal API call
 const formatUrl = (filePath) => {
   if (!filePath) return null;
   const base = BASE_URL.endsWith("/") ? BASE_URL.slice(0, -1) : BASE_URL;
-  return `${base}/${filePath.replace(/\\/g, "/")}`;
+  const filename = path.basename(filePath);
+  // restaurant media folder
+  return `${base}/uploads/restaurant_media/${filename}`;
+};
+
+const formatProductUrl = (filePath) => {
+  if (!filePath) return null;
+  const base = BASE_URL.endsWith("/") ? BASE_URL.slice(0, -1) : BASE_URL;
+  return `${base}/uploads/products/${path.basename(filePath)}`;
 };
 
 
@@ -2311,14 +2319,12 @@ exports.menuSetupStepId3 = async (req, res) => {
       }
     }
 
-   // ✅ Extract thumbnail image (fieldname = "image")
-const imageFile = req.files.find(f => f.fieldname === "image");
-const thumbnail_image = imageFile
-  ? `${BASE_URL}${imageFile.path.replace(/\\/g, "/")}`
-  : null;
+    const imageFile = req.files.find(f => f.fieldname === "image");
+    const thumbnail_image = imageFile
+      ? `${BASE_URL.replace(/\/$/, "")}/uploads/products/${path.basename(imageFile.path)}`
+      : null;
 
-// ✅ Multiple images (fieldnames like "images[0]", "images[1]", ...)
-const galleryImages = req.files.filter(f => f.fieldname.startsWith("images["));
+    const galleryImages = req.files.filter(f => f.fieldname.startsWith("images["));
 
 
     // ✅ Create main product entry
@@ -2340,7 +2346,7 @@ const galleryImages = req.files.filter(f => f.fieldname.startsWith("images["));
         await ProductMedia.create({
           product_id: newProduct.id,
           type: "image",
-          file_url: `${BASE_URL}${img.path.replace(/\\/g, "/")}`,
+          file_url: `${BASE_URL.replace(/\/$/, "")}/uploads/products/${path.basename(img.path)}`,
         });
       }
     }
