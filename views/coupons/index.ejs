@@ -255,6 +255,9 @@
     document.getElementById('add_min').value = '';
     document.getElementById('add_title').value = '';
     document.getElementById('add_type').value = '1';
+    const btn = document.getElementById('saveAdd');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="las la-plus" style="margin-right:6px;"></i>Add Coupon';
     new bootstrap.Modal(document.getElementById('addModal')).show();
   }
 
@@ -266,6 +269,9 @@
     $('#edit_min').val(min);
     $('#edit_title').val(title);
     $('#edit_type').val(type);
+    const btn = document.getElementById('saveUpdate');
+    btn.disabled = false;
+    btn.textContent = 'Update Coupon';
     new bootstrap.Modal(document.getElementById('editModal')).show();
   }
 

@@ -257,6 +257,9 @@ $(document).ready(function(){
     $('#charge_id').val($(this).data('id'));
     $('#charge_name').val($(this).data('name'));
     $('#charge_amount').val($(this).data('amount'));
+    const btn = document.querySelector('#editForm button[type="submit"]');
+    btn.disabled = false;
+    btn.textContent = 'Update Charge';
     new bootstrap.Modal(document.getElementById('editModal')).show();
   });
 
@@ -288,6 +291,9 @@ $(document).ready(function(){
     $('#a_dist').val($(this).data('dist'));
     $('#a_addon').val($(this).data('addon'));
     $('#a_est').val($(this).data('est'));
+    const btn = document.querySelector('#addonForm button[type="submit"]');
+    btn.disabled = false;
+    btn.textContent = 'Update Addon Charges';
     new bootstrap.Modal(document.getElementById('addonModal')).show();
   });
 
