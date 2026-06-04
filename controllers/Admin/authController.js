@@ -99,7 +99,7 @@ exports.dashboard = async (req, res) => {
       q("SELECT COUNT(id) AS v FROM categories"),
       q("SELECT COUNT(id) AS v FROM sub_categories"),
       q("SELECT COUNT(id) AS v FROM coupons"),
-      q("SELECT COALESCE(total_balance, 0) AS v FROM wallets WHERE id = 1"),
+      q("SELECT COALESCE(SUM(amount), 0) AS v FROM orders WHERE order_status = 'DELIVERED'"),
       q("SELECT COUNT(id) AS v FROM orders WHERE DATE(created_at) = CURDATE()"),
       q("SELECT COUNT(id) AS v FROM users WHERE DATE(created_at) = CURDATE()"),
       q("SELECT COUNT(id) AS v FROM DeliveryBoys WHERE DATE(createdAt) = CURDATE()"),
