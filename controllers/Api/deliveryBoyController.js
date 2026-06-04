@@ -1102,17 +1102,9 @@ exports.updateDeliveryBoyProfile = async (req, res) => {
     if (address) updateData.address = address;
     if (mobile_number) updateData.mobile_number = mobile_number;
 
-    // 🟢 Handle new profile picture upload
     if (req.files?.profile_picture?.[0]) {
-      const baseUrl = "https://root.namasteats.com/";
-      const filePath = req.files.profile_picture[0].path.replace(/\\/g, "/");
-
-      // ✅ Ensure it starts with uploads/
-      const cleanPath = filePath.startsWith("uploads/")
-        ? filePath
-        : `uploads/${filePath}`;
-
-      updateData.profile_picture = baseUrl + cleanPath;
+      const BASE_URL = "https://root.namasteats.com";
+      updateData.profile_picture = `${BASE_URL}/uploads/delivery_boys/${req.files.profile_picture[0].filename}`;
     }
 
     // ✅ Update record
@@ -1212,20 +1204,18 @@ exports.registerDeliveryBoy = async (req, res) => {
       });
     }
 
-    // 🟢 Base URL
-    const baseUrl = "https://root.namasteats.com/";
+    const BASE_URL = "https://root.namasteats.com";
 
-    // 🖼️ Handle file paths and prepend base URL if files exist
     const profile_picture = req.files?.profile_picture?.[0]
-      ? baseUrl + req.files.profile_picture[0].path.replace(/\\/g, "/")
+      ? `${BASE_URL}/uploads/delivery_boys/${req.files.profile_picture[0].filename}`
       : null;
 
     const identity_image = req.files?.identity_image?.[0]
-      ? baseUrl + req.files.identity_image[0].path.replace(/\\/g, "/")
+      ? `${BASE_URL}/uploads/delivery_boys/${req.files.identity_image[0].filename}`
       : null;
 
     const driving_license_image = req.files?.driving_license_image?.[0]
-      ? baseUrl + req.files.driving_license_image[0].path.replace(/\\/g, "/")
+      ? `${BASE_URL}/uploads/delivery_boys/${req.files.driving_license_image[0].filename}`
       : null;
 
     // ✅ Create record

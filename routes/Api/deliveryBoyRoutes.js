@@ -4,7 +4,7 @@ const router = express.Router();
 const path = require("path");
 const { upload, convertFields, ensureDir } = require("../../middlewares/uploadHelper");
 
-const DB_DIR = path.join(__dirname, "../../uploads/delivery_boys");
+const DB_DIR = path.join(__dirname, "../../public/uploads/delivery_boys");
 ensureDir(DB_DIR);
 const dbConvert = convertFields({
     profile_picture: DB_DIR,
