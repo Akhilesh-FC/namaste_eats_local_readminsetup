@@ -659,8 +659,15 @@ exports.getRecommended = async (req, res) => {
 
     if (!latitude || !longitude) return res.json({ status: false, message: "Latitude & Longitude required!" });
 
-    const { activeZonePolygon, mapRestaurantData } = await getZoneAndMapper(latitude, longitude, filter_ids);
+    const { activeZonePolygon, mapRestaurantData: baseMapper } = await getZoneAndMapper(latitude, longitude, filter_ids);
     if (!activeZonePolygon) return res.json({ status: false, message: "Service not available in your area.", data: { total_count: 0, restaurants: [] } });
+
+    // veg_only check wrap karo
+    const mapRestaurantData = (prod) => {
+      const r = prod.restaurant;
+      if (veg_only && r?.veg_type !== "veg") return null;
+      return baseMapper(prod);
+    };
 
     const categories = await Category.findAll({
       where: cat_id ? { id: cat_id, status: 1 } : { status: 1 },
