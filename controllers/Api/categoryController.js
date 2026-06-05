@@ -750,7 +750,6 @@ exports.getAllRestaurants = async (req, res) => {
           include: [{
             model: Product, as: "products", required: false,
             attributes: ["id", "name", "price", "thumbnail_image", "category_id", "sub_category_id"],
-            where: vegFilter,
             include: [{
               model: Restaurant, as: "restaurant",
               attributes: ["id", "name", "restaurant_title", "veg_type", "distance", "cooking_time", "rating", "latitude", "longitude", "image", "is_active"],
@@ -764,7 +763,6 @@ exports.getAllRestaurants = async (req, res) => {
         {
           model: Product, as: "products", required: false,
           attributes: ["id", "name", "price", "thumbnail_image", "category_id"],
-          where: vegFilter,
           include: [{
             model: Restaurant, as: "restaurant",
             attributes: ["id", "name", "restaurant_title", "veg_type", "distance", "cooking_time", "rating", "latitude", "longitude", "image", "is_active"],
