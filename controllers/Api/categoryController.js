@@ -653,7 +653,8 @@ exports.getSubCategories = async (req, res) => {
 exports.getRecommended = async (req, res) => {
   try {
     const { latitude, longitude, cat_id, filter_ids, veg_only } = req.body;
-    const vegFilter = veg_only ? { veg_type: "veg" } : {};
+    const isVegOnly = veg_only === true || veg_only === "true" || veg_only === 1 || veg_only === "1";
+    const vegFilter = isVegOnly ? { veg_type: "veg" } : {};
     const limit = parseInt(req.body.limit) || 10;
     const offset = parseInt(req.body.offset) || 0;
 
@@ -665,7 +666,7 @@ exports.getRecommended = async (req, res) => {
     // veg_only check wrap karo
     const mapRestaurantData = (prod) => {
       const r = prod.restaurant;
-      if (veg_only && r?.veg_type !== "veg") return null;
+      if (isVegOnly && r?.veg_type !== "veg") return null;
       return baseMapper(prod);
     };
 
