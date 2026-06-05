@@ -322,6 +322,14 @@
       <span>Category List</span>
     </div>
     <div class="dash-card-body" style="padding: 0;">
+      <!-- Search Bar -->
+      <form method="GET" action="/categories" style="padding:14px 22px; border-bottom:1px solid #f1f5f9; display:flex; gap:8px;">
+        <input type="text" name="search" value="<%= typeof search !== 'undefined' ? search : '' %>" class="form-control" placeholder="Search by name..." style="max-width:320px;">
+        <button type="submit" style="background:#0f172a;color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="las la-search"></i> Search</button>
+        <% if (typeof search !== 'undefined' && search) { %>
+          <a href="/categories" style="background:#f1f5f9;color:#64748b;border:none;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:4px;"><i class="las la-times"></i> Clear</a>
+        <% } %>
+      </form>
       <div class="table-responsive">
         <table class="cat-table">
           <thead>
@@ -338,9 +346,9 @@
           </thead>
           <tbody>
             <% if (categories && categories.length > 0) { %>
-              <% categories.forEach(cat => { %>
+              <% categories.forEach((cat, idx) => { %>
                 <tr>
-                  <td><span class="id-badge">#<%= cat.id %></span></td>
+                  <td><span class="id-badge">#<%= (page-1)*10 + idx + 1 %></span></td>
                   <td>
                     <% if (cat.image) { %>
                       <img src="<%= cat.image %>" alt="<%= cat.name %>" class="cat-img" onclick="openImgModal(this.src, this.alt)">
@@ -388,21 +396,21 @@
         </div>
         <div class="pag-btns">
           <!-- Prev -->
-          <a href="/categories?page=<%= page - 1 %>" class="pag-btn <%= page <= 1 ? 'disabled' : '' %>">
+          <a href="/categories?page=<%= page - 1 %>&search=<%= typeof search !== 'undefined' ? search : '' %>" class="pag-btn <%= page <= 1 ? 'disabled' : '' %>">
             <i class="las la-angle-left"></i>
           </a>
 
           <!-- Page numbers -->
           <% for(let i = 1; i <= totalPages; i++) { %>
             <% if (i === 1 || i === totalPages || (i >= page - 1 && i <= page + 1)) { %>
-              <a href="/categories?page=<%= i %>" class="pag-btn <%= i === page ? 'active' : '' %>"><%= i %></a>
+              <a href="/categories?page=<%= i %>&search=<%= typeof search !== 'undefined' ? search : '' %>" class="pag-btn <%= i === page ? 'active' : '' %>"><%= i %></a>
             <% } else if (i === page - 2 || i === page + 2) { %>
               <span class="pag-btn disabled">…</span>
             <% } %>
           <% } %>
 
           <!-- Next -->
-          <a href="/categories?page=<%= page + 1 %>" class="pag-btn <%= page >= totalPages ? 'disabled' : '' %>">
+          <a href="/categories?page=<%= page + 1 %>&search=<%= typeof search !== 'undefined' ? search : '' %>" class="pag-btn <%= page >= totalPages ? 'disabled' : '' %>">
             <i class="las la-angle-right"></i>
           </a>
         </div>

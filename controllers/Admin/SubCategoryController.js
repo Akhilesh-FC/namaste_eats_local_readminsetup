@@ -29,18 +29,22 @@ exports.uploadMiddleware = [_multer.single("image"), convertToWebp];
 // List + Pagination
 exports.subCategories = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = 10;
+    const page   = parseInt(req.query.page) || 1;
+    const limit  = 10;
     const offset = (page - 1) * limit;
+    const search = req.query.search ? req.query.search.trim() : "";
 
     const categories = await sequelize.query(
       `SELECT id, name FROM categories WHERE status = 1`,
       { type: sequelize.QueryTypes.SELECT }
     );
 
+    const where = search ? "WHERE s.name LIKE :s OR c.name LIKE :s" : "";
+    const replacements = search ? { s: `%${search}%`, limit, offset } : { limit, offset };
+
     const totalCountResult = await sequelize.query(
-      `SELECT COUNT(*) as count FROM sub_categories`,
-      { type: sequelize.QueryTypes.SELECT }
+      `SELECT COUNT(*) as count FROM sub_categories s LEFT JOIN categories c ON s.category_id = c.id ${where}`,
+      { replacements, type: sequelize.QueryTypes.SELECT }
     );
     const totalPages = Math.ceil(totalCountResult[0].count / limit);
 
@@ -48,13 +52,14 @@ exports.subCategories = async (req, res) => {
       `SELECT s.id, s.category_id, c.name AS category_name, s.name, s.description, s.icon, s.image, s.status, s.created_at, s.updated_at
        FROM sub_categories s
        LEFT JOIN categories c ON s.category_id = c.id
+       ${where}
        ORDER BY s.id DESC LIMIT :limit OFFSET :offset`,
-      { replacements: { limit, offset }, type: sequelize.QueryTypes.SELECT }
+      { replacements, type: sequelize.QueryTypes.SELECT }
     );
 
     if (req.xhr) return res.json({ subCategories, totalPages, currentPage: page });
 
-    res.render("subcategories/index", { title: "Sub Categories", categories, subCategories, totalPages, currentPage: page });
+    res.render("subcategories/index", { title: "Sub Categories", categories, subCategories, totalPages, currentPage: page, search });
   } catch (err) {
     console.error(err);
     res.status(500).send("Server error");

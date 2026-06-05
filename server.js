@@ -128,6 +128,7 @@ const zoneRoutes = require("./routes/Admin/zoneRoutes");
 const CouponAdminRoutes = require("./routes/Admin/CouponAdminRoutes");
 const deliveryBoyAdminRoutes = require("./routes/Admin/deliveryBoyAdminRoutes");
 const productAdminRoutes = require("./routes/Admin/productAdminRoutes");
+const withdrawRoutes = require("./routes/Admin/withdrawRoutes");
 //const admin =  require("./routes/Admin/dashboard");
 
 
@@ -165,6 +166,7 @@ app.use("/", zoneRoutes);
 app.use("/", CouponAdminRoutes);
 app.use("/", deliveryBoyAdminRoutes);
 app.use("/", productAdminRoutes);
+app.use("/", withdrawRoutes);
 
 
 app.use("/api/user", userRoutes);

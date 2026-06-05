@@ -1,0 +1,246 @@
+<style>
+  .cat-wrapper { padding: 28px 20px; background: #f8fafc; min-height: 100vh; }
+  .page-heading { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 24px; }
+  .page-heading span { color: #e63946; }
+
+  .dash-card { background: #fff; border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.07); overflow: hidden; margin-bottom: 28px; }
+  .dash-card-header { background: #0f172a; padding: 16px 22px; display: flex; align-items: center; gap: 10px; }
+  .dash-card-header i { color: #e63946; font-size: 20px; }
+  .dash-card-header span { color: #fff; font-size: 15px; font-weight: 600; }
+
+  .cat-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .cat-table thead tr th { background: #0f172a; color: rgba(255,255,255,0.75); font-size: 12px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; padding: 13px 16px; border: none; white-space: nowrap; }
+  .cat-table thead tr th:first-child { border-radius: 10px 0 0 0; }
+  .cat-table thead tr th:last-child  { border-radius: 0 10px 0 0; }
+  .cat-table tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.15s; }
+  .cat-table tbody tr:hover { background: #fafafa; }
+  .cat-table tbody tr:last-child { border-bottom: none; }
+  .cat-table tbody td { padding: 13px 16px; font-size: 13.5px; color: #334155; vertical-align: middle; }
+
+  .id-badge { background: #f1f5f9; color: #64748b; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 6px; }
+  .amount-badge { background: #f0fdf4; color: #16a34a; font-weight: 700; font-size: 13px; padding: 4px 10px; border-radius: 6px; }
+
+  .badge-pending  { background: #fff7ed; color: #f97316; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
+  .badge-approved { background: #dcfce7; color: #16a34a; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
+  .badge-rejected { background: #fee2e2; color: #dc2626; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
+
+  .filter-bar { padding: 14px 22px; border-bottom: 1px solid #f1f5f9; display: flex; gap: 8px; flex-wrap: wrap; }
+  .filter-btn { border: 1.5px solid #e2e8f0; border-radius: 8px; background: #fff; color: #64748b; font-size: 13px; font-weight: 600; padding: 7px 16px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+  .filter-btn:hover, .filter-btn.active { border-color: #e63946; color: #e63946; background: #fff1f2; }
+
+  .btn-approve { background: #dcfce7; color: #16a34a; border: none; border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-approve:hover { background: #16a34a; color: #fff; }
+  .btn-reject  { background: #fee2e2; color: #dc2626; border: none; border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-reject:hover  { background: #dc2626; color: #fff; }
+
+  .pagination-wrapper { display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; border-top: 1px solid #f1f5f9; flex-wrap: wrap; gap: 10px; }
+  .pagination-info { font-size: 13px; color: #64748b; }
+  .pag-btns { display: flex; gap: 6px; }
+  .pag-btn { min-width: 36px; height: 36px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #fff; color: #334155; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.2s; padding: 0 10px; }
+  .pag-btn:hover { border-color: #e63946; color: #e63946; }
+  .pag-btn.active { background: linear-gradient(135deg,#e63946,#c1121f); color: #fff; border-color: transparent; }
+  .pag-btn.disabled { opacity: 0.4; pointer-events: none; }
+
+  .empty-state { text-align: center; padding: 48px 20px; color: #94a3b8; }
+  .empty-state i { font-size: 48px; margin-bottom: 12px; display: block; }
+
+  .modal-content { border: none; border-radius: 16px; overflow: hidden; }
+  .modal-header-dark { background: #0f172a; padding: 16px 22px; display: flex; align-items: center; justify-content: space-between; }
+  .modal-header-dark span { color: #fff; font-size: 15px; font-weight: 600; }
+  .modal-header-dark button { background: none; border: none; color: rgba(255,255,255,0.6); font-size: 20px; cursor: pointer; }
+  .form-label { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; display: block; }
+  .form-control { border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 13.5px; padding: 9px 14px; color: #1e293b; width: 100%; outline: none; }
+  .form-control:focus { border-color: #e63946; box-shadow: 0 0 0 3px rgba(230,57,70,0.1); }
+  .btn-save { background: linear-gradient(135deg,#e63946,#c1121f); color:#fff; border:none; border-radius:10px; padding:10px 28px; font-size:14px; font-weight:600; cursor:pointer; }
+
+  .toast-msg { position:fixed; top:24px; right:24px; z-index:99999; background:#0f172a; color:#fff; padding:14px 22px; border-radius:12px; font-size:14px; font-weight:600; display:flex; align-items:center; gap:10px; box-shadow:0 8px 24px rgba(0,0,0,0.2); opacity:0; transform:translateY(-10px); transition:all 0.3s ease; pointer-events:none; }
+  .toast-msg.show { opacity:1; transform:translateY(0); }
+  .toast-msg i { color:#22c55e; font-size:18px; }
+  .toast-msg.error i { color:#e63946; }
+</style>
+
+<div class="cat-wrapper">
+  <div class="page-heading">
+    <i class="las la-money-check-alt" style="color:#e63946; margin-right:8px;"></i>
+    Restaurant <span>Withdraw Requests</span>
+  </div>
+
+  <div class="dash-card">
+    <div class="dash-card-header">
+      <i class="las la-list-alt"></i>
+      <span>All Withdraw Requests</span>
+    </div>
+
+    <div class="filter-bar">
+      <a href="/withdraw-requests" class="filter-btn <%= !status ? 'active' : '' %>">All</a>
+      <a href="/withdraw-requests?status=PENDING"  class="filter-btn <%= status==='PENDING'  ? 'active' : '' %>">Pending</a>
+      <a href="/withdraw-requests?status=APPROVED" class="filter-btn <%= status==='APPROVED' ? 'active' : '' %>">Approved</a>
+      <a href="/withdraw-requests?status=REJECTED" class="filter-btn <%= status==='REJECTED' ? 'active' : '' %>">Rejected</a>
+    </div>
+
+    <div style="padding:0;">
+      <div class="table-responsive">
+        <table class="cat-table">
+          <thead>
+            <tr>
+              <th>#ID</th>
+              <th>Restaurant</th>
+              <th>Amount</th>
+              <th>Mode</th>
+              <th>Account Details</th>
+              <th>Wallet Balance</th>
+              <th>Requested At</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (requests && requests.length > 0) { %>
+              <% requests.forEach(r => { %>
+                <tr id="row-<%= r.id %>">
+                  <td><span class="id-badge">#<%= r.id %></span></td>
+                  <td>
+                    <div style="font-weight:600;color:#0f172a;"><%= r.restaurant_name || '—' %></div>
+                    <div style="font-size:12px;color:#94a3b8;"><%= r.restaurant_mobile || '' %></div>
+                  </td>
+                  <td><span class="amount-badge">₹<%= parseFloat(r.amount).toFixed(2) %></span></td>
+                  <td>
+                    <% if (r.payment_type === 'UPI') { %>
+                      <span style="background:#eff6ff;color:#3b82f6;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">UPI</span>
+                    <% } else { %>
+                      <span style="background:#faf5ff;color:#7c3aed;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">Bank</span>
+                    <% } %>
+                  </td>
+                  <td style="font-size:12px;color:#64748b;">
+                    <% if (r.payment_type === 'UPI') { %>
+                      <div><%= r.upi_id || '—' %></div>
+                    <% } else { %>
+                      <div style="font-weight:600;"><%= r.bank_owner_name || '—' %></div>
+                      <div><%= r.bank_account_number || '—' %></div>
+                      <div>IFSC: <%= r.ifsc_code || '—' %></div>
+                    <% } %>
+                  </td>
+                  <td style="font-weight:600;">₹<%= parseFloat(r.current_balance || 0).toFixed(2) %></td>
+                  <td style="font-size:12px;color:#94a3b8;"><%= new Date(r.requested_at).toLocaleString() %></td>
+                  <td>
+                    <% if (r.status === 'PENDING') { %>
+                      <span class="badge-pending">⏳ Pending</span>
+                    <% } else if (r.status === 'APPROVED') { %>
+                      <span class="badge-approved">✓ Approved</span>
+                    <% } else { %>
+                      <span class="badge-rejected">✗ Rejected</span>
+                    <% } %>
+                    <% if (r.remarks) { %><div style="font-size:11px;color:#94a3b8;margin-top:3px;"><%= r.remarks %></div><% } %>
+                  </td>
+                  <td>
+                    <% if (r.status === 'PENDING') { %>
+                      <div style="display:flex;gap:6px;">
+                        <button class="btn-approve" onclick="approveRequest(<%= r.id %>, this)">✓ Approve</button>
+                        <button class="btn-reject"  onclick="openRejectModal(<%= r.id %>)">✗ Reject</button>
+                      </div>
+                    <% } else { %>
+                      <span style="font-size:12px;color:#94a3b8;">—</span>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr><td colspan="9"><div class="empty-state"><i class="las la-money-check-alt"></i><p>No withdraw requests found.</p></div></td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination-wrapper">
+        <div class="pagination-info">Page <strong><%= page %></strong> of <strong><%= totalPages %></strong></div>
+        <div class="pag-btns">
+          <a href="/withdraw-requests?page=<%= page-1 %>&status=<%= status %>" class="pag-btn <%= page<=1?'disabled':'' %>"><i class="las la-angle-left"></i></a>
+          <% for(let i=1;i<=totalPages;i++){ %>
+            <a href="/withdraw-requests?page=<%= i %>&status=<%= status %>" class="pag-btn <%= i===page?'active':'' %>"><%= i %></a>
+          <% } %>
+          <a href="/withdraw-requests?page=<%= page+1 %>&status=<%= status %>" class="pag-btn <%= page>=totalPages?'disabled':'' %>"><i class="las la-angle-right"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header-dark">
+        <span><i class="las la-times-circle" style="color:#e63946;margin-right:8px;"></i>Reject Request</span>
+        <button onclick="bootstrap.Modal.getInstance(document.getElementById('rejectModal')).hide()">✕</button>
+      </div>
+      <div style="padding:22px;">
+        <input type="hidden" id="reject_id">
+        <label class="form-label">Reason for Rejection</label>
+        <textarea id="reject_remarks" class="form-control" rows="3" placeholder="Enter reason..."></textarea>
+        <div style="text-align:right;margin-top:14px;">
+          <button class="btn-save" id="rejectConfirmBtn" onclick="confirmReject()">Confirm Reject</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-msg" id="toastMsg"><i class="las la-check-circle"></i><span id="toastText"></span></div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function showToast(msg, isError) {
+    const t = document.getElementById('toastMsg');
+    document.getElementById('toastText').textContent = msg;
+    t.classList.toggle('error', !!isError);
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  function approveRequest(id, btn) {
+    if (!confirm('Approve this withdraw request? Payout will be initiated via Cashfree.')) return;
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+    $.post('/withdraw-requests/' + id + '/approve', function(res) {
+      btn.disabled = false;
+      btn.textContent = '✓ Approve';
+      if (res.success) {
+        showToast(res.message);
+        document.querySelector('#row-' + id + ' td:nth-child(8)').innerHTML = '<span class="badge-approved">✓ Approved</span>';
+        document.querySelector('#row-' + id + ' td:nth-child(9)').innerHTML = '<span style="font-size:12px;color:#94a3b8;">—</span>';
+      } else {
+        showToast(res.message, true);
+      }
+    });
+  }
+
+  function openRejectModal(id) {
+    document.getElementById('reject_id').value = id;
+    document.getElementById('reject_remarks').value = '';
+    document.getElementById('rejectConfirmBtn').disabled = false;
+    document.getElementById('rejectConfirmBtn').textContent = 'Confirm Reject';
+    new bootstrap.Modal(document.getElementById('rejectModal')).show();
+  }
+
+  function confirmReject() {
+    const id = document.getElementById('reject_id').value;
+    const remarks = document.getElementById('reject_remarks').value.trim();
+    const btn = document.getElementById('rejectConfirmBtn');
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+    $.post('/withdraw-requests/' + id + '/reject', { remarks }, function(res) {
+      btn.disabled = false;
+      btn.textContent = 'Confirm Reject';
+      bootstrap.Modal.getInstance(document.getElementById('rejectModal')).hide();
+      if (res.success) {
+        showToast(res.message);
+        document.querySelector('#row-' + id + ' td:nth-child(8)').innerHTML = '<span class="badge-rejected">✗ Rejected</span>';
+        document.querySelector('#row-' + id + ' td:nth-child(9)').innerHTML = '<span style="font-size:12px;color:#94a3b8;">—</span>';
+      } else {
+        showToast(res.message, true);
+      }
+    });
+  }
+</script>

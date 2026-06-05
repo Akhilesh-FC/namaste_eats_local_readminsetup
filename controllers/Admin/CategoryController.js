@@ -29,22 +29,26 @@ exports.uploadMiddleware = [_multer.single("image"), convertToWebp];
 // List categories with pagination
 exports.categories = async (req, res) => {
   try {
-    const page  = Math.max(1, parseInt(req.query.page) || 1);
-    const limit = 10;
+    const page   = Math.max(1, parseInt(req.query.page) || 1);
+    const limit  = 10;
     const offset = (page - 1) * limit;
+    const search = req.query.search ? req.query.search.trim() : "";
+
+    const where = search ? "WHERE name LIKE :s" : "";
+    const replacements = search ? { s: `%${search}%`, limit, offset } : { limit, offset };
 
     const [{ total }] = await sequelize.query(
-      "SELECT COUNT(*) AS total FROM categories",
-      { type: sequelize.QueryTypes.SELECT }
+      `SELECT COUNT(*) AS total FROM categories ${where}`,
+      { replacements, type: sequelize.QueryTypes.SELECT }
     );
 
     const categories = await sequelize.query(
       `SELECT id, name, description, icon, image, veg_type, status, created_at, updated_at
-       FROM categories ORDER BY id DESC LIMIT :limit OFFSET :offset`,
-      { replacements: { limit, offset }, type: sequelize.QueryTypes.SELECT }
+       FROM categories ${where} ORDER BY id DESC LIMIT :limit OFFSET :offset`,
+      { replacements, type: sequelize.QueryTypes.SELECT }
     );
 
-    res.render("categories/index", { title: "Categories", categories, page, totalPages: Math.ceil(total / limit) });
+    res.render("categories/index", { title: "Categories", categories, page, totalPages: Math.ceil(total / limit), search });
   } catch (err) {
     console.error(err);
     res.status(500).send("Server error");

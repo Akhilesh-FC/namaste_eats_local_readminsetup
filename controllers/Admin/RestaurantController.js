@@ -134,14 +134,26 @@ exports.blockRestaurant = async (req, res) => {
 // List restaurants
 exports.restaurants = async (req, res) => {
   try {
-    const restaurants = await sequelize.query(
-      `SELECT id, name, restaurant_title, mobile, fcm_token, cod_available, address, city, state, pincode, latitude, longitude, distance, veg_type, rating, cooking_time, average_cost, image, video, is_active, step_id, created_at, updated_at
-       FROM restaurants
-       ORDER BY id DESC`,
-      { type: sequelize.QueryTypes.SELECT }
+    const page   = Math.max(1, parseInt(req.query.page) || 1);
+    const limit  = 10;
+    const offset = (page - 1) * limit;
+    const search = req.query.search ? req.query.search.trim() : "";
+
+    const where = search ? "WHERE name LIKE :s OR mobile LIKE :s" : "";
+    const replacements = search ? { s: `%${search}%`, limit, offset } : { limit, offset };
+
+    const [{ total }] = await sequelize.query(
+      `SELECT COUNT(*) AS total FROM restaurants ${where}`,
+      { replacements, type: sequelize.QueryTypes.SELECT }
     );
 
-    res.render("restaurants/index", { title: "Restaurants", restaurants });
+    const restaurants = await sequelize.query(
+      `SELECT id, name, restaurant_title, mobile, fcm_token, cod_available, address, city, state, pincode, latitude, longitude, distance, veg_type, rating, cooking_time, average_cost, image, video, is_active, step_id, created_at, updated_at
+       FROM restaurants ${where} ORDER BY id DESC LIMIT :limit OFFSET :offset`,
+      { replacements, type: sequelize.QueryTypes.SELECT }
+    );
+
+    res.render("restaurants/index", { title: "Restaurants", restaurants, page, totalPages: Math.ceil(total / limit), search });
   } catch (err) {
     console.error(err);
     res.status(500).send("Server Error");

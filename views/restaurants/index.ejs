@@ -92,6 +92,14 @@
       <span>Restaurant List</span>
     </div>
     <div style="padding:0;">
+      <!-- Search Bar -->
+      <form method="GET" action="/restaurants" style="padding:14px 22px; border-bottom:1px solid #f1f5f9; display:flex; gap:8px;">
+        <input type="text" name="search" value="<%= typeof search !== 'undefined' ? search : '' %>" class="form-control" placeholder="Search by name or mobile..." style="max-width:320px;">
+        <button type="submit" style="background:#0f172a;color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="las la-search"></i> Search</button>
+        <% if (typeof search !== 'undefined' && search) { %>
+          <a href="/restaurants" style="background:#f1f5f9;color:#64748b;border:none;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:4px;"><i class="las la-times"></i> Clear</a>
+        <% } %>
+      </form>
       <div class="table-responsive">
         <table class="cat-table">
           <thead>
@@ -111,9 +119,9 @@
           </thead>
           <tbody>
             <% if (restaurants && restaurants.length > 0) { %>
-              <% restaurants.forEach(r => { %>
+              <% restaurants.forEach((r, idx) => { %>
                 <tr>
-                  <td><span class="id-badge">#<%= r.id %></span></td>
+                  <td><span class="id-badge">#<%= (typeof page !== 'undefined' ? (page-1)*10 : 0) + idx + 1 %></span></td>
                   <td>
                     <% if (r.image) { %>
                       <img src="<%= r.image %>" class="rest-img" onclick="openImgModal(this.src)"
@@ -181,18 +189,18 @@
           Page <strong><%= typeof page !== 'undefined' ? page : 1 %></strong> of <strong><%= totalPages %></strong>
         </div>
         <div class="pag-btns">
-          <a href="/restaurants?page=<%= (typeof page !== 'undefined' ? page : 1) - 1 %>" class="pag-btn <%= (typeof page === 'undefined' || page <= 1) ? 'disabled' : '' %>">
+          <a href="/restaurants?page=<%= (typeof page !== 'undefined' ? page : 1) - 1 %>&search=<%= typeof search !== 'undefined' ? search : '' %>" class="pag-btn <%= (typeof page === 'undefined' || page <= 1) ? 'disabled' : '' %>">
             <i class="las la-angle-left"></i>
           </a>
           <% for(let i = 1; i <= totalPages; i++) { %>
             <% const curPage = typeof page !== 'undefined' ? page : 1; %>
             <% if (i === 1 || i === totalPages || (i >= curPage-1 && i <= curPage+1)) { %>
-              <a href="/restaurants?page=<%= i %>" class="pag-btn <%= i === curPage ? 'active' : '' %>"><%= i %></a>
+              <a href="/restaurants?page=<%= i %>&search=<%= typeof search !== 'undefined' ? search : '' %>" class="pag-btn <%= i === curPage ? 'active' : '' %>"><%= i %></a>
             <% } else if (i === curPage-2 || i === curPage+2) { %>
               <span class="pag-btn disabled">…</span>
             <% } %>
           <% } %>
-          <a href="/restaurants?page=<%= (typeof page !== 'undefined' ? page : 1) + 1 %>" class="pag-btn <%= (typeof page === 'undefined' || page >= totalPages) ? 'disabled' : '' %>">
+          <a href="/restaurants?page=<%= (typeof page !== 'undefined' ? page : 1) + 1 %>&search=<%= typeof search !== 'undefined' ? search : '' %>" class="pag-btn <%= (typeof page === 'undefined' || page >= totalPages) ? 'disabled' : '' %>">
             <i class="las la-angle-right"></i>
           </a>
         </div>

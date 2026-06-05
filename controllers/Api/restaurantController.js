@@ -19,8 +19,6 @@ const formatUrl = (filename, folder) => {
 
 const formatProductUrl = (filename) => formatUrl(filename, "products");
 
-
-
 exports.restaurantWithdrawHistory = async (req, res) => {
   try {
     const { restaurant_id } = req.query;
@@ -126,8 +124,6 @@ exports.restaurantWithdrawHistory = async (req, res) => {
     });
   }
 };
-
-
 
 // Controller: restaurantController.js
 exports.restaurantWithdraw = async (req, res) => {
@@ -240,7 +236,6 @@ exports.restaurantWithdraw = async (req, res) => {
     });
   }
 };
-
 
 
 exports.updateRestaurantStatus = async (req, res) => {
