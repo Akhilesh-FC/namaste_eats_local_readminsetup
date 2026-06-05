@@ -58,7 +58,8 @@ const getZoneAndMapper = async (latitude, longitude, filter_ids) => {
 
 exports.categories_lists = async (req, res) => {
   try {
-    const { cat_id, sub_category_id, filter_ids, latitude, longitude } = req.body;
+    const { cat_id, sub_category_id, filter_ids, latitude, longitude, veg_only } = req.body;
+    const vegFilter = veg_only ? { veg_type: "veg" } : {};
 
     if (!latitude || !longitude) {
       return res.json({ status: false, message: "Latitude & Longitude required!" });
@@ -138,6 +139,7 @@ exports.categories_lists = async (req, res) => {
                 "category_id",
                 "sub_category_id",
               ],
+              where: vegFilter,
               include: [
                 {
                   model: Restaurant,
@@ -191,6 +193,7 @@ exports.categories_lists = async (req, res) => {
           as: "products",
           required: false,
           attributes: ["id", "name", "price", "thumbnail_image", "category_id"],
+          where: vegFilter,
           include: [
             {
               model: Restaurant,
@@ -575,7 +578,8 @@ exports.filterRestaurants = async (req, res) => {
 // ─── API 1: sub_categories (category_id based, limit + offset + total) ────────
 exports.getSubCategories = async (req, res) => {
   try {
-    const { latitude, longitude, cat_id, filter_ids } = req.body;
+    const { latitude, longitude, cat_id, filter_ids, veg_only } = req.body;
+    const vegFilter = veg_only ? { veg_type: "veg" } : {};
     const limit = parseInt(req.body.limit) || 10;
     const offset = parseInt(req.body.offset) || 0;
 
@@ -600,6 +604,7 @@ exports.getSubCategories = async (req, res) => {
           as: "products",
           required: false,
           attributes: ["id", "name", "description", "price", "thumbnail_image", "status", "category_id", "sub_category_id"],
+          where: vegFilter,
           include: [{
             model: Restaurant,
             as: "restaurant",
@@ -647,7 +652,8 @@ exports.getSubCategories = async (req, res) => {
 // ─── API 2: recommended_for_you (limit + offset + total) ─────────────────────
 exports.getRecommended = async (req, res) => {
   try {
-    const { latitude, longitude, cat_id, filter_ids } = req.body;
+    const { latitude, longitude, cat_id, filter_ids, veg_only } = req.body;
+    const vegFilter = veg_only ? { veg_type: "veg" } : {};
     const limit = parseInt(req.body.limit) || 10;
     const offset = parseInt(req.body.offset) || 0;
 
@@ -665,6 +671,7 @@ exports.getRecommended = async (req, res) => {
           include: [{
             model: Product, as: "products", required: false,
             attributes: ["id", "name", "price", "thumbnail_image", "category_id", "sub_category_id"],
+            where: vegFilter,
             include: [{
               model: Restaurant, as: "restaurant",
               attributes: ["id", "name", "restaurant_title", "veg_type", "distance", "cooking_time", "rating", "latitude", "longitude", "image", "is_active"],
@@ -678,6 +685,7 @@ exports.getRecommended = async (req, res) => {
         {
           model: Product, as: "products", required: false,
           attributes: ["id", "name", "price", "thumbnail_image", "category_id"],
+          where: vegFilter,
           include: [{
             model: Restaurant, as: "restaurant",
             attributes: ["id", "name", "restaurant_title", "veg_type", "distance", "cooking_time", "rating", "latitude", "longitude", "image", "is_active"],
@@ -723,7 +731,8 @@ exports.getRecommended = async (req, res) => {
 // ─── API 3: all_restaurants (limit + offset + total) ─────────────────────────
 exports.getAllRestaurants = async (req, res) => {
   try {
-    const { latitude, longitude, cat_id, filter_ids } = req.body;
+    const { latitude, longitude, cat_id, filter_ids, veg_only } = req.body;
+    const vegFilter = veg_only ? { veg_type: "veg" } : {};
     const limit = parseInt(req.body.limit) || 10;
     const offset = parseInt(req.body.offset) || 0;
 
@@ -741,6 +750,7 @@ exports.getAllRestaurants = async (req, res) => {
           include: [{
             model: Product, as: "products", required: false,
             attributes: ["id", "name", "price", "thumbnail_image", "category_id", "sub_category_id"],
+            where: vegFilter,
             include: [{
               model: Restaurant, as: "restaurant",
               attributes: ["id", "name", "restaurant_title", "veg_type", "distance", "cooking_time", "rating", "latitude", "longitude", "image", "is_active"],
@@ -754,6 +764,7 @@ exports.getAllRestaurants = async (req, res) => {
         {
           model: Product, as: "products", required: false,
           attributes: ["id", "name", "price", "thumbnail_image", "category_id"],
+          where: vegFilter,
           include: [{
             model: Restaurant, as: "restaurant",
             attributes: ["id", "name", "restaurant_title", "veg_type", "distance", "cooking_time", "rating", "latitude", "longitude", "image", "is_active"],
