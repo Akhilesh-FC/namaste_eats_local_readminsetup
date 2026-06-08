@@ -1580,6 +1580,10 @@ exports.getRestaurantOrdersSummary = async (req, res) => {
         "product_id",
         "order_status",
         "amount",
+        "gst",
+        "delivery_charges",
+        "charges",
+        "coupon_discount_amount",
         "product_quantity",
         "created_at",
         "user_id",
@@ -1599,14 +1603,14 @@ exports.getRestaurantOrdersSummary = async (req, res) => {
           ready_to_pickup_count: 0,
           past_orders_count: 0,
           cancelled_orders_count: 0,
-		  assign_to_delivery_boy_count: 0,
+		      assign_to_delivery_boy_count: 0,
           sales: 0,
           new_order_request: [],
           preparing: [],
           ready_to_pickup: [],
           past_orders: [],
           cancelled_orders: [],
-		  assign_to_delivery_boy: [],
+		      assign_to_delivery_boy: [],
         },
       });
     }
@@ -1663,7 +1667,7 @@ exports.getRestaurantOrdersSummary = async (req, res) => {
       product_id: order.product_id,
       product_name: product ? product.name : null,
       veg_type: product ? product.veg_type : null,
-	  product_image: product ? product.thumbnail_image : null, // ✅ added here
+	    product_image: product ? product.thumbnail_image : null, // ✅ added here
       variant_name: variant_name,
       variant_price: variant_price,
       product_quantity: order.product_quantity,
@@ -1689,6 +1693,11 @@ exports.getRestaurantOrdersSummary = async (req, res) => {
           current_address: order.current_address,
           cooking_time: order.cooking_time,
           created_at: order.created_at,
+          subtotal: 0,
+          gst: Number(order.gst) || 0,
+          delivery_charges: Number(order.delivery_charges) || 0,
+          platform_fee: Number(order.charges) || 0,
+          coupon_discount: Number(order.coupon_discount_amount) || 0,
           amount: 0,
           products: [],
           order_status: order.order_status,
@@ -1700,14 +1709,15 @@ exports.getRestaurantOrdersSummary = async (req, res) => {
         product_id: order.product_id,
         product_name: order.product_name,
         veg_type: order.veg_type,
-		product_image: order.product_image, // ✅ added image here
+		product_image: order.product_image,
         variant_name: order.variant_name,
         variant_price: order.variant_price,
         product_quantity: order.product_quantity,
         product_status: order.order_status,
       });
 
-      group.amount += order.amount;
+      group.subtotal += order.amount;
+      group.amount = group.subtotal + group.gst + group.delivery_charges + group.platform_fee - group.coupon_discount;
     }
 
     const groupedOrders = Array.from(groupedOrdersMap.values());
@@ -1768,7 +1778,7 @@ exports.getRestaurantOrdersSummary = async (req, res) => {
         ready_to_pickup,
         past_orders,
         cancelled_orders,
-		assign_to_delivery_boy, // ✅ added,
+		    assign_to_delivery_boy, // ✅ added,
       },
     });
   } catch (error) {

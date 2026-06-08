@@ -285,6 +285,15 @@
           </div>
 
           <div class="col-md-6">
+            <label class="form-label">Veg Type</label>
+            <select name="veg_type" class="form-select">
+              <option value="veg">🟢 Veg</option>
+              <option value="non-veg">🔴 Non-Veg</option>
+              <option value="both">🟡 Both</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
             <label class="form-label">Category Image</label>
             <div class="file-upload-wrapper">
               <label class="file-upload-label" for="categoryImageInput">
@@ -338,6 +347,7 @@
               <th>Image</th>
               <th>Name</th>
               <th>Description</th>
+              <th>Veg Type</th>
               <th>Status</th>
               <th>Created At</th>
               <th>Updated At</th>
@@ -358,7 +368,17 @@
                   </td>
                   <td style="font-weight:600; color:#0f172a;"><%= cat.name %></td>
                   <td style="max-width:180px; color:#64748b;"><%= cat.description || '—' %></td>
-                  
+                  <td>
+                    <% if (cat.veg_type === 'veg') { %>
+                      <span class="badge-veg">🟢 Veg</span>
+                    <% } else if (cat.veg_type === 'non-veg') { %>
+                      <span class="badge-nonveg">🔴 Non-Veg</span>
+                    <% } else if (cat.veg_type === 'both') { %>
+                      <span style="background:#fef9c3;color:#ca8a04;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;">🟡 Both</span>
+                    <% } else { %>
+                      <span style="color:#94a3b8;">—</span>
+                    <% } %>
+                  </td>
                   <td>
                     <% if (cat.status == 1) { %>
                       <button class="toggle-status btn-success" data-id="<%= cat.id %>">✓ Active</button>
@@ -369,7 +389,7 @@
                   <td><span class="date-text"><%= new Date(cat.created_at).toLocaleString() %></span></td>
                   <td><span class="date-text"><%= new Date(cat.updated_at).toLocaleString() %></span></td>
                   <td>
-                    <button class="btn-edit" onclick="openEditModal(<%= cat.id %>, '<%= (cat.name||'').replace(/'/g,'&#39;') %>', '<%= (cat.description||'').replace(/'/g,'&#39;') %>', '<%= cat.status %>', '<%= cat.image||'' %>')">
+                    <button class="btn-edit" onclick="openEditModal(<%= cat.id %>, '<%= (cat.name||'').replace(/'/g,'&#39;') %>', '<%= (cat.description||'').replace(/'/g,'&#39;') %>', '<%= cat.status %>', '<%= cat.image||'' %>', '<%= cat.veg_type||'veg' %>')">
                       <i class="las la-pen"></i> Edit
                     </button>
                   </td>
@@ -377,7 +397,7 @@
               <% }) %>
             <% } else { %>
               <tr>
-                <td colspan="8">
+                <td colspan="9">
                   <div class="empty-state">
                     <i class="las la-folder-open"></i>
                     <p>No categories found. Create one above!</p>
@@ -453,6 +473,14 @@
               </select>
             </div>
             <div class="col-md-6">
+              <label class="form-label">Veg Type</label>
+              <select id="edit_veg_type" name="veg_type" class="form-select">
+                <option value="veg">🟢 Veg</option>
+                <option value="non-veg">🔴 Non-Veg</option>
+                <option value="both">🟡 Both</option>
+              </select>
+            </div>
+            <div class="col-md-6">
               <label class="form-label">Image <span style="color:#94a3b8;font-weight:400;">(leave empty to keep current)</span></label>
               <div class="file-upload-wrapper">
                 <label class="file-upload-label" for="editImageInput">
@@ -500,11 +528,12 @@
     setTimeout(() => t.classList.remove('show'), 3000);
   }
 
-  function openEditModal(id, name, desc, status, image) {
+  function openEditModal(id, name, desc, status, image, veg_type) {
     document.getElementById('edit_id').value = id;
     document.getElementById('edit_name').value = name;
     document.getElementById('edit_description').value = desc;
     document.getElementById('edit_status').value = status;
+    document.getElementById('edit_veg_type').value = veg_type || 'veg';
     const img = document.getElementById('edit_current_img');
     if (image) { img.src = image; img.style.display = 'block'; } else { img.style.display = 'none'; }
     document.getElementById('editFileName').style.display = 'none';

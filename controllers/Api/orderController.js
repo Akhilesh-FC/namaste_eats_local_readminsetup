@@ -226,7 +226,7 @@ if (paymode !== "COD" && paymode !== "WALLET") {
               ? "SUCCESS"
               : payment_status,
           payable_amount,
-          amount: payable_amount,
+          amount: productTotal,
           cf_order_id: payment_order_id,
           paymode,
           address_id,
@@ -681,7 +681,7 @@ const initiateCheckout_old = async (req, res) => {
 
 // 📌 Order Summary API
 const getOrderSummary = async (req, res) => {
-	console.log('sanjana')
+	//console.log('sanjana')
   try {
     const { order_id } = req.body;
 
@@ -699,7 +699,7 @@ const getOrderSummary = async (req, res) => {
         "amount",
         "paymode",
         "order_status",
-		"delivery_pin",
+		    "delivery_pin",
         "payment_status",
         "gst",
         "delivery_charges",
@@ -768,7 +768,7 @@ const getOrderSummary = async (req, res) => {
         return {
           product_id: product.id,
           product_name: product.name,
-		  product_veg_type: product.veg_type,
+		      product_veg_type: product.veg_type,
           product_quantity: order.product_quantity,
           line_total: order.product_quantity * productPrice,
 
@@ -861,7 +861,7 @@ const getOrderSummary = async (req, res) => {
         subtotal,
         gst,
         delivery_charges,
-		delivery_pin: orders[0].delivery_pin,
+		    delivery_pin: orders[0].delivery_pin,
         discount,
         total_amount,
         paymode: orders[0].paymode,

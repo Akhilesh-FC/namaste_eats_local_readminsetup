@@ -66,8 +66,8 @@ exports.createCategory = async (req, res) => {
     }
 
     await sequelize.query(
-      `INSERT INTO categories (name, description, status, image, created_at, updated_at) VALUES (:name, :description, :status, :image, NOW(), NOW())`,
-      { replacements: { name, description, status, image: imageUrl }, type: sequelize.QueryTypes.INSERT }
+      `INSERT INTO categories (name, description, status, image, veg_type, created_at, updated_at) VALUES (:name, :description, :status, :image, :veg_type, NOW(), NOW())`,
+      { replacements: { name, description, status, image: imageUrl, veg_type: req.body.veg_type || 'veg' }, type: sequelize.QueryTypes.INSERT }
     );
 
     res.redirect("/categories");
@@ -81,14 +81,15 @@ exports.createCategory = async (req, res) => {
 exports.updateCategory = async (req, res) => {
   try {
     const { id, name, description, status } = req.body;
+    const veg_type = req.body.veg_type || 'veg';
     let imageUrl = null;
 
     if (req.file) {
       imageUrl = `${BASE_URL}/uploads/category/${req.file.filename}`;
     }
 
-    let sql = `UPDATE categories SET name=:name, description=:description, status=:status, updated_at=NOW()`;
-    const replacements = { name, description, status, id };
+    let sql = `UPDATE categories SET name=:name, description=:description, status=:status, veg_type=:veg_type, updated_at=NOW()`;
+    const replacements = { name, description, status, veg_type, id };
 
     if (imageUrl) {
       sql += `, image=:image`;
