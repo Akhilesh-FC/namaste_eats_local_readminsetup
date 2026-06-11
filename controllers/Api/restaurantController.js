@@ -534,15 +534,17 @@ exports.updateOrderStatus = async (req, res) => {
     ]);
 
     // 🔹 Helper function for sending FCM
-    const sendFCM = async (token, title, body) => {
+    const sendFCM = async (token, title, body, extraData = {}) => {
       if (!token) return;
       const message = {
         notification: { title, body },
+        data: { ...extraData, new_booking: 'false' },
         token,
+        android: { priority: 'high' },
+        apns: { payload: { aps: { sound: 'default' } } }
       };
       try {
         await fcm.send(message);
-        console.log(`✅ Notification sent: ${title}`);
       } catch (err) {
         console.error(`❌ FCM send error: ${err.message}`);
       }
@@ -550,72 +552,27 @@ exports.updateOrderStatus = async (req, res) => {
 
     // 🔹 Send notifications based on status
     switch (newStatus) {
-      // ---- To Restaurant ----
       case "ORDER_REQUEST_TO_DB":
-        await sendFCM(
-          restaurantData?.fcm_token,
-          "🍔 New Order Received",
-          "A new order has been placed. Please accept it."
-        );
+        await sendFCM(restaurantData?.fcm_token, "🍔 New Order Received", "A new order has been placed. Please accept it.", { type: 'ORDER_REQUEST_TO_DB', order_id: String(order_id) });
         break;
-
-      // ---- To User ----
       case "ORDER_ACCEPT":
-        await sendFCM(
-          userData?.fcm_token,
-          "✅ Order Accepted",
-          "Your order has been accepted by the restaurant."
-        );
+        await sendFCM(userData?.fcm_token, "✅ Order Accepted", "Your order has been accepted by the restaurant.", { type: 'ORDER_ACCEPT', order_id: String(order_id) });
         break;
-
-      // ---- To Delivery Boy ----
       case "PREPARING":
-        await sendFCM(
-          deliveryBoyData?.fcm_token,
-          "👨‍🍳 Order Preparing",
-          "Restaurant is preparing the order. Get ready for pickup."
-        );
+        await sendFCM(deliveryBoyData?.fcm_token, "👨‍🍳 Order Preparing", "Restaurant is preparing the order. Get ready for pickup.", { type: 'PREPARING', order_id: String(order_id) });
         break;
-
-      // ---- To Delivery Boy ----
       case "READY_TO_PICKUP":
-        await sendFCM(
-          deliveryBoyData?.fcm_token,
-          "🚀 Ready to Pickup",
-          "Your order is ready to be picked up from the restaurant."
-        );
+        await sendFCM(deliveryBoyData?.fcm_token, "🚀 Ready to Pickup", "Your order is ready to be picked up from the restaurant.", { type: 'READY_TO_PICKUP', order_id: String(order_id) });
         break;
-
-      // ---- To User ----
       case "ON_THE_WAY":
-        await sendFCM(
-          userData?.fcm_token,
-          "🚗 On the Way",
-          "Your food is on the way to you!"
-        );
+        await sendFCM(userData?.fcm_token, "🚗 On the Way", "Your food is on the way to you!", { type: 'ON_THE_WAY', order_id: String(order_id) });
         break;
-
-      // ---- To User ----
       case "DELIVERED":
-        await sendFCM(
-          userData?.fcm_token,
-          "🎉 Order Delivered",
-          "Your order has been delivered successfully!"
-        );
+        await sendFCM(userData?.fcm_token, "🎉 Order Delivered", "Your order has been delivered successfully!", { type: 'DELIVERED', order_id: String(order_id) });
         break;
-
-      // ---- To User + Restaurant ----
       case "CANCELLED":
-        await sendFCM(
-          userData?.fcm_token,
-          "❌ Order Cancelled",
-          "Your order has been cancelled."
-        );
-        await sendFCM(
-          restaurantData?.fcm_token,
-          "⚠️ Order Cancelled",
-          "User cancelled the order."
-        );
+        await sendFCM(userData?.fcm_token, "❌ Order Cancelled", "Your order has been cancelled.", { type: 'CANCELLED', order_id: String(order_id) });
+        await sendFCM(restaurantData?.fcm_token, "⚠️ Order Cancelled", "User cancelled the order.", { type: 'CANCELLED', order_id: String(order_id) });
         break;
     }
 

@@ -316,18 +316,18 @@ if (paymode !== "COD" && paymode !== "WALLET") {
           },
           data: {
             order_id: createdOrders[0]?.order_id || '',
-            type: 'ORDER_PLACED'
+            type: 'ORDER_PLACED',
+            new_booking: 'false'
           },
           android: { priority: 'high' },
           apns: { payload: { aps: { sound: 'default' } } }
         });
-        console.log('✅ Push notification sent to user:', user_id);
       }
     } catch (notifErr) {
       console.warn('⚠️ Notification failed (non-blocking):', notifErr.message);
     }
 
-    // ✅ SEND PUSH NOTIFICATION TO EACH RESTAURANT
+    // ✅ SEND SILENT NOTIFICATION TO EACH RESTAURANT
     try {
       const { fcm } = admin;
       const uniqueRestaurantIds = [...new Set(createdOrders.map(o => o.restaurant_id))];
@@ -340,17 +340,25 @@ if (paymode !== "COD" && paymode !== "WALLET") {
           await fcm.send({
             token: restaurant.fcm_token,
             notification: {
-              title: '🛒 New Order Request!',
-              body: 'You have received a new order. Please accept it quickly!',
+              title: 'New Booking! 🍔',
+              body: `Order #${createdOrders[0]?.order_id || ''} - ₹${payable_amount}`
             },
             data: {
-              order_id: createdOrders[0]?.order_id || '',
-              type: 'NEW_ORDER_REQUEST'
+              type: 'NEW_BOOKING',
+              order_id: String(createdOrders[0]?.order_id || ''),
+              restaurant_id: String(restId),
+              new_booking: 'true',
+              address: String(current_address || ''),
+              total_amount: String(payable_amount || ''),
+              booking_date: new Date().toISOString(),
+              show_overlay: 'true'
             },
             android: { priority: 'high' },
-            apns: { payload: { aps: { sound: 'default' } } }
+            apns: {
+              headers: { 'apns-push-type': 'background', 'apns-priority': '5' },
+              payload: { aps: { 'content-available': 1 } }
+            }
           });
-          console.log('✅ Push notification sent to restaurant:', restId);
         }
       }
     } catch (restNotifErr) {
