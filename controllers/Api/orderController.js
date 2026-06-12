@@ -350,13 +350,24 @@ if (paymode !== "COD" && paymode !== "WALLET") {
               new_booking: 'true',
               address: String(current_address || ''),
               total_amount: String(payable_amount || ''),
-              booking_date: new Date().toISOString(),
+              booking_date: String(new Date().toISOString()),
               show_overlay: 'true'
             },
-            android: { priority: 'high' },
+            android: {
+              priority: 'high',
+              directBootOk: true
+            },
             apns: {
-              headers: { 'apns-push-type': 'background', 'apns-priority': '5' },
-              payload: { aps: { 'content-available': 1 } }
+              headers: {
+                'apns-push-type': 'background',
+                'apns-priority': '5'
+              },
+              payload: {
+                aps: {
+                  'content-available': 1,
+                  'mutable-content': 1
+                }
+              }
             }
           });
         }
