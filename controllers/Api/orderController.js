@@ -31,7 +31,7 @@ const initiateCheckout = async (req, res) => {
       charges,
       payment_status,
       payable_amount,
-      wallet_payable_amount, // NEW OPTIONAL FIELD
+      wallet_payable_amount,
       amount_as_per_restaurant,
       payment_order_id,
       address_id,
@@ -51,35 +51,23 @@ const initiateCheckout = async (req, res) => {
     }
 
     // ------------------------------------------------------------
-    // COUPON VALIDATION (NO CHANGE)
+    // COUPON VALIDATION
     // ------------------------------------------------------------
     if (coupon_id) {
       const coupon = await Coupon.findOne({ where: { id: coupon_id, is_active: true } });
 
       if (!coupon) {
-        return res.status(200).json({
-          status: false,
-          message: "Invalid or inactive coupon",
-        });
+        return res.status(200).json({ status: false, message: "Invalid or inactive coupon" });
       }
 
       const today = new Date();
       if (new Date(coupon.validity) < today) {
-        return res.status(200).json({
-          status: false,
-          message: "Coupon has expired",
-        });
+        return res.status(200).json({ status: false, message: "Coupon has expired" });
       }
 
-      const alreadyUsed = await CouponHistory.findOne({
-        where: { user_id, coupon_id },
-      });
-
+      const alreadyUsed = await CouponHistory.findOne({ where: { user_id, coupon_id } });
       if (alreadyUsed) {
-        return res.status(200).json({
-          status: false,
-          message: "You have already used this coupon once",
-        });
+        return res.status(200).json({ status: false, message: "You have already used this coupon once" });
       }
 
       if (parseFloat(payable_amount) < parseFloat(coupon.min_availability)) {
@@ -90,84 +78,77 @@ const initiateCheckout = async (req, res) => {
       }
     }
 
-// ------------------------------------------------------------
-// AUTO WALLET DEDUCTION (ONLY FOR ONLINE PAYMENT)
-// COD & WALLET => NO AUTO WALLET
-// ------------------------------------------------------------
-let autoWalletDeduct = 0;
+    // ------------------------------------------------------------
+    // AUTO WALLET DEDUCTION (ONLY FOR ONLINE PAYMENT)
+    // ------------------------------------------------------------
+    let autoWalletDeduct = 0;
 
-if (paymode !== "COD" && paymode !== "WALLET") {
-  const userWallet = await Wallet.findOne({
-    where: { entity_id: user_id, entity_type: "USER" },
-  });
+    if (paymode !== "COD" && paymode !== "WALLET") {
+      const userWallet = await Wallet.findOne({
+        where: { entity_id: user_id, entity_type: "USER" },
+      });
 
-  if (userWallet && parseFloat(userWallet.total_balance) > 0) {
-    autoWalletDeduct = Math.min(
-      parseFloat(userWallet.total_balance),
-      parseFloat(payable_amount)
-    );
+      if (userWallet && parseFloat(userWallet.total_balance) > 0) {
+        autoWalletDeduct = Math.min(
+          parseFloat(userWallet.total_balance),
+          parseFloat(payable_amount)
+        );
 
-    const newTotalBalance =
-      parseFloat(userWallet.total_balance) - autoWalletDeduct;
+        const newTotalBalance = parseFloat(userWallet.total_balance) - autoWalletDeduct;
 
-    await userWallet.update({
-      total_balance: newTotalBalance,
-      last_transaction_amount: autoWalletDeduct,
-      last_transaction_type: "DEBIT",
-      last_transaction_time: new Date(),
-      last_transaction_id: "AUTO-WALLET-" + Date.now(),
-    });
+        await userWallet.update({
+          total_balance: newTotalBalance,
+          last_transaction_amount: autoWalletDeduct,
+          last_transaction_type: "DEBIT",
+          last_transaction_time: new Date(),
+          last_transaction_id: "AUTO-WALLET-" + Date.now(),
+        });
 
-    await Transaction.create({
-      entity_id: user_id,
-      entity_type: "USER",
-      order_id: payment_order_id || null,
-      amount: autoWalletDeduct,
-      type: "DEBIT",
-      remarks: "Auto wallet deduction for online payment (total balance)",
-    });
-  }
-}
-
+        await Transaction.create({
+          entity_id: user_id,
+          entity_type: "USER",
+          order_id: payment_order_id || null,
+          amount: autoWalletDeduct,
+          type: "DEBIT",
+          remarks: "Auto wallet deduction for online payment (total balance)",
+        });
+      }
+    }
 
     // ------------------------------------------------------------
-    // WALLET PAYMENT CHECK (FULL PAYMENT) — NO CHANGE
+    // WALLET PAYMENT CHECK (FULL PAYMENT)
     // ------------------------------------------------------------
-   if (paymode === "WALLET") {
-  const userWallet = await Wallet.findOne({
-    where: { entity_id: user_id, entity_type: "USER" },
-  });
+    if (paymode === "WALLET") {
+      const userWallet = await Wallet.findOne({
+        where: { entity_id: user_id, entity_type: "USER" },
+      });
 
-  if (parseFloat(userWallet.total_balance) < parseFloat(payable_amount)) {
-    return res.status(200).json({
-      status: false,
-      message: "Insufficient wallet balance",
-    });
-  }
+      if (parseFloat(userWallet.total_balance) < parseFloat(payable_amount)) {
+        return res.status(200).json({ status: false, message: "Insufficient wallet balance" });
+      }
 
-  const newTotalBalance =
-    parseFloat(userWallet.total_balance) - parseFloat(payable_amount);
+      const newTotalBalance = parseFloat(userWallet.total_balance) - parseFloat(payable_amount);
 
-  await userWallet.update({
-    total_balance: newTotalBalance,
-    last_transaction_amount: payable_amount,
-    last_transaction_type: "DEBIT",
-    last_transaction_time: new Date(),
-    last_transaction_id: "WALLET-" + Date.now(),
-  });
+      await userWallet.update({
+        total_balance: newTotalBalance,
+        last_transaction_amount: payable_amount,
+        last_transaction_type: "DEBIT",
+        last_transaction_time: new Date(),
+        last_transaction_id: "WALLET-" + Date.now(),
+      });
 
-  await Transaction.create({
-    entity_id: user_id,
-    entity_type: "USER",
-    order_id: payment_order_id || null,
-    amount: payable_amount,
-    type: "DEBIT",
-    remarks: "Full wallet payment (total balance)",
-  });
-}
+      await Transaction.create({
+        entity_id: user_id,
+        entity_type: "USER",
+        order_id: payment_order_id || null,
+        amount: payable_amount,
+        type: "DEBIT",
+        remarks: "Full wallet payment (total balance)",
+      });
+    }
 
     // ------------------------------------------------------------
-    // CREATE ORDERS PER RESTAURANT (NO CHANGE)
+    // CREATE ORDERS PER RESTAURANT
     // ------------------------------------------------------------
     const createdOrders = [];
 
@@ -188,9 +169,7 @@ if (paymode !== "COD" && paymode !== "WALLET") {
       let totalRestaurantAmount = 0;
 
       for (let cartItem of cartItems) {
-        const product = await Product.findOne({
-          where: { id: cartItem.product_id },
-        });
+        const product = await Product.findOne({ where: { id: cartItem.product_id } });
 
         if (!product) {
           return res.status(200).json({
@@ -201,9 +180,7 @@ if (paymode !== "COD" && paymode !== "WALLET") {
 
         let productPrice = product.price;
         if (cartItem.variant_id) {
-          const variant = await ProductVariant.findOne({
-            where: { id: cartItem.variant_id },
-          });
+          const variant = await ProductVariant.findOne({ where: { id: cartItem.variant_id } });
           if (variant) productPrice = variant.price;
         }
 
@@ -220,11 +197,9 @@ if (paymode !== "COD" && paymode !== "WALLET") {
           coupon_discount_amount: coupon_discount_amount || 0,
           charges,
           payment_status:
-            paymode === "COD"
-              ? "PENDING"
-              : paymode === "WALLET"
-              ? "SUCCESS"
-              : payment_status,
+            paymode === "COD" ? "PENDING" :
+            paymode === "WALLET" ? "SUCCESS" :
+            payment_status,
           payable_amount,
           amount: productTotal,
           cf_order_id: payment_order_id,
@@ -241,12 +216,10 @@ if (paymode !== "COD" && paymode !== "WALLET") {
         createdOrders.push(newOrder);
       }
 
-      await Cart.destroy({
-        where: { user_id, restaurant_id: item.restaurant_id },
-      });
+      await Cart.destroy({ where: { user_id, restaurant_id: item.restaurant_id } });
 
       await Payin.create({
-        user_id: user_id,
+        user_id,
         restaurant_id: item.restaurant_id,
         order_id: randomOrderId,
         amount: payable_amount,
@@ -264,23 +237,18 @@ if (paymode !== "COD" && paymode !== "WALLET") {
       });
 
       const restWallet = await Wallet.findOne({
-        where: {
-          entity_id: item.restaurant_id,
-          entity_type: "RESTAURANT",
-        },
+        where: { entity_id: item.restaurant_id, entity_type: "RESTAURANT" },
       });
 
       if (!restWallet) {
         return res.status(500).json({
           status: false,
-          message: `Restaurant wallet not found for restaurant_id ${item.restaurant_id}. Please create wallet at registration.`,
+          message: `Restaurant wallet not found for restaurant_id ${item.restaurant_id}`,
         });
       }
 
-      const newTotal =
-        parseFloat(restWallet.total_balance) + parseFloat(totalRestaurantAmount);
-      const newCurrent =
-        parseFloat(restWallet.current_balance) + parseFloat(totalRestaurantAmount);
+      const newTotal = parseFloat(restWallet.total_balance) + parseFloat(totalRestaurantAmount);
+      const newCurrent = parseFloat(restWallet.current_balance) + parseFloat(totalRestaurantAmount);
 
       await restWallet.update({
         total_balance: newTotal,
@@ -303,73 +271,95 @@ if (paymode !== "COD" && paymode !== "WALLET") {
       }
     }
 
-    // ✅ SEND PUSH NOTIFICATION TO USER
+    // ✅ NOTIFICATION TO USER — notification block OK hai (user side Flutter handles it)
     try {
-      const user = await User.findOne({ where: { id: user_id }, attributes: ['fcm_token', 'name'] });
+      const user = await User.findOne({
+        where: { id: user_id },
+        attributes: ['fcm_token', 'name'],
+      });
       if (user && user.fcm_token) {
-        const { fcm } = admin;
-        await fcm.send({
+        await admin.fcm.send({
           token: user.fcm_token,
           notification: {
             title: 'Order Placed Successfully! 🎉',
             body: `Your order has been placed. We are preparing it for you!`,
           },
           data: {
-            order_id: createdOrders[0]?.order_id || '',
+            order_id: String(createdOrders[0]?.order_id || ''),
             type: 'ORDER_PLACED',
-            new_booking: 'false'
+            new_booking: 'false',
           },
           android: { priority: 'high' },
-          apns: { payload: { aps: { sound: 'default' } } }
+          apns: { payload: { aps: { sound: 'default' } } },
         });
       }
     } catch (notifErr) {
-      console.warn('⚠️ Notification failed (non-blocking):', notifErr.message);
+      console.warn('⚠️ User notification failed (non-blocking):', notifErr.message);
     }
 
-    // ✅ SEND SILENT NOTIFICATION TO EACH RESTAURANT
+    // ✅ NOTIFICATION TO RESTAURANT
+    // ─────────────────────────────────────────────────────────────────────────
+    // CRITICAL FIX:
+    // NO "notification" block here!
+    // Jab "notification" block hota hai FCM payload mein aur app background/killed
+    // hoti hai, Android khud notification handle karta hai aur onMessageReceived()
+    // CALL NAHI HOTA. Isliye ringer nahi bajta, overlay nahi aata.
+    //
+    // Sirf "data" block = onMessageReceived() HAMESHA call hota hai
+    // chahe app foreground ho, background ho, ya killed ho.
+    // ─────────────────────────────────────────────────────────────────────────
     try {
-      const { fcm } = admin;
       const uniqueRestaurantIds = [...new Set(createdOrders.map(o => o.restaurant_id))];
+
       for (const restId of uniqueRestaurantIds) {
         const restaurant = await Restaurant.findOne({
           where: { id: restId },
-          attributes: ['fcm_token', 'name']
+          attributes: ['fcm_token', 'name'],
         });
+
         if (restaurant && restaurant.fcm_token) {
-          await fcm.send({
+          await admin.fcm.send({
             token: restaurant.fcm_token,
-            notification: {
-              title: 'New Booking! 🍔',
-              body: `Order #${createdOrders[0]?.order_id || ''} - ₹${payable_amount}`
-            },
+
+            // ❌ NO notification block — intentionally removed
+            // notification: { title: '...', body: '...' }  ← REMOVE KIYA
+
+            // ✅ Sirf data block — onMessageReceived() always fires
             data: {
-              type: 'NEW_BOOKING',
-              order_id: String(createdOrders[0]?.order_id || ''),
-              restaurant_id: String(restId),
-              new_booking: 'true',
-              address: String(current_address || ''),
+              type:         'NEW_BOOKING',
+              order_id:     String(createdOrders[0]?.order_id || ''),
+              restaurant_id:String(restId),
+              new_booking:  'true',
+              show_overlay: 'true',
+              address:      String(current_address || ''),
               total_amount: String(payable_amount || ''),
               booking_date: String(new Date().toISOString()),
-              show_overlay: 'true'
+              // Title/body data mein pass karo — Kotlin/Flutter padhega
+              notif_title:  'New Booking! 🍔',
+              notif_body:   `Order #${createdOrders[0]?.order_id || ''} - ₹${payable_amount}`,
             },
+
             android: {
               priority: 'high',
-              directBootOk: true
+              // ✅ direct_boot_ok — app killed ho tab bhi deliver hogi
+              direct_boot_ok: true,
             },
+
+            // ✅ apns content-available: 1 — iOS background delivery
             apns: {
               headers: {
                 'apns-push-type': 'background',
-                'apns-priority': '5'
+                'apns-priority':  '5',
               },
               payload: {
                 aps: {
                   'content-available': 1,
-                  'mutable-content': 1
-                }
-              }
-            }
+                },
+              },
+            },
           });
+
+          console.log(`✅ Restaurant FCM sent to ${restId} (data-only)`);
         }
       }
     } catch (restNotifErr) {
@@ -384,12 +374,379 @@ if (paymode !== "COD" && paymode !== "WALLET") {
 
   } catch (err) {
     console.error("❌ initiateCheckout Error:", err);
-    return res.status(500).json({
-      status: false,
-      message: err.message,
-    });
+    return res.status(500).json({ status: false, message: err.message });
   }
 };
+
+// const initiateCheckout = async (req, res) => {
+	
+//   try {
+//     const {
+//       user_id,
+//       coupon_id,
+//       coupon_discount_amount,
+//       charges,
+//       payment_status,
+//       payable_amount,
+//       wallet_payable_amount, // NEW OPTIONAL FIELD
+//       amount_as_per_restaurant,
+//       payment_order_id,
+//       address_id,
+//       paymode,
+//       latitude,
+//       longitude,
+//       gst,
+//       delivery_charges,
+//       current_address,
+//     } = req.body;
+
+//     if (!user_id || !Array.isArray(amount_as_per_restaurant) || amount_as_per_restaurant.length === 0) {
+//       return res.status(200).json({
+//         status: false,
+//         message: "Missing required fields or amount_as_per_restaurant is empty",
+//       });
+//     }
+
+//     // ------------------------------------------------------------
+//     // COUPON VALIDATION (NO CHANGE)
+//     // ------------------------------------------------------------
+//     if (coupon_id) {
+//       const coupon = await Coupon.findOne({ where: { id: coupon_id, is_active: true } });
+
+//       if (!coupon) {
+//         return res.status(200).json({
+//           status: false,
+//           message: "Invalid or inactive coupon",
+//         });
+//       }
+
+//       const today = new Date();
+//       if (new Date(coupon.validity) < today) {
+//         return res.status(200).json({
+//           status: false,
+//           message: "Coupon has expired",
+//         });
+//       }
+
+//       const alreadyUsed = await CouponHistory.findOne({
+//         where: { user_id, coupon_id },
+//       });
+
+//       if (alreadyUsed) {
+//         return res.status(200).json({
+//           status: false,
+//           message: "You have already used this coupon once",
+//         });
+//       }
+
+//       if (parseFloat(payable_amount) < parseFloat(coupon.min_availability)) {
+//         return res.status(200).json({
+//           status: false,
+//           message: `Minimum order amount to apply this coupon is ₹${coupon.min_availability}`,
+//         });
+//       }
+//     }
+
+// // ------------------------------------------------------------
+// // AUTO WALLET DEDUCTION (ONLY FOR ONLINE PAYMENT)
+// // COD & WALLET => NO AUTO WALLET
+// // ------------------------------------------------------------
+// let autoWalletDeduct = 0;
+
+// if (paymode !== "COD" && paymode !== "WALLET") {
+//   const userWallet = await Wallet.findOne({
+//     where: { entity_id: user_id, entity_type: "USER" },
+//   });
+
+//   if (userWallet && parseFloat(userWallet.total_balance) > 0) {
+//     autoWalletDeduct = Math.min(
+//       parseFloat(userWallet.total_balance),
+//       parseFloat(payable_amount)
+//     );
+
+//     const newTotalBalance =
+//       parseFloat(userWallet.total_balance) - autoWalletDeduct;
+
+//     await userWallet.update({
+//       total_balance: newTotalBalance,
+//       last_transaction_amount: autoWalletDeduct,
+//       last_transaction_type: "DEBIT",
+//       last_transaction_time: new Date(),
+//       last_transaction_id: "AUTO-WALLET-" + Date.now(),
+//     });
+
+//     await Transaction.create({
+//       entity_id: user_id,
+//       entity_type: "USER",
+//       order_id: payment_order_id || null,
+//       amount: autoWalletDeduct,
+//       type: "DEBIT",
+//       remarks: "Auto wallet deduction for online payment (total balance)",
+//     });
+//   }
+// }
+
+
+//     // ------------------------------------------------------------
+//     // WALLET PAYMENT CHECK (FULL PAYMENT) — NO CHANGE
+//     // ------------------------------------------------------------
+//    if (paymode === "WALLET") {
+//   const userWallet = await Wallet.findOne({
+//     where: { entity_id: user_id, entity_type: "USER" },
+//   });
+
+//   if (parseFloat(userWallet.total_balance) < parseFloat(payable_amount)) {
+//     return res.status(200).json({
+//       status: false,
+//       message: "Insufficient wallet balance",
+//     });
+//   }
+
+//   const newTotalBalance =
+//     parseFloat(userWallet.total_balance) - parseFloat(payable_amount);
+
+//   await userWallet.update({
+//     total_balance: newTotalBalance,
+//     last_transaction_amount: payable_amount,
+//     last_transaction_type: "DEBIT",
+//     last_transaction_time: new Date(),
+//     last_transaction_id: "WALLET-" + Date.now(),
+//   });
+
+//   await Transaction.create({
+//     entity_id: user_id,
+//     entity_type: "USER",
+//     order_id: payment_order_id || null,
+//     amount: payable_amount,
+//     type: "DEBIT",
+//     remarks: "Full wallet payment (total balance)",
+//   });
+// }
+
+//     // ------------------------------------------------------------
+//     // CREATE ORDERS PER RESTAURANT (NO CHANGE)
+//     // ------------------------------------------------------------
+//     const createdOrders = [];
+
+//     for (let item of amount_as_per_restaurant) {
+//       const cartItems = await Cart.findAll({
+//         where: { user_id, restaurant_id: item.restaurant_id },
+//       });
+
+//       if (!cartItems.length) {
+//         return res.status(200).json({
+//           status: false,
+//           message: `No cart found for restaurant_id ${item.restaurant_id}`,
+//         });
+//       }
+
+//       const randomOrderId = `NE${Math.floor(1000 + Math.random() * 9000)}`;
+//       const deliveryPin = Math.floor(1000 + Math.random() * 9000).toString();
+//       let totalRestaurantAmount = 0;
+
+//       for (let cartItem of cartItems) {
+//         const product = await Product.findOne({
+//           where: { id: cartItem.product_id },
+//         });
+
+//         if (!product) {
+//           return res.status(200).json({
+//             status: false,
+//             message: `Product not found for product_id ${cartItem.product_id}`,
+//           });
+//         }
+
+//         let productPrice = product.price;
+//         if (cartItem.variant_id) {
+//           const variant = await ProductVariant.findOne({
+//             where: { id: cartItem.variant_id },
+//           });
+//           if (variant) productPrice = variant.price;
+//         }
+
+//         const productTotal = productPrice * cartItem.quantity;
+//         totalRestaurantAmount += productTotal;
+
+//         const newOrder = await Order.create({
+//           order_id: randomOrderId,
+//           user_id,
+//           restaurant_id: item.restaurant_id,
+//           product_id: cartItem.product_id,
+//           product_variant_id: cartItem.variant_id || null,
+//           product_quantity: cartItem.quantity,
+//           coupon_discount_amount: coupon_discount_amount || 0,
+//           charges,
+//           payment_status:
+//             paymode === "COD"
+//               ? "PENDING"
+//               : paymode === "WALLET"
+//               ? "SUCCESS"
+//               : payment_status,
+//           payable_amount,
+//           amount: productTotal,
+//           cf_order_id: payment_order_id,
+//           paymode,
+//           address_id,
+//           latitude,
+//           longitude,
+//           gst,
+//           delivery_charges,
+//           current_address,
+//           delivery_pin: deliveryPin,
+//         });
+
+//         createdOrders.push(newOrder);
+//       }
+
+//       await Cart.destroy({
+//         where: { user_id, restaurant_id: item.restaurant_id },
+//       });
+
+//       await Payin.create({
+//         user_id: user_id,
+//         restaurant_id: item.restaurant_id,
+//         order_id: randomOrderId,
+//         amount: payable_amount,
+//         payment_method: paymode,
+//         status: paymode === "COD" ? "PENDING" : "SUCCESS",
+//       });
+
+//       await Transaction.create({
+//         entity_id: item.restaurant_id,
+//         entity_type: "RESTAURANT",
+//         order_id: randomOrderId,
+//         amount: payable_amount,
+//         type: "CREDIT",
+//         remarks: "Order payment received",
+//       });
+
+//       const restWallet = await Wallet.findOne({
+//         where: {
+//           entity_id: item.restaurant_id,
+//           entity_type: "RESTAURANT",
+//         },
+//       });
+
+//       if (!restWallet) {
+//         return res.status(500).json({
+//           status: false,
+//           message: `Restaurant wallet not found for restaurant_id ${item.restaurant_id}. Please create wallet at registration.`,
+//         });
+//       }
+
+//       const newTotal =
+//         parseFloat(restWallet.total_balance) + parseFloat(totalRestaurantAmount);
+//       const newCurrent =
+//         parseFloat(restWallet.current_balance) + parseFloat(totalRestaurantAmount);
+
+//       await restWallet.update({
+//         total_balance: newTotal,
+//         current_balance: newCurrent,
+//         last_transaction_id: randomOrderId,
+//         last_transaction_amount: totalRestaurantAmount,
+//         last_transaction_type: "CREDIT",
+//         last_transaction_time: new Date(),
+//       });
+
+//       if (coupon_id) {
+//         await CouponHistory.create({
+//           coupon_id,
+//           user_id,
+//           order_id: randomOrderId,
+//           discount_amount: coupon_discount_amount || 0,
+//           status: "SUCCESS",
+//           remarks: "Coupon applied successfully",
+//         });
+//       }
+//     }
+
+//     // ✅ SEND PUSH NOTIFICATION TO USER
+//     try {
+//       const user = await User.findOne({ where: { id: user_id }, attributes: ['fcm_token', 'name'] });
+//       if (user && user.fcm_token) {
+//         const { fcm } = admin;
+//         await fcm.send({
+//           token: user.fcm_token,
+//           notification: {
+//             title: 'Order Placed Successfully! 🎉',
+//             body: `Your order has been placed. We are preparing it for you!`,
+//           },
+//           data: {
+//             order_id: createdOrders[0]?.order_id || '',
+//             type: 'ORDER_PLACED',
+//             new_booking: 'false'
+//           },
+//           android: { priority: 'high' },
+//           apns: { payload: { aps: { sound: 'default' } } }
+//         });
+//       }
+//     } catch (notifErr) {
+//       console.warn('⚠️ Notification failed (non-blocking):', notifErr.message);
+//     }
+
+//     // ✅ SEND SILENT NOTIFICATION TO EACH RESTAURANT
+//     try {
+//       const { fcm } = admin;
+//       const uniqueRestaurantIds = [...new Set(createdOrders.map(o => o.restaurant_id))];
+//       for (const restId of uniqueRestaurantIds) {
+//         const restaurant = await Restaurant.findOne({
+//           where: { id: restId },
+//           attributes: ['fcm_token', 'name']
+//         });
+//         if (restaurant && restaurant.fcm_token) {
+//           await fcm.send({
+//             token: restaurant.fcm_token,
+//             notification: {
+//               title: 'New Booking! 🍔',
+//               body: `Order #${createdOrders[0]?.order_id || ''} - ₹${payable_amount}`
+//             },
+//             data: {
+//               type: 'NEW_BOOKING',
+//               order_id: String(createdOrders[0]?.order_id || ''),
+//               restaurant_id: String(restId),
+//               new_booking: 'true',
+//               address: String(current_address || ''),
+//               total_amount: String(payable_amount || ''),
+//               booking_date: String(new Date().toISOString()),
+//               show_overlay: 'true'
+//             },
+//             android: {
+//               priority: 'high',
+//               directBootOk: true
+//             },
+//             apns: {
+//               headers: {
+//                 'apns-push-type': 'background',
+//                 'apns-priority': '5'
+//               },
+//               payload: {
+//                 aps: {
+//                   'content-available': 1,
+//                   'mutable-content': 1
+//                 }
+//               }
+//             }
+//           });
+//         }
+//       }
+//     } catch (restNotifErr) {
+//       console.warn('⚠️ Restaurant notification failed (non-blocking):', restNotifErr.message);
+//     }
+
+//     return res.json({
+//       status: true,
+//       message: "Orders created successfully",
+//       orders: createdOrders,
+//     });
+
+//   } catch (err) {
+//     console.error("❌ initiateCheckout Error:", err);
+//     return res.status(500).json({
+//       status: false,
+//       message: err.message,
+//     });
+//   }
+// };
 
 
 const initiateCheckout_old = async (req, res) => {
