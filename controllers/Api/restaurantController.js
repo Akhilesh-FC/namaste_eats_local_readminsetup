@@ -561,9 +561,82 @@ exports.updateOrderStatus = async (req, res) => {
       case "PREPARING":
         await sendFCM(deliveryBoyData?.fcm_token, "👨‍🍳 Order Preparing", "Restaurant is preparing the order. Get ready for pickup.", { type: 'PREPARING', order_id: String(order_id) });
         break;
-      case "READY_TO_PICKUP":
-        await sendFCM(deliveryBoyData?.fcm_token, "🚀 Ready to Pickup", "Your order is ready to be picked up from the restaurant.", { type: 'READY_TO_PICKUP', order_id: String(order_id) });
-        break;
+      // case "READY_TO_PICKUP":
+      //   await sendFCM(deliveryBoyData?.fcm_token, "🚀 Ready to Pickup", "Your order is ready to be picked up from the restaurant.", { type: 'READY_TO_PICKUP', order_id: String(order_id) });
+      //   break;
+
+      ////////SILENT NOTIFCATION START
+
+
+case "READY_TO_PICKUP":
+  try {
+    if (deliveryBoyData?.fcm_token) {
+
+      await fcm.send({
+        token: deliveryBoyData.fcm_token,
+
+        // ❌ Notification block intentionally removed
+        // notification: {
+        //   title: "🚀 Ready to Pickup",
+        //   body: "Your order is ready to be picked up from the restaurant.",
+        // },
+
+        // ✅ Data Only (Silent Notification)
+        data: {
+          type: "READY_TO_PICKUP",
+          order_id: String(order_id),
+          restaurant_id: String(order.restaurant_id),
+          new_booking: "true",
+          show_overlay: "true",
+
+          // Flutter/Kotlin side se read karna
+          notif_title: "🚀 Ready to Pickup",
+          notif_body: "Your order is ready to be picked up from the restaurant.",
+
+          booking_date: String(new Date().toISOString()),
+        },
+
+        android: {
+          priority: "high",
+          direct_boot_ok: true,
+        },
+
+        apns: {
+          headers: {
+            "apns-push-type": "background",
+            "apns-priority": "5",
+          },
+          payload: {
+            aps: {
+              "content-available": 1,
+            },
+          },
+        },
+      });
+
+      console.log(
+        `✅ READY_TO_PICKUP silent notification sent to Delivery Boy (${deliveryBoyData.id})`
+      );
+    } else {
+      console.log("⚠️ Delivery boy FCM token not found");
+    }
+  } catch (err) {
+    console.error(
+      "❌ READY_TO_PICKUP notification error:",
+      err.message
+    );
+  }
+
+  break;
+
+
+
+
+      ////////SILENT NOTIFCATION END
+
+
+
+
       case "ON_THE_WAY":
         await sendFCM(userData?.fcm_token, "🚗 On the Way", "Your food is on the way to you!", { type: 'ON_THE_WAY', order_id: String(order_id) });
         break;
