@@ -505,14 +505,12 @@ const verifyOtp = async (req, res) => {
 };
 
 
-
-// ✅ Register API with fcm_token required
 const register = async (req, res) => {
   try {
-    const { name, email, mobile_no } = req.body;
+    const { name, email, mobile_no, fcm_token } = req.body;
 
-    // Step 1: FCM token from headers
-    const fcmToken = req.headers["fcm_token"] || req.headers["fcm-token"];
+    // Step 1: FCM token from body params
+    const fcmToken = fcm_token;
     if (!fcmToken) {
       return res.status(200).json({
         status: false,
@@ -564,9 +562,9 @@ const register = async (req, res) => {
       mobile_no: mobile_no || null,
       fcm_token: fcmToken
     });
-	  
-	  
-	// ⭐⭐⭐ AUTO CREATE USER WALLET ⭐⭐⭐
+
+
+    // ⭐⭐⭐ AUTO CREATE USER WALLET ⭐⭐⭐
     await Wallet.create({
       entity_id: user.id,
       entity_type: "USER",
@@ -574,7 +572,7 @@ const register = async (req, res) => {
       current_balance: 0,
       status: 1,
       currency: "INR"
-    });	  
+    });
 
 
     // ✅ Response same format
@@ -618,12 +616,12 @@ const register = async (req, res) => {
   }
 };
 
-// Login
+
 const login = async (req, res) => {
-	console.log("req.params", req.params);
+  console.log("req.params", req.params);
   try {
-    const { mobile_no, email } = req.body;
-	  //console.log("req.body", req.body)
+    const { mobile_no, email, fcm_token } = req.body;
+    //console.log("req.body", req.body)
 
     // Step 1: Validation (either mobile_no or email required)
     if (!mobile_no && !email) {
@@ -635,17 +633,16 @@ const login = async (req, res) => {
         user_id: null
       });
     }
-//console.log("yaha tk pahuh gye h ")
-    // Step 2: FCM token from headers
-	  const fcmToken =
-  req.headers["fcm_token"] || req.headers["fcm-token"];
+    //console.log("yaha tk pahuh gye h ")
+    // Step 2: FCM token from body params
+    const fcmToken = fcm_token;
 
-	  console.log("fcmTokenfcmToken",fcmToken)
+    console.log("fcmTokenfcmToken", fcmToken)
     if (!fcmToken) {
       return res.status(200).json({
         status: false,
         field: "fcm_token",
-        message: "FCM token is required in h",
+        message: "FCM token is required",
         login_status: 0,
         user_id: null
       });
@@ -659,7 +656,7 @@ const login = async (req, res) => {
       user = await User.findOne({ where: { email } });
     }
 
-   
+
     if (user) {
       await user.update({ fcm_token: fcmToken });
 
@@ -671,7 +668,7 @@ const login = async (req, res) => {
         user_id: user.id
       });
     } else {
-      
+
       return res.status(200).json({
         status: false,
         message: "User not registered",
@@ -681,7 +678,7 @@ const login = async (req, res) => {
     }
 
   } catch (error) {
-	  console.log("error",error)
+    console.log("error", error)
     return res.status(500).json({
       status: false,
       message: error.message,
@@ -690,6 +687,193 @@ const login = async (req, res) => {
     });
   }
 };
+
+
+
+// // ✅ Register API with fcm_token required
+// const register = async (req, res) => {
+//   try {
+//     const { name, email, mobile_no } = req.body;
+
+//     // Step 1: FCM token from headers
+//     const fcmToken = req.headers["fcm_token"] || req.headers["fcm-token"];
+//     if (!fcmToken) {
+//       return res.status(200).json({
+//         status: false,
+//         field: "fcm_token",
+//         message: "FCM token is required",
+//         user_id: null
+//       });
+//     }
+
+//     // ✅ Name required
+//     if (!name) {
+//       return res.status(200).json({
+//         status: false,
+//         field: "name",
+//         message: "Name is required",
+//         user_id: null
+//       });
+//     }
+
+//     // ✅ Check unique constraints
+//     if (mobile_no) {
+//       const existingMobile = await User.findOne({ where: { mobile_no } });
+//       if (existingMobile) {
+//         return res.status(200).json({
+//           status: false,
+//           field: "mobile_no",
+//           message: "Mobile number already exists",
+//           user_id: null
+//         });
+//       }
+//     }
+
+//     if (email) {
+//       const existingEmail = await User.findOne({ where: { email } });
+//       if (existingEmail) {
+//         return res.status(200).json({
+//           status: false,
+//           field: "email",
+//           message: "Email already exists",
+//           user_id: null
+//         });
+//       }
+//     }
+
+//     // ✅ Create user (with fcm_token)
+//     const user = await User.create({
+//       name,
+//       email: email || null,
+//       mobile_no: mobile_no || null,
+//       fcm_token: fcmToken
+//     });
+	  
+	  
+// 	// ⭐⭐⭐ AUTO CREATE USER WALLET ⭐⭐⭐
+//     await Wallet.create({
+//       entity_id: user.id,
+//       entity_type: "USER",
+//       total_balance: 0,
+//       current_balance: 0,
+//       status: 1,
+//       currency: "INR"
+//     });	  
+
+
+//     // ✅ Response same format
+//     return res.status(200).json({
+//       status: true,
+//       message: "Registration successful",
+//       user: {
+//         id: user.id,
+//         name: user.name,
+//         email: user.email,
+//         mobile_no: user.mobile_no,
+//         fcm_token: user.fcm_token
+//       }
+//     });
+
+//   } catch (error) {
+//     console.log("register error", error);
+//     // Sequelize validation/unique error
+//     if (error.name === 'SequelizeUniqueConstraintError') {
+//       const field = error.errors?.[0]?.path || 'field';
+//       return res.status(200).json({
+//         status: false,
+//         message: `${field} already exists`,
+//         field,
+//         user_id: null
+//       });
+//     }
+//     if (error.name === 'SequelizeValidationError') {
+//       const msg = error.errors?.[0]?.message || 'Validation error';
+//       return res.status(200).json({
+//         status: false,
+//         message: msg,
+//         user_id: null
+//       });
+//     }
+//     return res.status(500).json({
+//       status: false,
+//       message: error.message,
+//       user_id: null
+//     });
+//   }
+// };
+
+// // Login
+// const login = async (req, res) => {
+// 	console.log("req.params", req.params);
+//   try {
+//     const { mobile_no, email } = req.body;
+// 	  //console.log("req.body", req.body)
+
+//     // Step 1: Validation (either mobile_no or email required)
+//     if (!mobile_no && !email) {
+//       return res.status(200).json({
+//         status: false,
+//         field: "mobile_no / email",
+//         message: "Either mobile_no or email is required",
+//         login_status: 0,
+//         user_id: null
+//       });
+//     }
+// //console.log("yaha tk pahuh gye h ")
+//     // Step 2: FCM token from headers
+// 	  const fcmToken =
+//   req.headers["fcm_token"] || req.headers["fcm-token"];
+
+// 	  console.log("fcmTokenfcmToken",fcmToken)
+//     if (!fcmToken) {
+//       return res.status(200).json({
+//         status: false,
+//         field: "fcm_token",
+//         message: "FCM token is required in h",
+//         login_status: 0,
+//         user_id: null
+//       });
+//     }
+
+//     let user;
+//     if (mobile_no) {
+//       user = await User.findOne({ where: { mobile_no } });
+//     }
+//     if (!user && email) {
+//       user = await User.findOne({ where: { email } });
+//     }
+
+   
+//     if (user) {
+//       await user.update({ fcm_token: fcmToken });
+
+//       return res.status(200).json({
+//         status: true,
+//         message: "Login successful",
+//         fcm_token: user.fcm_token,
+//         login_status: 1,
+//         user_id: user.id
+//       });
+//     } else {
+      
+//       return res.status(200).json({
+//         status: false,
+//         message: "User not registered",
+//         login_status: 0,
+//         user_id: null
+//       });
+//     }
+
+//   } catch (error) {
+// 	  console.log("error",error)
+//     return res.status(500).json({
+//       status: false,
+//       message: error.message,
+//       login_status: 0,
+//       user_id: null
+//     });
+//   }
+// };
 
 
 
