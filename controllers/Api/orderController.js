@@ -1174,7 +1174,7 @@ const getOrderSummary = async (req, res) => {
     const discount = Number(orders[0].coupon_discount_amount) || 0;
     const platform_fee = Number(orders[0].charges) || 0;
 
-    const total_amount = subtotal + gst + delivery_charges + platform_fee - discount;
+    const total_amount = parseFloat((subtotal + gst + delivery_charges + platform_fee - discount).toFixed(2));
 
     // 7️⃣ Invoice file path
     const invoicePath = path.join(
