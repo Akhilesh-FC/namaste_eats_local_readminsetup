@@ -1174,7 +1174,7 @@ const getOrderSummary = async (req, res) => {
     const discount = Number(orders[0].coupon_discount_amount) || 0;
     const platform_fee = Number(orders[0].charges) || 0;
 
-    const total_amount = parseFloat((subtotal + gst + delivery_charges + platform_fee - discount).toFixed(2));
+    const total_amount = (subtotal + gst + delivery_charges + platform_fee - discount).toFixed(2);
 
     // 7️⃣ Invoice file path
     const invoicePath = path.join(
@@ -1480,7 +1480,7 @@ const getOrderHistory = async (req, res) => {
           payment_status: o.payment_status,
           order_status: o.order_status?.toUpperCase() || "UNKNOWN",
           order_placed_at: o.created_at,
-          total_amount: parseFloat((productAmt + gst + delivery + platform - discount).toFixed(2)),
+          total_amount: (productAmt + gst + delivery + platform - discount).toFixed(2),
           delivery_pin: o.delivery_pin || null,
           products: [],
         });
