@@ -1480,7 +1480,8 @@ const getOrderHistory = async (req, res) => {
           payment_status: o.payment_status,
           order_status: o.order_status?.toUpperCase() || "UNKNOWN",
           order_placed_at: o.created_at,
-          total_amount: (productAmt + gst + delivery + platform - discount).toFixed(2),
+          //total_amount: (productAmt + gst + delivery + platform - discount).toFixed(2),
+          total_amount: Number((productAmt + gst + delivery + platform - discount).toFixed(2)),
           delivery_pin: o.delivery_pin || null,
           products: [],
         });
@@ -1501,7 +1502,8 @@ const getOrderHistory = async (req, res) => {
         variant_price: variant ? variant.price : null,
         is_available: variant ? variant.is_available : null,
         quantity: qty,
-        line_total: lineTotal.toFixed(2),
+        //line_total: lineTotal.toFixed(2),
+        line_total: Number(lineTotal.toFixed(2)),
       });
     }
 
