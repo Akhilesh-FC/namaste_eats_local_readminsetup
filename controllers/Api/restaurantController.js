@@ -1746,11 +1746,25 @@ exports.getRestaurantOrdersSummary = async (req, res) => {
         product_status: order.order_status,
       });
 
+      // group.subtotal += order.amount;
+      // group.amount = group.subtotal + group.gst + group.delivery_charges + group.platform_fee - group.coupon_discount;
       group.subtotal += order.amount;
-      group.amount = group.subtotal + group.gst + group.delivery_charges + group.platform_fee - group.coupon_discount;
+
     }
 
+    //const groupedOrders = Array.from(groupedOrdersMap.values());
+
+
+
     const groupedOrders = Array.from(groupedOrdersMap.values());
+
+    // ✅ Update subtotal to include gst, delivery, platform fee, and discount
+    groupedOrders.forEach((order) => {
+      order.subtotal = order.subtotal + order.gst + order.delivery_charges + order.platform_fee - order.coupon_discount;
+      order.amount = order.subtotal; // keep amount in sync too
+    });
+
+    
 
     // ✅ Categorize Orders
     const new_order_request = [];
