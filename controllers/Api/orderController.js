@@ -1397,6 +1397,11 @@ const getOrderHistory = async (req, res) => {
     const orders = await Order.findAll({
       where: { user_id },
       order: [["created_at", "DESC"]],
+      attributes: [
+        "order_id", "user_id", "restaurant_id", "product_id", "product_variant_id",
+        "product_quantity", "order_status", "payment_status", "delivery_pin",
+        "created_at", "amount", "gst", "delivery_charges", "charges", "coupon_discount_amount"
+      ]
     });
 
     if (!orders || orders.length === 0) {
@@ -1462,14 +1467,19 @@ const getOrderHistory = async (req, res) => {
       const variant = variantMap.get(Number(o.product_variant_id)) || null;
 
       if (!grouped.has(oid)) {
+        const gst = parseFloat(o.gst) || 0;
+        const delivery = parseFloat(o.delivery_charges) || 0;
+        const platform = parseFloat(o.charges) || 0;
+        const discount = parseFloat(o.coupon_discount_amount) || 0;
+        const productAmt = parseFloat(o.amount) || 0;
         grouped.set(oid, {
           order_id: oid,
           restaurant: rest || null,
           payment_status: o.payment_status,
           order_status: o.order_status?.toUpperCase() || "UNKNOWN",
           order_placed_at: o.created_at,
-          total_amount: parseFloat(o.payable_amount) || 0,
-		  delivery_pin: o.delivery_pin || null,
+          total_amount: parseFloat((productAmt + gst + delivery + platform - discount).toFixed(2)),
+          delivery_pin: o.delivery_pin || null,
           products: [],
         });
       }
