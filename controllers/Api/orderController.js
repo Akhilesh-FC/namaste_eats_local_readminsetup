@@ -1157,10 +1157,12 @@ const getOrderSummary = async (req, res) => {
     );
 
     // 6️⃣ Totals
-    const subtotal = productDetails.reduce(
-      (acc, item) => acc + item.line_total,
-      0
-    );
+    // const subtotal = productDetails.reduce(
+    //   (acc, item) => acc + item.line_total,
+    //   0
+    // );
+
+     const subtotal = productDetails;
     const gst = Number(orders[0].gst) || 0;
     const delivery_charges = Number(orders[0].delivery_charges) || 0;
     const discount = Number(orders[0].coupon_discount_amount) || 0;
