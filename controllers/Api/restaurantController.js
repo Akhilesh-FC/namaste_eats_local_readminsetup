@@ -1633,84 +1633,87 @@ exports.getRestaurantOrdersSummary = async (req, res) => {
           ready_to_pickup_count: 0,
           past_orders_count: 0,
           cancelled_orders_count: 0,
-		      assign_to_delivery_boy_count: 0,
+          assign_to_delivery_boy_count: 0,
           sales: 0,
           new_order_request: [],
           preparing: [],
           ready_to_pickup: [],
           past_orders: [],
           cancelled_orders: [],
-		      assign_to_delivery_boy: [],
+          assign_to_delivery_boy: [],
         },
       });
     }
 
-   const enrichedOrders = await Promise.all(
-  orders.map(async (order) => {
-    const product = await Product.findOne({
-      where: { id: order.product_id },
-      attributes: ["name", "veg_type","thumbnail_image"],
-    });
+    const enrichedOrders = await Promise.all(
+      orders.map(async (order) => {
+        const product = await Product.findOne({
+          where: { id: order.product_id },
+          attributes: ["name", "veg_type", "thumbnail_image"],
+        });
 
-    // ✅ Get all variants for this product
-    const variants = await ProductVariant.findAll({
-      where: { product_id: order.product_id },
-      attributes: ["name", "price"],
-    });
+        // ✅ Get all variants for this product
+        const variants = await ProductVariant.findAll({
+          where: { product_id: order.product_id },
+          attributes: ["name", "price"],
+        });
 
-    // ✅ Match variant name and price correctly
-    let variant_name = null;
-    let variant_price = null;
+        // ✅ Match variant name and price correctly
+        let variant_name = null;
+        let variant_price = null;
 
-    if (variants && variants.length > 0) {
-      // Match by price-per-quantity logic
-      for (const v of variants) {
-        if (
-          Number(v.price) ===
-          Number(order.amount) / Number(order.product_quantity)
-        ) {
-          variant_name = v.name;
-          variant_price = v.price;
-          break;
+        if (variants && variants.length > 0) {
+          for (const v of variants) {
+            if (
+              Number(v.price) ===
+              Number(order.amount) / Number(order.product_quantity)
+            ) {
+              variant_name = v.name;
+              variant_price = v.price;
+              break;
+            }
+          }
+
+          if (!variant_name) {
+            variant_name = variants[0].name;
+            variant_price = variants[0].price;
+          }
         }
-      }
 
-      // fallback agar match na mile
-      if (!variant_name) {
-        variant_name = variants[0].name;
-        variant_price = variants[0].price;
-      }
-    }
+        const user = await User.findOne({
+          where: { id: order.user_id },
+          attributes: ["name", "mobile_no"],
+        });
 
-    const user = await User.findOne({
-      where: { id: order.user_id },
-      attributes: ["name", "mobile_no"],
-    });
+        const restaurant = await Restaurant.findOne({
+          where: { id: order.restaurant_id },
+          attributes: ["cooking_time"],
+        });
 
-    const restaurant = await Restaurant.findOne({
-      where: { id: order.restaurant_id },
-      attributes: ["cooking_time"],
-    });
-
-    return {
-      order_id: order.order_id,
-      product_id: order.product_id,
-      product_name: product ? product.name : null,
-      veg_type: product ? product.veg_type : null,
-	    product_image: product ? product.thumbnail_image : null, // ✅ added here
-      variant_name: variant_name,
-      variant_price: variant_price,
-      product_quantity: order.product_quantity,
-      order_status: order.order_status?.toUpperCase() || "PENDING",
-      amount: Number(order.amount) || 0,
-      created_at: order.created_at,
-      current_address: order.current_address || null,
-      user_name: user ? user.name : null,
-      user_mobile: user ? user.mobile_no : null,
-      cooking_time: restaurant ? restaurant.cooking_time : null,
-    };
-  })
-);
+        return {
+          order_id: order.order_id,
+          product_id: order.product_id,
+          product_name: product ? product.name : null,
+          veg_type: product ? product.veg_type : null,
+          product_image: product ? product.thumbnail_image : null,
+          variant_name: variant_name,
+          variant_price: variant_price,
+          product_quantity: order.product_quantity,
+          order_status: order.order_status?.toUpperCase() || "PENDING",
+          amount: Number(order.amount) || 0,
+          // ✅ FIX: these were missing before, causing gst/delivery/charges/discount to always be 0
+          gst: Number(order.gst) || 0,
+          delivery_charges: Number(order.delivery_charges) || 0,
+          charges: Number(order.charges) || 0,
+          coupon_discount_amount: Number(order.coupon_discount_amount) || 0,
+          created_at: order.created_at,
+          current_address: order.current_address || null,
+          user_name: user ? user.name : null,
+          user_mobile: user ? user.mobile_no : null,
+          cooking_time: restaurant ? restaurant.cooking_time : null,
+        };
+      })
+    );
 
     // ✅ Group by order_id
     const groupedOrdersMap = new Map();
@@ -1728,7 +1731,6 @@ exports.getRestaurantOrdersSummary = async (req, res) => {
           delivery_charges: Number(order.delivery_charges) || 0,
           platform_fee: Number(order.charges) || 0,
           coupon_discount: Number(order.coupon_discount_amount) || 0,
-          amount: 0,
           products: [],
           order_status: order.order_status,
         });
@@ -1739,32 +1741,29 @@ exports.getRestaurantOrdersSummary = async (req, res) => {
         product_id: order.product_id,
         product_name: order.product_name,
         veg_type: order.veg_type,
-		product_image: order.product_image,
+        product_image: order.product_image,
         variant_name: order.variant_name,
         variant_price: order.variant_price,
         product_quantity: order.product_quantity,
         product_status: order.order_status,
       });
 
-      // group.subtotal += order.amount;
-      // group.amount = group.subtotal + group.gst + group.delivery_charges + group.platform_fee - group.coupon_discount;
+      // ✅ running total of product price only (for now)
       group.subtotal += order.amount;
-
     }
-
-    //const groupedOrders = Array.from(groupedOrdersMap.values());
-
-
 
     const groupedOrders = Array.from(groupedOrdersMap.values());
 
-    // ✅ Update subtotal to include gst, delivery, platform fee, and discount
+    // ✅ FIX (Option A): fold gst + delivery_charges + platform_fee - coupon_discount
+    // into subtotal itself, so subtotal becomes the final total in one field
     groupedOrders.forEach((order) => {
-      order.subtotal = order.subtotal + order.gst + order.delivery_charges + order.platform_fee - order.coupon_discount;
-      order.amount = order.subtotal; // keep amount in sync too
+      order.subtotal =
+        order.subtotal +
+        order.gst +
+        order.delivery_charges +
+        order.platform_fee -
+        order.coupon_discount;
     });
-
-    
 
     // ✅ Categorize Orders
     const new_order_request = [];
@@ -1776,34 +1775,34 @@ exports.getRestaurantOrdersSummary = async (req, res) => {
     let totalSales = 0;
 
     for (const order of groupedOrders) {
-  const statuses = order.products.map((p) => p.product_status?.toUpperCase() || "PENDING");
+      const statuses = order.products.map(
+        (p) => p.product_status?.toUpperCase() || "PENDING"
+      );
 
-  if (statuses.every((s) => s === "CANCELLED")) {
-    order.order_status = "CANCELLED";
-    cancelled_orders.push(order);
-  } 
-  else if (statuses.every((s) => s === "DELIVERED")) {
-    order.order_status = "DELIVERED";
-    past_orders.push(order);
-    totalSales += order.amount;
-  } 
-  else if (statuses.some((s) => s === "READY_TO_PICKUP")) {
-    order.order_status = "READY_TO_PICKUP";
-    ready_to_pickup.push(order);
-  } 
-  else if (statuses.some((s) => s === "ON_THE_WAY") || statuses.some((s) => s === "ASSIGN_TO_DELIVERY_BOY")) {
-    order.order_status = "ASSIGN_TO_DELIVERY_BOY";
-    assign_to_delivery_boy.push(order);
-  } 
-  else if (statuses.some((s) => s === "ORDER_ACCEPT" || s === "PREPARING")) {
-    order.order_status = "ORDER_ACCEPT";
-    preparing.push(order);
-  } 
-  else if (statuses.some((s) => s === "PENDING")) {
-    order.order_status = "PENDING";
-    new_order_request.push(order);
-  }
-}
+      if (statuses.every((s) => s === "CANCELLED")) {
+        order.order_status = "CANCELLED";
+        cancelled_orders.push(order);
+      } else if (statuses.every((s) => s === "DELIVERED")) {
+        order.order_status = "DELIVERED";
+        past_orders.push(order);
+        totalSales += order.subtotal; // ✅ subtotal is now the final total
+      } else if (statuses.some((s) => s === "READY_TO_PICKUP")) {
+        order.order_status = "READY_TO_PICKUP";
+        ready_to_pickup.push(order);
+      } else if (
+        statuses.some((s) => s === "ON_THE_WAY") ||
+        statuses.some((s) => s === "ASSIGN_TO_DELIVERY_BOY")
+      ) {
+        order.order_status = "ASSIGN_TO_DELIVERY_BOY";
+        assign_to_delivery_boy.push(order);
+      } else if (statuses.some((s) => s === "ORDER_ACCEPT" || s === "PREPARING")) {
+        order.order_status = "ORDER_ACCEPT";
+        preparing.push(order);
+      } else if (statuses.some((s) => s === "PENDING")) {
+        order.order_status = "PENDING";
+        new_order_request.push(order);
+      }
+    }
 
     // ✅ Final Response
     return res.status(200).json({
@@ -1822,7 +1821,7 @@ exports.getRestaurantOrdersSummary = async (req, res) => {
         ready_to_pickup,
         past_orders,
         cancelled_orders,
-		    assign_to_delivery_boy, // ✅ added,
+        assign_to_delivery_boy,
       },
     });
   } catch (error) {
@@ -1834,6 +1833,251 @@ exports.getRestaurantOrdersSummary = async (req, res) => {
     });
   }
 };
+
+
+// exports.getRestaurantOrdersSummary = async (req, res) => {
+//   try {
+//     const { restaurant_id } = req.query;
+
+//     if (!restaurant_id) {
+//       return res.status(400).json({
+//         status: 400,
+//         message: "restaurant_id is required",
+//       });
+//     }
+
+//     // ✅ Fetch all orders for this restaurant
+//     const orders = await Order.findAll({
+//       where: { restaurant_id },
+//       attributes: [
+//         "order_id",
+//         "product_id",
+//         "order_status",
+//         "amount",
+//         "gst",
+//         "delivery_charges",
+//         "charges",
+//         "coupon_discount_amount",
+//         "product_quantity",
+//         "created_at",
+//         "user_id",
+//         "restaurant_id",
+//         "current_address",
+//       ],
+//       order: [["created_at", "DESC"]],
+//     });
+
+//     if (!orders.length) {
+//       return res.status(200).json({
+//         status: 200,
+//         message: "No orders found for this restaurant",
+//         data: {
+//           new_order_request_count: 0,
+//           preparing_count: 0,
+//           ready_to_pickup_count: 0,
+//           past_orders_count: 0,
+//           cancelled_orders_count: 0,
+// 		      assign_to_delivery_boy_count: 0,
+//           sales: 0,
+//           new_order_request: [],
+//           preparing: [],
+//           ready_to_pickup: [],
+//           past_orders: [],
+//           cancelled_orders: [],
+// 		      assign_to_delivery_boy: [],
+//         },
+//       });
+//     }
+
+//    const enrichedOrders = await Promise.all(
+//   orders.map(async (order) => {
+//     const product = await Product.findOne({
+//       where: { id: order.product_id },
+//       attributes: ["name", "veg_type","thumbnail_image"],
+//     });
+
+//     // ✅ Get all variants for this product
+//     const variants = await ProductVariant.findAll({
+//       where: { product_id: order.product_id },
+//       attributes: ["name", "price"],
+//     });
+
+//     // ✅ Match variant name and price correctly
+//     let variant_name = null;
+//     let variant_price = null;
+
+//     if (variants && variants.length > 0) {
+//       // Match by price-per-quantity logic
+//       for (const v of variants) {
+//         if (
+//           Number(v.price) ===
+//           Number(order.amount) / Number(order.product_quantity)
+//         ) {
+//           variant_name = v.name;
+//           variant_price = v.price;
+//           break;
+//         }
+//       }
+
+//       // fallback agar match na mile
+//       if (!variant_name) {
+//         variant_name = variants[0].name;
+//         variant_price = variants[0].price;
+//       }
+//     }
+
+//     const user = await User.findOne({
+//       where: { id: order.user_id },
+//       attributes: ["name", "mobile_no"],
+//     });
+
+//     const restaurant = await Restaurant.findOne({
+//       where: { id: order.restaurant_id },
+//       attributes: ["cooking_time"],
+//     });
+
+//     return {
+//       order_id: order.order_id,
+//       product_id: order.product_id,
+//       product_name: product ? product.name : null,
+//       veg_type: product ? product.veg_type : null,
+// 	    product_image: product ? product.thumbnail_image : null, // ✅ added here
+//       variant_name: variant_name,
+//       variant_price: variant_price,
+//       product_quantity: order.product_quantity,
+//       order_status: order.order_status?.toUpperCase() || "PENDING",
+//       amount: Number(order.amount) || 0,
+//       created_at: order.created_at,
+//       current_address: order.current_address || null,
+//       user_name: user ? user.name : null,
+//       user_mobile: user ? user.mobile_no : null,
+//       cooking_time: restaurant ? restaurant.cooking_time : null,
+//     };
+//   })
+// );
+
+//     // ✅ Group by order_id
+//     const groupedOrdersMap = new Map();
+//     for (const order of enrichedOrders) {
+//       if (!groupedOrdersMap.has(order.order_id)) {
+//         groupedOrdersMap.set(order.order_id, {
+//           order_id: order.order_id,
+//           user_name: order.user_name,
+//           user_mobile: order.user_mobile,
+//           current_address: order.current_address,
+//           cooking_time: order.cooking_time,
+//           created_at: order.created_at,
+//           subtotal: 0,
+//           gst: Number(order.gst) || 0,
+//           delivery_charges: Number(order.delivery_charges) || 0,
+//           platform_fee: Number(order.charges) || 0,
+//           coupon_discount: Number(order.coupon_discount_amount) || 0,
+//           amount: 0,
+//           products: [],
+//           order_status: order.order_status,
+//         });
+//       }
+
+//       const group = groupedOrdersMap.get(order.order_id);
+//       group.products.push({
+//         product_id: order.product_id,
+//         product_name: order.product_name,
+//         veg_type: order.veg_type,
+// 		product_image: order.product_image,
+//         variant_name: order.variant_name,
+//         variant_price: order.variant_price,
+//         product_quantity: order.product_quantity,
+//         product_status: order.order_status,
+//       });
+
+//       // group.subtotal += order.amount;
+//       // group.amount = group.subtotal + group.gst + group.delivery_charges + group.platform_fee - group.coupon_discount;
+//       group.subtotal += order.amount;
+
+//     }
+
+//     //const groupedOrders = Array.from(groupedOrdersMap.values());
+
+
+
+//     const groupedOrders = Array.from(groupedOrdersMap.values());
+
+//     // ✅ Update subtotal to include gst, delivery, platform fee, and discount
+//     groupedOrders.forEach((order) => {
+//       order.subtotal = order.subtotal + order.gst + order.delivery_charges + order.platform_fee - order.coupon_discount;
+//       order.amount = order.subtotal; // keep amount in sync too
+//     });
+
+    
+
+//     // ✅ Categorize Orders
+//     const new_order_request = [];
+//     const preparing = [];
+//     const ready_to_pickup = [];
+//     const past_orders = [];
+//     const cancelled_orders = [];
+//     const assign_to_delivery_boy = [];
+//     let totalSales = 0;
+
+//     for (const order of groupedOrders) {
+//   const statuses = order.products.map((p) => p.product_status?.toUpperCase() || "PENDING");
+
+//   if (statuses.every((s) => s === "CANCELLED")) {
+//     order.order_status = "CANCELLED";
+//     cancelled_orders.push(order);
+//   } 
+//   else if (statuses.every((s) => s === "DELIVERED")) {
+//     order.order_status = "DELIVERED";
+//     past_orders.push(order);
+//     totalSales += order.amount;
+//   } 
+//   else if (statuses.some((s) => s === "READY_TO_PICKUP")) {
+//     order.order_status = "READY_TO_PICKUP";
+//     ready_to_pickup.push(order);
+//   } 
+//   else if (statuses.some((s) => s === "ON_THE_WAY") || statuses.some((s) => s === "ASSIGN_TO_DELIVERY_BOY")) {
+//     order.order_status = "ASSIGN_TO_DELIVERY_BOY";
+//     assign_to_delivery_boy.push(order);
+//   } 
+//   else if (statuses.some((s) => s === "ORDER_ACCEPT" || s === "PREPARING")) {
+//     order.order_status = "ORDER_ACCEPT";
+//     preparing.push(order);
+//   } 
+//   else if (statuses.some((s) => s === "PENDING")) {
+//     order.order_status = "PENDING";
+//     new_order_request.push(order);
+//   }
+// }
+
+//     // ✅ Final Response
+//     return res.status(200).json({
+//       status: 200,
+//       message: "Restaurant order summary fetched successfully",
+//       data: {
+//         new_order_request_count: new_order_request.length,
+//         preparing_count: preparing.length,
+//         ready_to_pickup_count: ready_to_pickup.length,
+//         past_orders_count: past_orders.length,
+//         cancelled_orders_count: cancelled_orders.length,
+//         sales: totalSales,
+
+//         new_order_request,
+//         preparing,
+//         ready_to_pickup,
+//         past_orders,
+//         cancelled_orders,
+// 		    assign_to_delivery_boy, // ✅ added,
+//       },
+//     });
+//   } catch (error) {
+//     console.error("❌ Error fetching order summary:", error);
+//     return res.status(500).json({
+//       status: 500,
+//       message: "Internal Server Error",
+//       error: error.message,
+//     });
+//   }
+// };
 
 
 exports.updateProducts = async (req, res) => {
