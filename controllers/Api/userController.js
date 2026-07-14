@@ -29,6 +29,107 @@ const CASHFREE_APP_ID = process.env.CASHFREE_APP_ID || "TEST430329ae80e0f32e41a3
 const CASHFREE_SECRET = process.env.CASHFREE_SECRET || "TESTaf195616268bd6202eeb3bf8dc458956e7192a85";
 const CASHFREE_API_VERSION = process.env.CASHFREE_API_VERSION || "2023-08-01";
 const CASHFREE_BASE = process.env.CASHFREE_BASE || "https://sandbox.cashfree.com/pg/orders";
+
+const processWalletTopupCallback = async ({ orderId, paymentStatus, orderAmount, cfOrderId, paymentResponse }) => {
+  if (!orderId) {
+    return { status: false, message: "order_id missing" };
+  }
+
+  const wallet = await Wallet.findOne({ where: { order_id: orderId } });
+
+  if (!wallet) {
+    console.log("⚠️ Wallet not found for order_id:", orderId);
+    return { status: false, message: "Wallet entry not found" };
+  }
+
+  let transaction = await Transaction.findOne({ where: { order_id: orderId } });
+  const amountToCredit = parseFloat(orderAmount || transaction?.amount || 0) || 0;
+
+  if (paymentStatus === "SUCCESS") {
+    if (transaction && transaction.status === "SUCCESS") {
+      await wallet.update({
+        payment_status: "SUCCESS",
+        order_status: "SUCCESS",
+        cf_order_id: cfOrderId || wallet.cf_order_id,
+        payment_response: paymentResponse || wallet.payment_response,
+      });
+
+      await transaction.update({
+        status: "SUCCESS",
+        order_status: "SUCCESS",
+        cf_order_id: cfOrderId || transaction.cf_order_id,
+        payment_response: paymentResponse || transaction.payment_response,
+      });
+
+      return { status: true, message: "Payment already processed", wallet, transaction };
+    }
+
+    if (!transaction) {
+      transaction = await Transaction.create({
+        wallet_id: wallet.id,
+        entity_id: wallet.entity_id,
+        entity_type: wallet.entity_type,
+        order_id: orderId,
+        amount: amountToCredit,
+        type: "CREDIT",
+        status: "SUCCESS",
+        cf_order_id: cfOrderId || null,
+        description: "Wallet Top-up",
+        payment_response: paymentResponse || null,
+      });
+    } else {
+      await transaction.update({
+        status: "SUCCESS",
+        amount: amountToCredit || transaction.amount,
+        order_status: "SUCCESS",
+        cf_order_id: cfOrderId || transaction.cf_order_id,
+        payment_response: paymentResponse || transaction.payment_response,
+      });
+    }
+
+    if (amountToCredit > 0) {
+      await wallet.update({
+        current_balance: parseFloat(wallet.current_balance || 0) + amountToCredit,
+        total_balance: parseFloat(wallet.total_balance || 0) + amountToCredit,
+        payment_status: "SUCCESS",
+        order_status: "SUCCESS",
+        last_transaction_id: orderId,
+        last_transaction_amount: amountToCredit,
+        last_transaction_type: "CREDIT",
+        cf_order_id: cfOrderId || wallet.cf_order_id,
+        payment_response: paymentResponse || wallet.payment_response,
+      });
+    } else {
+      await wallet.update({
+        payment_status: "SUCCESS",
+        order_status: "SUCCESS",
+        cf_order_id: cfOrderId || wallet.cf_order_id,
+        payment_response: paymentResponse || wallet.payment_response,
+      });
+    }
+
+    return { status: true, message: "Payment processed successfully", wallet, transaction };
+  }
+
+  if (transaction) {
+    await transaction.update({
+      status: "FAILED",
+      order_status: paymentStatus || "FAILED",
+      cf_order_id: cfOrderId || transaction.cf_order_id,
+      payment_response: paymentResponse || transaction.payment_response,
+    });
+  }
+
+  await wallet.update({
+    payment_status: paymentStatus || "FAILED",
+    order_status: paymentStatus || "FAILED",
+    cf_order_id: cfOrderId || wallet.cf_order_id,
+    payment_response: paymentResponse || wallet.payment_response,
+  });
+
+  return { status: true, message: "Payment status updated", wallet, transaction };
+};
+
 // ✅ CREATE WALLET SESSION
 
 const createWalletSession = async (req, res) => {
@@ -91,43 +192,36 @@ const createWalletSession = async (req, res) => {
       wallet = await Wallet.create({
         entity_id,
         entity_type,
-        total_balance: parseFloat(amount),
-        current_balance: parseFloat(amount),
+        total_balance: 0,
+        current_balance: 0,
       });
     } else {
-      console.log("💰 Wallet already exists, updating balances...");
-      // Add the amount to existing balances (top-up)
-      const newTotal = parseFloat(wallet.total_balance || 0) + parseFloat(amount);
-      const newCurrent = parseFloat(wallet.current_balance || 0) + parseFloat(amount);
-
-      await wallet.update({
-        total_balance: newTotal,
-        current_balance: newCurrent,
-      });
+      console.log("💰 Wallet already exists, keeping balances unchanged until payment succeeds.");
     }
 
     console.log("💰 Wallet found/created with ID:", wallet.id);
 
-    // 🔹 STEP 2: Prevent duplicate transaction
+    // 🔹 STEP 2: Create or update a pending transaction
     const txnOrderId = cfData.order_id || orderId;
+    const topupAmount = parseFloat(amount);
     const existingTxn = await Transaction.findOne({
       where: { order_id: txnOrderId },
     });
 
     if (!existingTxn) {
-      console.log("🧾 Creating new transaction...");
+      console.log("🧾 Creating pending transaction...");
       await Transaction.create({
         wallet_id: wallet.id,
         entity_id,
         entity_type,
         order_id: txnOrderId,
-        amount: parseFloat(amount),
+        amount: topupAmount,
         type: "CREDIT",
         description: "Wallet Top-up",
-        status: "SUCCESS",
+        status: "PENDING",
       });
     } else {
-      console.log("⚠️ Transaction already exists, skipping insert.");
+      console.log("⚠️ Transaction already exists, keeping it as the source of truth.");
     }
 
     // 🔹 STEP 3: Update wallet with payment info
@@ -136,6 +230,7 @@ const createWalletSession = async (req, res) => {
       cf_order_id: cfData.cf_order_id || null,
       payment_session_id: cfData.payment_session_id || null,
       order_status: cfData.order_status || "PENDING",
+      payment_status: cfData.order_status === "PAID" ? "PENDING" : "PENDING",
       payment_response: cfData || null,
     });
 
@@ -177,28 +272,19 @@ const paymentCallback = async (req, res) => {
 
     const orderId = order.order_id || "";
     const paymentStatus = payment.payment_status || "SUCCESS";
+    const orderAmount = order.order_amount || payment.order_amount || null;
 
-    if (paymentStatus === "SUCCESS" && orderId) {
-      console.log(`🔹 Payment SUCCESS for order_id: ${orderId}`);
+    const result = await processWalletTopupCallback({
+      orderId,
+      paymentStatus,
+      orderAmount,
+      cfOrderId: payment.cf_order_id || null,
+      paymentResponse: req.body,
+    });
 
-      // 🔹 Find wallet by order_id
-      const wallet = await Wallet.findOne({ where: { order_id: orderId } });
-
-      if (!wallet) {
-        console.log("⚠️ Wallet not found for this order_id!");
-      } else {
-        // 🔹 Update payment_status and order_status
-        await wallet.update({
-          payment_status: "SUCCESS",
-          order_status: "SUCCESS",
-        });
-
-        console.log(`✅ Wallet updated! Wallet ID: ${wallet.id}, payment_status set to SUCCESS`);
-      }
-    } else {
-      console.log(`⚠️ Payment status not SUCCESS or order_id missing: ${paymentStatus}`);
+    if (result.status) {
+      console.log(`✅ Callback handled for order_id: ${orderId}`);
     }
-
   } catch (err) {
     console.error("❌ Payment callback processing error:", err.message);
   }
@@ -217,61 +303,19 @@ const cashfreeCallback = async (req, res) => {
       return res.status(400).json({ status: false, message: "order_id missing" });
     }
 
-    // STEP 1: Find Wallet
-    const wallet = await Wallet.findOne({ where: { order_id } });
+    const paymentStatus = order_status === "PAID" || order_status === "SUCCESS" ? "SUCCESS" : order_status;
 
-    if (!wallet) {
-      return res.status(404).json({ status: false, message: "Wallet entry not found" });
-    }
-
-    // STEP 2: Check Existing Transaction (idempotent)
-    let transaction = await Transaction.findOne({ where: { order_id } });
-
-    // If already processed, skip
-    if (transaction && (transaction.status === "SUCCESS" || transaction.status === "FAILED")) {
-      return res.status(200).json({
-        status: true,
-        message: "Payment already processed",
-      });
-    }
-
-    // STEP 3: Create Transaction if not exists
-    if (!transaction) {
-      transaction = await Transaction.create({
-        wallet_id: wallet.id,
-        entity_id: wallet.entity_id,
-        entity_type: wallet.entity_type,
-        order_id,
-        amount: order_amount,
-        type: "CREDIT",
-        status: order_status,
-        cf_order_id,
-        description: "Wallet Top-up",
-      });
-    } else {
-      transaction.status = order_status;
-      transaction.cf_order_id = cf_order_id;
-      await transaction.save();
-    }
-
-    // STEP 4: Update wallet info
-    wallet.order_status = order_status;
-    wallet.payment_status = order_status;
-    wallet.last_transaction_id = order_id;
-    wallet.last_transaction_amount = order_amount;
-    wallet.cf_order_id = cf_order_id;
-
-    // STEP 5: Add money ONLY on SUCCESS
-    if (order_status === "SUCCESS") {
-      wallet.current_balance += parseFloat(order_amount);
-      wallet.total_balance += parseFloat(order_amount);
-    }
-
-    await wallet.save();
+    const result = await processWalletTopupCallback({
+      orderId: order_id,
+      paymentStatus,
+      orderAmount: order_amount,
+      cfOrderId: cf_order_id || null,
+      paymentResponse: req.body,
+    });
 
     return res.status(200).json({
       status: true,
-      message: "Payment processed successfully",
+      message: result.message,
     });
 
   } catch (error) {
@@ -615,6 +659,7 @@ const register = async (req, res) => {
     });
   }
 };
+
 
 
 const login = async (req, res) => {
