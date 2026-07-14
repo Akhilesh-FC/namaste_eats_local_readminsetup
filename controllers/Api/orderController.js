@@ -1464,12 +1464,12 @@ const getOrderHistory = async (req, res) => {
       if (!grouped.has(oid)) {
         grouped.set(oid, {
           order_id: oid,
-          restaurant: rest || null, // 🔥 full restaurant object
+          restaurant: rest || null,
           payment_status: o.payment_status,
           order_status: o.order_status?.toUpperCase() || "UNKNOWN",
           order_placed_at: o.created_at,
-          total_amount: 0,
-		  delivery_pin: o.delivery_pin || null, // 🆕 Added here
+          total_amount: parseFloat(o.payable_amount) || 0,
+		  delivery_pin: o.delivery_pin || null,
           products: [],
         });
       }
@@ -1491,8 +1491,6 @@ const getOrderHistory = async (req, res) => {
         quantity: qty,
         line_total: lineTotal.toFixed(2),
       });
-
-      grouped.get(oid).total_amount += lineTotal;
     }
 
     const formattedOrders = Array.from(grouped.values());
@@ -1541,7 +1539,6 @@ const getOrderHistory = async (req, res) => {
     });
   }
 };
-
 
 const createSession = async (req, res) => {
   try {
