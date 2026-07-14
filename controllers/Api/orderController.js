@@ -1079,6 +1079,7 @@ const getOrderSummary = async (req, res) => {
         "payment_status",
         "gst",
         "delivery_charges",
+        "charges",
         "coupon_discount_amount",
         "address_id",
         "created_at",
@@ -1171,8 +1172,9 @@ const getOrderSummary = async (req, res) => {
     const gst = Number(orders[0].gst) || 0;
     const delivery_charges = Number(orders[0].delivery_charges) || 0;
     const discount = Number(orders[0].coupon_discount_amount) || 0;
+    const platform_fee = Number(orders[0].charges) || 0;
 
-    const total_amount = subtotal + gst + delivery_charges - discount;
+    const total_amount = subtotal + gst + delivery_charges + platform_fee - discount;
 
     // 7️⃣ Invoice file path
     const invoicePath = path.join(
