@@ -1079,7 +1079,6 @@ const getOrderSummary = async (req, res) => {
         "payment_status",
         "gst",
         "delivery_charges",
-        "charges",
         "coupon_discount_amount",
         "address_id",
         "created_at",
@@ -1114,6 +1113,7 @@ const getOrderSummary = async (req, res) => {
     // 5️⃣ Products List with Variant details
     const productDetails = await Promise.all(
       orders.map(async (order) => {
+        // ✅ Product info
         const product = await Product.findOne({
           where: { id: order.product_id },
           attributes: ["id", "name", "price","veg_type"],
@@ -1122,26 +1122,33 @@ const getOrderSummary = async (req, res) => {
         let variant = null;
         let productPrice = product.price;
 
+        // ✅ Agar order me variant ho
         if (order.product_variant_id) {
           variant = await ProductVariant.findOne({
             where: { id: order.product_variant_id },
-            attributes: ["id", "name", "price", "quantity", "unit_type_id", "is_available"],
+            attributes: [
+              "id",
+              "name",
+              "price",
+              "quantity",
+              "unit_type_id",
+              "is_available",
+            ],
           });
-          if (variant) productPrice = variant.price;
-        }
 
-        const itemSubtotal = order.product_quantity * productPrice;
-        const gstVal = Number(order.gst) || 0;
-        const deliveryVal = Number(order.delivery_charges) || 0;
-        const platformVal = Number(order.charges) || 0;
-        const discountVal = Number(order.coupon_discount_amount) || 0;
+          if (variant) {
+            productPrice = variant.price;
+          }
+        }
 
         return {
           product_id: product.id,
           product_name: product.name,
 		      product_veg_type: product.veg_type,
           product_quantity: order.product_quantity,
-          line_total: itemSubtotal + gstVal + deliveryVal + platformVal - discountVal,
+          line_total: order.product_quantity * productPrice,
+
+          // 🔥 Variant ka detail
           variant: variant
             ? {
                 variant_id: variant.id,
@@ -1157,18 +1164,15 @@ const getOrderSummary = async (req, res) => {
     );
 
     // 6️⃣ Totals
-    // const subtotal = productDetails.reduce(
-    //   (acc, item) => acc + item.line_total,
-    //   0
-    // );
-
-     const subtotal = productDetails;
+    const subtotal = productDetails.reduce(
+      (acc, item) => acc + item.line_total,
+      0
+    );
     const gst = Number(orders[0].gst) || 0;
     const delivery_charges = Number(orders[0].delivery_charges) || 0;
     const discount = Number(orders[0].coupon_discount_amount) || 0;
-    const platform_fee = Number(orders[0].charges) || 0;
 
-    const total_amount = subtotal + gst + delivery_charges + platform_fee - discount;
+    const total_amount = subtotal + gst + delivery_charges - discount;
 
     // 7️⃣ Invoice file path
     const invoicePath = path.join(
@@ -1233,7 +1237,6 @@ const getOrderSummary = async (req, res) => {
         subtotal,
         gst,
         delivery_charges,
-        platform_fee,
 		    delivery_pin: orders[0].delivery_pin,
         discount,
         total_amount,
