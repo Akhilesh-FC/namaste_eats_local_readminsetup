@@ -1461,14 +1461,13 @@ const getOrderHistory = async (req, res) => {
           payment_status: o.payment_status,
           order_status: o.order_status?.toUpperCase() || "UNKNOWN",
           order_placed_at: o.created_at,
-          subtotal: 0,
-          gst: parseFloat(o.gst) || 0,
-          delivery_charges: parseFloat(o.delivery_charges) || 0,
-          platform_fee: parseFloat(o.charges) || 0,
-          coupon_discount: parseFloat(o.coupon_discount_amount) || 0,
           total_amount: 0,
           delivery_pin: o.delivery_pin || null,
           products: [],
+          _gst: parseFloat(o.gst) || 0,
+          _delivery: parseFloat(o.delivery_charges) || 0,
+          _platform: parseFloat(o.charges) || 0,
+          _discount: parseFloat(o.coupon_discount_amount) || 0,
         });
       }
 
@@ -1490,12 +1489,14 @@ const getOrderHistory = async (req, res) => {
         line_total: lineTotal.toFixed(2),
       });
 
-      grouped.get(oid).subtotal += lineTotal;
       const g = grouped.get(oid);
-      g.total_amount = parseFloat((g.subtotal + g.gst + g.delivery_charges + g.platform_fee - g.coupon_discount).toFixed(2));
+      g.total_amount = parseFloat((lineTotal + g._gst + g._delivery + g._platform - g._discount).toFixed(2));
     }
 
-    const formattedOrders = Array.from(grouped.values());
+    const formattedOrders = Array.from(grouped.values()).map(o => {
+      const { _gst, _delivery, _platform, _discount, ...rest } = o;
+      return rest;
+    });
 
     // ✅ Normalize status to uppercase (for safety)
     formattedOrders.forEach((o) => {
