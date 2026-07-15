@@ -1947,6 +1947,13 @@ exports.getRestaurantOrdersSummary = async (req, res) => {
       product_quantity: order.product_quantity,
       order_status: order.order_status?.toUpperCase() || "PENDING",
       amount: Number(order.amount) || 0,
+
+        gst: Number(order.gst) || 0,                                   // ✅ add
+        delivery_charges: Number(order.delivery_charges) || 0,         // ✅ add
+        charges: Number(order.charges) || 0,                           // ✅ add
+        coupon_discount_amount: Number(order.coupon_discount_amount) || 0, // ✅ add
+
+
       created_at: order.created_at,
       current_address: order.current_address || null,
       user_name: user ? user.name : null,
